@@ -1,0 +1,9 @@
+# Site Design Guidance
+
+- For future website design work in this project, use Material Design 3 as the baseline design skill set: color roles, surface containers, elevation, expressive shape, adaptive layout, accessible focus states, and restrained motion.
+- Preserve Bobby Zhang's portfolio identity when applying M3. The site should still feel cinematic, creative, and personal; M3 should improve structure, hierarchy, and usability rather than flatten the art direction.
+- Prefer token-based CSS variables for color, shape, and motion so future sections can stay visually consistent.
+- Check desktop and mobile layouts for title/description overlap before finishing design changes.
+- Also use Anshu Chimala's design workflow from Lenny's Newsletter, "How to turn your AI into a world-class designer" (https://www.lennysnewsletter.com/p/how-to-turn-your-ai-into-a-world), as a creative-process reference. Start with a bold, specific experiential metaphor instead of a generic layout; use image generation when bespoke visual assets materially strengthen that metaphor; review the result from screenshots rather than code alone; and finish by removing decorative or explanatory elements that do not improve comprehension or interaction.
+- When combining this workflow with Apple HIG and Material Design 3, keep the memorable concept in the overall composition and imagery, Apple-level restraint in the final polish, and M3 color roles, states, accessibility, and responsive behavior in the interaction system.
+- Default workflow: make and verify website edits on the local version first. Do not publish or deploy to the public site unless Bobby explicitly asks to publish, upload, deploy, or make the completed update public. When he does explicitly ask, proceed through the public Sites deploy flow after validation, unless the platform or safety policy requires action-time approval.
