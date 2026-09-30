@@ -31,6 +31,14 @@ source is located at `public/portfolio/index.html`.
 npm run build
 ```
 
+## Hosting
+
+Production hosting uses Netlify. `netlify.toml` publishes
+`public/portfolio` directly, so the portfolio's `index.html` is served at the
+site root and its relative image paths continue to work.
+
+Connect this repository to Netlify for continuous deployment from `main`.
+
 ## Project Structure
 
 - `app/`: vinext application shell
@@ -38,6 +46,7 @@ npm run build
 - `public/portfolio/assets/menu-objects/`: category-selection artwork
 - `tests/`: rendered HTML checks
 - `AGENTS.md`: design and local-first publishing guidance
+- `netlify.toml`: Netlify static publishing and response-header configuration
 
 Website changes should be developed and verified locally. Publishing is a
 separate explicit step.
