@@ -12,18 +12,7 @@ if (page === 'home' && legacyHashRoutes[location.hash.slice(1)]) location.replac
 
 function nav() {
   const current = categories.find(category => category.slug === page)?.title || ({ projects:'Mission Board', 'skills-experience':'Skill Tree', resume:'Dossier', about:'Player Profile', detail:'Project Detail' }[page] || 'Creative Room');
-  return `
-    <a class="skip-link" href="#main">Skip to content</a>
-    <header class="hud">
-      <a class="brand" href="/" aria-label="Bobby Zhang — Creative Room"><span class="brand-mark">BZ</span><span class="brand-sub">player one</span></a>
-      <nav class="hud-actions" aria-label="Primary">
-        ${page !== 'home' ? '<button class="history-back" type="button">← Back</button>' : ''}
-        <a href="/" ${page === 'home' ? 'aria-current="page"' : ''}>Room</a>
-        <button class="menu-button" type="button" aria-expanded="false" aria-controls="player-menu">☰ Player Menu</button>
-        <button class="sound-button" type="button" aria-pressed="false"></button>
-      </nav>
-      <div class="section-indicator"><span>Current zone</span><strong>${esc(current)}</strong></div>
-    </header>
+  const sharedMenu = `
     <div class="menu-backdrop" hidden></div>
     <aside class="player-menu" id="player-menu" aria-labelledby="player-menu-title" aria-modal="true" role="dialog" hidden>
       <div class="pause-status"><span class="status-dot"></span> Player Menu</div>
@@ -39,6 +28,21 @@ function nav() {
       </nav>
       <p class="menu-help">Esc close · Tab navigate · Enter select</p>
     </aside>`;
+
+  if (page === 'home') return `<a class="skip-link" href="#main">Skip to content</a>${sharedMenu}`;
+
+  return `
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="hud">
+      <a class="brand" href="/" aria-label="Bobby Zhang — Creative Room"><span class="brand-mark">BZ</span><span class="brand-sub">player one</span></a>
+      <nav class="hud-actions" aria-label="Primary">
+        <button class="history-back" type="button">← Back</button>
+        <a href="/">Room</a>
+        <button class="menu-button" type="button" aria-expanded="false" aria-controls="player-menu">☰ Player Menu</button>
+        <button class="sound-button" type="button" aria-pressed="false"></button>
+      </nav>
+      <div class="section-indicator"><span>Current zone</span><strong>${esc(current)}</strong></div>
+    </header>${sharedMenu}`;
 }
 
 function categoryHeader(kicker, title, description) {
@@ -55,25 +59,55 @@ function card(project) {
 }
 
 function home() {
-  const objects = categories.map(category => {
-    const customProp = category.slug === 'research' ? '<span class="css-book" aria-hidden="true"><i></i><i></i></span>' : category.slug === 'ai' ? '<span class="css-computer" aria-hidden="true"><i></i></span>' : `<img src="${category.artwork}" alt="" aria-hidden="true">`;
-    const action = ({ games:'Follow', films:'Open lens', research:'Open book', music:'Enter studio', ai:'Boot system' })[category.slug];
-    return `<a class="room-object object-${category.slug}" data-depth="${({games:14,films:8,research:11,music:6,ai:9})[category.slug]}" href="/${category.slug}/" aria-label="${category.title}: ${category.description}">
-      <span class="object-art">${customProp}<span class="object-glow"></span></span>
-      <span class="object-label"><small>${esc(category.object)}</small><strong>${esc(category.title)}</strong><span>${esc(category.description)}</span><b>${action} <i aria-hidden="true">↗</i></b></span>
+  const assetRoot = '/assets/room/pixel/';
+  const homeArtwork = {
+    films: `${assetRoot}camera-original.svg`,
+    research: `${assetRoot}cool-school-book.png`,
+    music: `${assetRoot}guitar-original.svg`,
+    ai: `${assetRoot}cool-school-computer.png`
+  };
+  const objects = categories.map((category, index) => {
+    const artwork = homeArtwork[category.slug];
+    const art = category.slug === 'games'
+      ? '<span class="bird-sprite" aria-hidden="true"></span>'
+      : `<img src="${artwork}" alt="" aria-hidden="true">`;
+    const birdAttributes = category.slug === 'games' ? ' data-bird-route data-asset-status="temporary" data-state="idle"' : '';
+    return `<a class="room-object object-${category.slug}" href="/${category.slug}/" aria-label="${esc(`${category.title}: ${category.description}`)}" data-room-object data-route-index="${index}"${birdAttributes}>
+      <span class="object-parallax" data-depth="${({games:5,films:4,research:4,music:3,ai:3})[category.slug]}"><span class="object-art">${art}</span></span>
+      <span class="object-prompt" aria-hidden="true"><strong>${esc(category.title)}</strong><kbd>E</kbd></span>
     </a>`;
   }).join('');
   return `<main id="main" class="room-page">
-    <section class="room-intro"><p class="eyebrow">Bobby Zhang · Creative room</p><h1>Pick up an object.<br><em>Enter the work.</em></h1><p>Five creative paths, one room. Use the objects or open Player Menu for the fast professional route.</p><span class="room-instruction">Mouse / arrows / touch · Select with Enter</span></section>
-    <section class="room-stage" aria-label="Interactive creative room">
-      <div class="room-layer layer-wall" data-depth="2"><div class="window"><i></i><i></i><span></span></div><div class="poster">MAKE<br>STRANGE<br>THINGS</div><div class="shelf"><i></i><i></i><i></i></div></div>
-      <div class="room-layer layer-furniture" data-depth="5"><div class="desk"></div><div class="cabinet"></div><div class="rug"></div><div class="lamp"></div></div>
-      <div class="room-layer layer-light" data-depth="1"></div>
-      <div class="room-objects">${objects}</div>
-      <div class="room-layer layer-foreground" data-depth="15"><i></i><b></b></div>
+    <section class="room-intro"><div><p class="eyebrow">Bobby Zhang · Home Room</p><h1>Choose an object.</h1></div><p>Five paths live in one pixel-built studio. Hover, focus, or move with the arrow keys.</p></section>
+    <section class="room-stage" data-room-stage aria-label="Interactive creative room" aria-describedby="room-navigation-help">
+      <span id="room-navigation-help" class="visually-hidden">Use Tab to enter the room, arrow keys to move among the five objects, and Enter or E to open a route.</span>
+      <div class="room-controls" role="group" aria-label="Room controls">
+        <button class="menu-button room-control" type="button" aria-label="Open Player Menu" aria-expanded="false" aria-controls="player-menu" title="Player Menu">☰</button>
+        <button class="sound-button room-control" type="button" aria-pressed="false"></button>
+      </div>
+      <div class="room-layer room-background" data-depth="1" aria-hidden="true"><span class="wall-field"></span><span class="floor-field"></span></div>
+      <div class="room-layer room-architecture" data-depth="2" aria-hidden="true">
+        <img class="room-sprite architecture-window" src="${assetRoot}cool-school-window.png" alt="">
+        <img class="room-sprite architecture-landscape" src="${assetRoot}cool-school-landscape.png" alt="">
+      </div>
+      <div class="room-layer room-floor-decals" data-depth="2" aria-hidden="true"><img class="room-rug" src="${assetRoot}rug-original.svg" alt=""></div>
+      <div class="room-layer room-furniture" data-depth="3" aria-hidden="true">
+        <img class="room-sprite furniture-cabinet" src="${assetRoot}cool-school-cabinet-tall.png" alt="">
+        <img class="room-sprite furniture-books-left" src="${assetRoot}cool-school-bookshelf-left.png" alt="">
+        <img class="room-sprite furniture-books-right" src="${assetRoot}cool-school-bookshelf-right.png" alt="">
+        <img class="room-sprite furniture-low-shelf" src="${assetRoot}cool-school-low-shelf.png" alt="">
+        <img class="room-sprite furniture-desk" src="${assetRoot}cool-school-counter-long.png" alt="">
+        <img class="room-sprite furniture-drawers" src="${assetRoot}cool-school-desk-drawers.png" alt="">
+        <img class="room-sprite furniture-chair" src="${assetRoot}cool-school-chair-front.png" alt="">
+        <img class="room-sprite furniture-globe" src="${assetRoot}cool-school-globe.png" alt="">
+        <img class="room-sprite furniture-papers" src="${assetRoot}cool-school-papers.png" alt="">
+      </div>
+      <nav class="room-objects" aria-label="Creative room objects">${objects}</nav>
+      <div class="room-layer room-foreground" data-depth="5" aria-hidden="true"><span class="foreground-counter"></span></div>
+      <div class="room-layer room-lighting" data-depth="1" aria-hidden="true"><img src="${assetRoot}lighting-overlay-original.svg" alt=""></div>
       <div class="room-location"><span>ROOM 01</span><strong>Creative Studio</strong></div>
+      <div class="room-status"><span class="status-dot" aria-hidden="true"></span><b>Room tone ready</b><span>Opt-in audio</span></div>
     </section>
-    <p class="asset-note"><b>Art direction layer:</b> the room environment is built in CSS while final panoramic room art is pending review. Existing portfolio objects remain in use where they match.</p>
   </main>`;
 }
 
@@ -198,21 +232,28 @@ function initMenu() {
   const closer = $('.menu-close');
   const continueButton = $('.menu-continue');
   let previousFocus;
+  const outsideMenu = () => [...document.body.children].filter(element => element !== menu && element !== backdrop && element.tagName !== 'SCRIPT');
   function setMenu(open) {
-    previousFocus = open ? document.activeElement : previousFocus;
-    menu.hidden = !open; backdrop.hidden = !open; opener.setAttribute('aria-expanded', String(open));
+    if (open) previousFocus = document.activeElement;
+    menu.hidden = !open;
+    backdrop.hidden = !open;
+    opener.setAttribute('aria-expanded', String(open));
     document.body.classList.toggle('menu-open', open);
-    if (open) closer.focus(); else (previousFocus || opener).focus();
+    outsideMenu().forEach(element => { element.inert = open; });
+    if (open) closer.focus();
+    else if (previousFocus?.isConnected) previousFocus.focus();
+    else opener.focus();
   }
   opener.addEventListener('click', () => setMenu(true));
   closer.addEventListener('click', () => setMenu(false));
   continueButton.addEventListener('click', () => setMenu(false));
   backdrop.addEventListener('click', () => setMenu(false));
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape') setMenu(menu.hidden);
+    if (event.key === 'Escape' && !menu.hidden) { event.preventDefault(); setMenu(false); }
     if (event.key === 'Tab' && !menu.hidden) {
-      const focusable = $$('button, a', menu).filter(element => !element.hidden);
+      const focusable = $$('button:not(:disabled), a[href], [tabindex]:not([tabindex="-1"])', menu).filter(element => !element.hidden);
       const first = focusable[0]; const last = focusable.at(-1);
+      if (!menu.contains(document.activeElement)) { event.preventDefault(); first.focus(); return; }
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     }
@@ -284,9 +325,107 @@ function initAI() {
 }
 
 function initRoom() {
-  const stage = $('.room-stage'); if (!stage || reducedMotion.matches || matchMedia('(pointer: coarse)').matches) return;
-  stage.addEventListener('pointermove', event => { const bounds = stage.getBoundingClientRect(); const x = (event.clientX - bounds.left) / bounds.width - .5; const y = (event.clientY - bounds.top) / bounds.height - .5; $$('[data-depth]', stage).forEach(layer => { const depth = Number(layer.dataset.depth); layer.style.transform = `translate3d(${x * depth}px, ${y * depth}px, 0)`; }); });
-  stage.addEventListener('pointerleave', () => $$('[data-depth]', stage).forEach(layer => { layer.style.transform = ''; }));
+  const stage = $('.room-stage'); if (!stage) return;
+  const objects = $$('[data-room-object]', stage);
+  const layers = $$('[data-depth]', stage);
+  let activeIndex = 0;
+
+  function focusObject(nextIndex) {
+    activeIndex = (nextIndex + objects.length) % objects.length;
+    objects.forEach((object, index) => { object.tabIndex = index === activeIndex ? 0 : -1; });
+    objects[activeIndex].focus();
+  }
+
+  objects.forEach((object, index) => {
+    object.tabIndex = index === 0 ? 0 : -1;
+    object.addEventListener('focus', () => {
+      activeIndex = index;
+      objects.forEach((item, itemIndex) => { item.tabIndex = itemIndex === activeIndex ? 0 : -1; });
+    });
+  });
+
+  stage.addEventListener('keydown', event => {
+    if (!event.target.closest('[data-room-object]')) return;
+    const direction = ({ ArrowRight:1, ArrowDown:1, ArrowLeft:-1, ArrowUp:-1 })[event.key];
+    if (direction) { event.preventDefault(); focusObject(activeIndex + direction); }
+    else if (event.key === 'Home') { event.preventDefault(); focusObject(0); }
+    else if (event.key === 'End') { event.preventDefault(); focusObject(objects.length - 1); }
+    else if (event.key.toLowerCase() === 'e') { event.preventDefault(); event.target.closest('[data-room-object]').click(); }
+  });
+
+  initBirdNPC(stage);
+
+  if (reducedMotion.matches || matchMedia('(pointer: coarse)').matches) return;
+  let frame = 0;
+  stage.addEventListener('pointermove', event => {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      const bounds = stage.getBoundingClientRect();
+      const x = (event.clientX - bounds.left) / bounds.width - .5;
+      const y = (event.clientY - bounds.top) / bounds.height - .5;
+      layers.forEach(layer => {
+        const depth = Number(layer.dataset.depth);
+        layer.style.setProperty('--parallax-x', `${x * depth}px`);
+        layer.style.setProperty('--parallax-y', `${y * depth}px`);
+      });
+      frame = 0;
+    });
+  });
+  stage.addEventListener('pointerleave', () => layers.forEach(layer => {
+    layer.style.removeProperty('--parallax-x');
+    layer.style.removeProperty('--parallax-y');
+  }));
+}
+
+function initBirdNPC(stage) {
+  const route = $('[data-bird-route]', stage);
+  if (!route) return;
+
+  const desktopPoints = [[44,74],[55,72],[36,76],[48,70]];
+  const mobilePoints = [[38,76],[56,75],[31,80],[48,72]];
+  let pointIndex = 1;
+  let timer;
+  let interacting = false;
+
+  function currentPoints() {
+    return matchMedia('(max-width: 700px)').matches ? mobilePoints : desktopPoints;
+  }
+
+  function schedule(delay = 2600) {
+    clearTimeout(timer);
+    if (interacting || document.hidden || reducedMotion.matches) return;
+    timer = setTimeout(() => {
+      const points = currentPoints();
+      const currentX = Number.parseFloat(getComputedStyle(route).left) / stage.clientWidth * 100;
+      const [x,y] = points[pointIndex++ % points.length];
+      route.dataset.state = x < currentX ? 'walk-left' : 'walk-right';
+      route.style.setProperty('--bird-x', `${x}%`);
+      route.style.setProperty('--bird-y', `${y}%`);
+      timer = setTimeout(() => { route.dataset.state = 'idle'; schedule(3000); }, 1500);
+    }, delay);
+  }
+
+  function pauseWalk() {
+    interacting = true;
+    clearTimeout(timer);
+    route.dataset.state = 'idle';
+  }
+
+  function resumeWalk(event) {
+    if (event?.relatedTarget && route.contains(event.relatedTarget)) return;
+    interacting = false;
+    schedule(1800);
+  }
+
+  route.addEventListener('pointerenter', pauseWalk);
+  route.addEventListener('pointerleave', resumeWalk);
+  route.addEventListener('focusin', pauseWalk);
+  route.addEventListener('focusout', resumeWalk);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) clearTimeout(timer);
+    else schedule(900);
+  });
+  schedule();
 }
 
 function initFilters() {
@@ -297,6 +436,8 @@ function initTransitions() {
   document.addEventListener('click', event => { const link = event.target.closest('a[href]'); if (!link || reducedMotion.matches || event.defaultPrevented || event.metaKey || event.ctrlKey || link.target === '_blank' || link.origin !== location.origin || link.hash && link.pathname === location.pathname) return; event.preventDefault(); const destination = link.href; const route = link.pathname.split('/').filter(Boolean)[0] || 'home'; document.body.dataset.transition = route; document.body.classList.add('route-leave'); setTimeout(() => { location.href = destination; }, 330); });
 }
 
-initMenu(); initAudio($('.sound-button')); initRoom(); initGames(); initFilms(); initBook(); initStudio(); initAI(); initFilters(); initTransitions();
+initMenu();
+initAudio($('.sound-button'), page === 'home' ? { ambience:true, ambienceSrc:'/assets/audio/roomtone-bedroom-yew.mp3' } : undefined);
+initRoom(); initGames(); initFilms(); initBook(); initStudio(); initAI(); initFilters(); initTransitions();
 $('.history-back')?.addEventListener('click', () => history.length > 1 ? history.back() : location.assign('/'));
 requestAnimationFrame(() => document.body.classList.add('ready'));

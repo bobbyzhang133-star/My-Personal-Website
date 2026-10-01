@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 144" shape-rendering="crispEdges">
+  <title>Original pixel-art studio rug</title>
+  <rect width="384" height="144" rx="4" fill="#242c5c"/>
+  <rect x="12" y="12" width="360" height="120" fill="#393d7d"/>
+  <rect x="24" y="24" width="336" height="12" fill="#d07aa2"/>
+  <rect x="24" y="108" width="336" height="12" fill="#2f5798"/>
+  <rect x="42" y="55" width="18" height="30" fill="#e08b5f"/>
+  <rect x="92" y="55" width="18" height="30" fill="#79a0a0"/>
+  <rect x="142" y="55" width="18" height="30" fill="#e08b5f"/>
+  <rect x="192" y="55" width="18" height="30" fill="#79a0a0"/>
+  <rect x="242" y="55" width="18" height="30" fill="#e08b5f"/>
+  <rect x="292" y="55" width="18" height="30" fill="#79a0a0"/>
+  <rect x="326" y="55" width="16" height="30" fill="#e08b5f"/>
+</svg>

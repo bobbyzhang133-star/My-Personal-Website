@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 96" shape-rendering="crispEdges">
+  <title>Original pixel-art guitar</title>
+  <rect x="20" y="5" width="9" height="5" fill="#5c160a"/>
+  <rect x="17" y="7" width="4" height="3" fill="#d0dedb"/>
+  <rect x="29" y="7" width="4" height="3" fill="#d0dedb"/>
+  <rect x="21" y="10" width="7" height="43" fill="#a5503b"/>
+  <rect x="23" y="10" width="2" height="43" fill="#ffc77c"/>
+  <rect x="21" y="19" width="7" height="2" fill="#5c160a"/>
+  <rect x="21" y="29" width="7" height="2" fill="#5c160a"/>
+  <rect x="21" y="39" width="7" height="2" fill="#5c160a"/>
+  <path d="M14 47h8v6h6v-6h8v5h5v10h-4v18h-7v8H18v-8h-7V62H7V52h7z" fill="#5c160a"/>
+  <path d="M15 50h7v7h6v-7h7v5h4v7h-5v16h-6v7h-8v-7h-6V62H9v-7h6z" fill="#b34858"/>
+  <rect x="14" y="58" width="21" height="5" fill="#d07aa2"/>
+  <rect x="17" y="66" width="15" height="12" fill="#f895a3"/>
+  <rect x="22" y="62" width="6" height="18" fill="#242c5c"/>
+  <rect x="23" y="64" width="4" height="8" fill="#5c160a"/>
+  <rect x="19" y="82" width="11" height="4" fill="#a5503b"/>
+  <rect x="23" y="14" width="1" height="70" fill="#e5fff9"/>
+  <rect x="26" y="14" width="1" height="70" fill="#ffc77c"/>
+</svg>
