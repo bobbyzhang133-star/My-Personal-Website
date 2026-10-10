@@ -1,0 +1,19 @@
+---
+description: Make Room navigation read as player camera travel while preserving the clicked physical object
+alwaysApply: true
+---
+
+# Room Camera Travel and Shared-Object Continuity
+
+Apply this rule to every Home Room → category transition and its reverse.
+
+1. Express approach by transforming the complete Room world with one camera dolly/pan. Walls, floor, supports, neighboring props, shadows, and the clicked object must enlarge and move together.
+2. Do not simulate player approach by scaling an isolated prop, destination container, screen, or full category interface out of the clicked object.
+3. Aim the camera at the visible object artwork, not a broad layout anchor. Use a meaningful travel scale greater than 1 and enough duration for the environmental motion to read.
+4. Keep the clicked object's silhouette, perspective, identity, and support relationship continuous at handoff. Never replace it with unrelated hardware or a different object family.
+5. Mount or reveal category controls only after the camera arrives. UI may use a short local opacity/translation entrance, but it must not become the spatial motion itself and the viewport must not fade away.
+6. When a category has no physical screen—especially Games/Bird—keep the object shape visible and place game-like controls around it instead of inventing a monitor or rectangular console.
+7. Reverse in the opposite order: close the local UI, reconnect the same focused Room object, then restore the Room camera so the player appears to step backward.
+8. Preserve one stable perspective and grounding system throughout travel. Do not independently scale grounded layers or let props drift relative to their support planes.
+9. Reduced motion must skip dolly/scale movement and use an instant handoff or brief object-local dissolve.
+10. Before finishing, review enter midpoint, category-active state, and reverse midpoint at desktop, 390 × 844 portrait, and 844 × 390 landscape. Reject any transition that reads as the object flying at the viewer.

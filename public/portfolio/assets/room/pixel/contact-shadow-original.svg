@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 24" shape-rendering="crispEdges">
+  <title>Original pixel-art footprint contact shadow</title>
+  <path d="M4 6h88v4H88v4H80v4H16v-4H8v-4H4z" fill="#242c5c" opacity=".12"/>
+  <path d="M10 5h76v4h-6v4H16V9h-6z" fill="#242c5c" opacity=".18"/>
+  <path d="M16 3h64v5H16z" fill="#242c5c" opacity=".26"/>
+</svg>

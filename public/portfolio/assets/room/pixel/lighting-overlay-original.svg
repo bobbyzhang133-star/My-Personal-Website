@@ -6,11 +6,6 @@
       <stop offset=".72" stop-color="#ffc77c" stop-opacity=".08"/>
       <stop offset="1" stop-color="#ffc77c" stop-opacity="0"/>
     </linearGradient>
-    <radialGradient id="edgeShade">
-      <stop offset=".58" stop-color="#242c5c" stop-opacity="0"/>
-      <stop offset="1" stop-color="#242c5c" stop-opacity=".28"/>
-    </radialGradient>
   </defs>
   <path d="M432 80h192l-56 264H272z" fill="url(#windowLight)"/>
-  <rect width="768" height="480" fill="url(#edgeShade)"/>
 </svg>

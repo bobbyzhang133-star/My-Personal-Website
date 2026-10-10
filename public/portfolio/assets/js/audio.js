@@ -26,6 +26,7 @@ export function initAudio(button, { ambience = false, ambienceSrc = AMBIENCE_SRC
   let ambienceUnavailable = false;
   let fadeFrame;
   let fadeGeneration = 0;
+  let ambienceActive = ambience;
 
   const ambientTrack = ambience && typeof Audio !== 'undefined' ? new Audio(ambienceSrc) : null;
   if (ambientTrack) {
@@ -58,8 +59,9 @@ export function initAudio(button, { ambience = false, ambienceSrc = AMBIENCE_SRC
 
     const step = now => {
       if (generation !== fadeGeneration) return;
-      const progress = Math.min((now - startedAt) / duration, 1);
-      ambientTrack.volume = initialVolume + (targetVolume - initialVolume) * progress;
+      const progress = Math.max(0, Math.min((now - startedAt) / duration, 1));
+      const nextVolume = initialVolume + (targetVolume - initialVolume) * progress;
+      ambientTrack.volume = Math.max(0, Math.min(nextVolume, 1));
       if (progress < 1) {
         fadeFrame = requestAnimationFrame(step);
       } else if (pauseAfter) {
@@ -71,12 +73,12 @@ export function initAudio(button, { ambience = false, ambienceSrc = AMBIENCE_SRC
   }
 
   async function startAmbience() {
-    if (!ambientTrack || ambienceUnavailable || !enabled || !userGestureGranted || document.hidden) return;
+    if (!ambientTrack || ambienceUnavailable || !ambienceActive || !enabled || !userGestureGranted || document.hidden) return;
 
     try {
       ambientTrack.volume = 0;
       await ambientTrack.play();
-      if (!enabled || document.hidden) {
+      if (!ambienceActive || !enabled || document.hidden) {
         pauseAmbienceImmediately();
         return;
       }
@@ -152,11 +154,18 @@ export function initAudio(button, { ambience = false, ambienceSrc = AMBIENCE_SRC
     if (document.hidden) {
       pauseAmbienceImmediately();
       if (context?.state === 'running') context.suspend().catch(() => {});
-    } else if (enabled && userGestureGranted && ambienceStarted) {
+    } else if (ambienceActive && enabled && userGestureGranted && ambienceStarted) {
       startAmbience();
     }
   });
 
   update();
-  return { tone };
+  return {
+    tone,
+    setAmbienceActive(active) {
+      ambienceActive = Boolean(active);
+      if (ambienceActive) startAmbience();
+      else stopAmbience();
+    }
+  };
 }

@@ -49,17 +49,34 @@ Exact third-party derivative inventory:
 - `cool-school-papers.png`
 - `cool-school-globe.png`
 
+### Computer perspective derivatives
+
+- The 48×48 `cool-school-computer.png` remains the licensed CC0 Room object and the identity source for the AI category computer.
+- Four project-produced perspective derivatives were created from that exact source with OpenAI ImageGen. The prompts required the source computer's mint casing, navy pixel outline, cream keyboard deck, coral lower lip, and green keys to remain consistent; they did not introduce a different computer or any third-party imagery.
+- `cool-school-computer-preferred-perspective.png` is Bobby's selected straight-on, seated-eye-level production shell used at every category breakpoint. Portrait layouts use a closer crop of this same asset rather than substituting a differently proportioned computer.
+- `cool-school-computer-mobile-perspective.png`, `cool-school-computer-wide-study.png`, and `cool-school-computer-three-quarter-study.png` are alternate perspective studies retained for provenance and visual comparison. They are not loaded at runtime.
+- These files are derivative project assets based on NettySvit's CC0 Cool School computer. The straight-on variants were selected because they permit crisp, accessible live HTML in the screen opening; the three-quarter study was rejected for runtime use because it would require skewing interactive text.
+
 ### Original portfolio artwork
 
 - The pixel camera and guitar were created for this Home Room and matched to the Cool School tileset's scale, palette, perspective, and shading language.
-- The rug and lighting overlays are original Home Room artwork. They are exported separately where layering is needed for interaction, occlusion, responsive composition, or restrained parallax.
-- Exact original-file inventory: `camera-original.svg`, `guitar-original.svg`, `rug-original.svg`, and `lighting-overlay-original.svg`.
+- The rug, footprint contact shadow, and lighting overlays are original Home Room artwork. They are exported separately where layering is needed for interaction, grounding, occlusion, or responsive composition.
+- Exact original-file inventory: `camera-original.svg`, `guitar-original.svg`, `rug-original.svg`, `contact-shadow-original.svg`, and `lighting-overlay-original.svg`.
 
 ### Temporary and missing artwork
 
 - The current bird sprite sheet is an original temporary proxy with idle, walk-left, and walk-right states. It is marked as temporary internally and must not be represented as the final One Last Bird character artwork.
 - Temporary-file inventory: `bird-temporary-sprites.svg`.
 - The actual One Last Bird sprite was not found in the project files or Git history. The existing flattened game cover is not a reusable character sprite, and no generic third-party bird has been substituted as final artwork.
+
+### Games character-select concepts
+
+- Five transparent character-selection concepts were generated with OpenAI ImageGen from the existing portfolio game covers as visual references. They are project-produced selector artwork, not recovered in-game sprites and not evidence of additional game canon.
+- `game-characters/one-last-bird-selector.png` represents the cover's adult Ivory-billed Woodpecker. It remains separate from the missing actual One Last Bird production sprite.
+- `game-characters/chickens-breakout-selector.png` expands the cover's minimal red circular chicken mark only for character-selection presentation.
+- `game-characters/five-nights-at-chickens-selector.png` translates the original black, white, and red chicken creature shown on the project cover.
+- `game-characters/chickens-nightmare-gamemaker-selector.png` and `game-characters/chickens-nightmare-ue5-selector.png` are two presentation treatments of the same red-eyed shadow-chicken identity. The UE5 image does not claim a separate canonical character.
+- The generation prompts required isolated characters, transparent backgrounds, no text, no logos, and a consistent modern indie pixel-art language. Existing covers remain the canonical project artwork and are preserved unchanged.
 
 ### Interaction mapping and scope
 
@@ -68,7 +85,7 @@ Exact third-party derivative inventory:
 - Research → Book
 - Music → Guitar
 - AI → Computer
-- This asset direction applies only to the Home Room. It has not been propagated to the category or professional pages, and this approval pass is not deployed.
+- The coherent Room asset family remains scoped to the creative experience. At Bobby's request, the AI category now reuses perspective derivatives of the exact Room computer so the object remains visually continuous through the transition. No professional page was redesigned, and this pass is not deployed.
 
 ## Rejected generated reference
 

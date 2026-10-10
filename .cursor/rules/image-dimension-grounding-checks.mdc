@@ -1,0 +1,45 @@
+---
+description: Require perspective-grid, scale, full-footprint grounding, occlusion, and shadow checks for image-based visuals
+alwaysApply: true
+---
+
+# Perspective and Full-Footprint Grounding
+
+Apply this rule whenever creating, editing, generating, scaling, positioning, cropping, or animating image-based objects.
+
+## Construct the scene
+
+1. Define the camera before placing objects: perspective type, horizon/eye level, ground level, vanishing point(s), viewing distance, and viewing angle.
+2. Draw or overlay the perspective grid and explicit floor, shelf, desk, or other support plane. Lock these guides while composing.
+3. Establish a scale key using one known reference object. Objects at equal depth must share scale; objects moving in depth must scale along the grid.
+4. Preserve intrinsic aspect ratio unless intentional distortion is documented. Inspect transparent padding and meaningful opaque bounds.
+
+## Ground the entire base
+
+5. Define each object's projected footprint—not merely its lowest visible pixel. Mark every required contact point: all feet, legs, wheels, base corners, or the complete bottom plane.
+6. Project every contact marker onto the same support plane. A chair requires every intended leg to meet the floor; a desk requires its whole base; a laptop or book requires its complete supporting edge or plane.
+7. The support polygon must contain the object's complete footprint. No part may overhang, float, or sink unless intentionally designed.
+8. Do not accept edge-only contact. If one corner touches but another required contact point is above or below the projected plane, the object is floating or sinking.
+9. Follow the plane's perspective; do not force all contacts onto one horizontal screen line when the support plane recedes toward a vanishing point.
+10. Add a restrained contact shadow attached across the footprint, consistent with the scene light. A shadow supports grounding but never replaces geometric contact.
+
+## Preserve spatial relationships
+
+11. Project parallel edges toward the established vanishing point(s), and keep furniture depth, thickness, and proportions consistent with grid cells.
+12. Resolve occlusion from footprints and depth: nearer objects may cover farther objects, but supports must remain visually understandable.
+13. When an object continues into another scene, retain its identity, proportions, perspective, support relationship, and surrounding context.
+
+## Verify before completion
+
+14. Review screenshots with temporary overlays showing horizon, vanishing lines, support planes, footprint polygons, and contact markers.
+15. Measure all critical contact markers against the projected support plane, accounting for transparent pixels; verify polygon containment rather than one `getBoundingClientRect()` edge.
+16. Check desktop, 390 × 844 mobile, a short landscape viewport, and transition start/midpoint/end. Reject any view where one required contact marker separates from its support.
+17. Remove debug guides only after checks pass. Do not publish while any object floats, sinks, changes scale incorrectly, or has unexplained overlap.
+
+## References
+
+- [Adobe: About perspective drawing](https://helpx.adobe.com/in/illustrator/desktop/manage-objects/reshape-transform-objects/about-perspective-drawing.html)
+- [Adobe: Placing and scaling objects on an active perspective plane](https://helpx.adobe.com/au/illustrator/using/draw-and-modify-objects-perspective-grid.html)
+- [Autodesk: Perspective guides](https://help.autodesk.com/cloudhelp/ENU/SKETPRO-Help/files/sb-tools/SKETPRO_Help_sb_tools_how_to_use_perspective_guides_html.html)
+- [Autodesk: Floor contact markers and oriented planes](https://help.autodesk.com/cloudhelp/2016/ENU/HumanIK-SDK-Help/files/GUID-DBE08C49-E87A-4053-A3D0-00C813122EE6.htm)
+- [Autodesk: Ground shadows and positioning](https://help.autodesk.com/cloudhelp/2026/ENU/Inventor-Help/files/GUID-3395B47F-7D8B-47B4-ACDD-0A9489948DB4.htm)
