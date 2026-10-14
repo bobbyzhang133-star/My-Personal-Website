@@ -7,7 +7,8 @@ const FLOOR_ITEMS = Object.freeze([
   { name: 'drawers', selector: '.furniture-drawers', plane: 'front', source: [96, 96], contacts: [[1, 70], [48, 70], [95, 70]] },
   { name: 'chair', selector: '.furniture-chair', plane: 'middle', source: [48, 48], contacts: [[12, 48], [37, 48]] },
   { name: 'guitar', selector: '.object-music img', moveSelector: '.object-music', plane: 'rear', source: [48, 96], contacts: [[18, 88], [30, 88]] },
-  { name: 'bird', selector: '.bird-sprite', moveSelector: '.object-games', plane: 'bird', source: [48, 48], contacts: [[18, 43], [21, 43], [28, 43], [31, 43]], hasExternalShadow: false }
+  // The woodpecker's rear foot is higher in the artwork's perspective, not floating.
+  { name: 'bird', selector: '.bird-sprite', moveSelector: '.object-games', plane: 'bird', source: [192, 192], groundDatum: 173, contacts: [[116, 173], [141, 168]], hasExternalShadow: false }
 ]);
 
 const SUPPORTED_ITEMS = Object.freeze([
@@ -151,11 +152,13 @@ export function alignRoomGeometry(root) {
       continue;
     }
     const planeY = plane.getBoundingClientRect().top;
+    const scale = renderedFrame(element, item.source).scale;
+    const offsets = item.contacts.map(([, y]) => item.groundDatum ? (y - item.groundDatum) * scale : 0);
     const before = pointEnvelope(projectPoints(element, item.source, item.contacts));
-    translateTo(scene, item, planeY - before.y);
+    translateTo(scene, item, planeY - before.y + offsets.reduce((sum, offset) => sum + offset, 0) / offsets.length);
     const points = projectPoints(element, item.source, item.contacts);
     const after = pointEnvelope(points);
-    const error = Math.max(...points.map(point => Math.abs(point.y - planeY)));
+    const error = Math.max(...points.map((point, index) => Math.abs(point.y - planeY - offsets[index])));
     const grounded = error <= .75;
     markTarget(scene, item, error, grounded);
     placeShadow(scene, item, after, planeY);

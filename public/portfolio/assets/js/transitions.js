@@ -1,5 +1,5 @@
-import { CAMERA_HOME, VirtualCamera } from './camera.js?v=20261006-2';
-import { isReducedMotion, nextFrame } from './utils.js?v=20261006-2';
+import { CAMERA_HOME, VirtualCamera } from './camera.js?v=39bd00589fe9';
+import { isReducedMotion, nextFrame } from './utils.js?v=39bd00589fe9';
 
 export const OBJECT_TRANSITIONS = Object.freeze({
   games: { cameraDuration: 940, interfaceDuration: 320, exitInterfaceDuration: 220, restoreDuration: 820 },
@@ -80,14 +80,27 @@ export class TransitionDirector {
     const computer = this.host.querySelector('.computer-object');
     if (!support || !computer) return;
     const supportRect = support.getBoundingClientRect();
-    const computerRect = computer.getBoundingClientRect();
     const hostRect = this.host.getBoundingClientRect();
+    // Fit the entire meaningful base inside the desk, not merely its bottom edge.
+    computer.style.width = `${supportRect.width * .88}px`;
+    computer.style.left = `${supportRect.left - hostRect.left + supportRect.width / 2}px`;
+    const computerRect = computer.getBoundingClientRect();
     if (supportRect.width <= 0 || computerRect.height <= 0) return;
     // Alpha-bound scan: the meaningful laptop base ends at row 1113/1194.
     // Rows below it are only 1–2 alpha cleanup fringe and must not create a gap.
     const visibleBottomRatio = 1113 / 1194;
     computer.style.top = `${supportRect.top - hostRect.top - computerRect.height * visibleBottomRatio}px`;
     computer.style.bottom = 'auto';
+    const screen = computer.querySelector('.computer-screen-window');
+    if (screen) {
+      // Keep the live controls within the visible glass when portrait crops the shell.
+      const glassLeft = computerRect.left + computerRect.width * .1412;
+      const glassRight = glassLeft + computerRect.width * .7168;
+      const visibleLeft = Math.max(glassLeft, hostRect.left + 12);
+      const visibleRight = Math.min(glassRight, hostRect.right - 12);
+      screen.style.left = `${visibleLeft - computerRect.left}px`;
+      screen.style.width = `${Math.max(0, visibleRight - visibleLeft)}px`;
+    }
   }
 
   watchSceneAlignment(route) {

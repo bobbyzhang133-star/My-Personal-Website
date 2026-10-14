@@ -1,5 +1,7 @@
 # Site Design Guidance
 
+- Follow `.cursor/rules/portfolio-release-navigation.mdc` for every portfolio runtime change: synchronize all entry documents and module versions, verify the release check, and test detail/category/Room return paths.
+
 - For future website design work in this project, use Material Design 3 as the baseline design skill set: color roles, surface containers, elevation, expressive shape, adaptive layout, accessible focus states, and restrained motion.
 - Preserve Bobby Zhang's portfolio identity when applying M3. The site should still feel cinematic, creative, and personal; M3 should improve structure, hierarchy, and usability rather than flatten the art direction.
 - Prefer token-based CSS variables for color, shape, and motion so future sections can stay visually consistent.

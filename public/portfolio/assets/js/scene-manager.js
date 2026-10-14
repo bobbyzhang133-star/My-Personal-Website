@@ -1,5 +1,5 @@
-import { isCreativePath, routeFromPath } from './utils.js?v=20261006-2';
-import { TransitionDirector } from './transitions.js?v=20261006-2';
+import { isCreativePath, routeFromPath } from './utils.js?v=39bd00589fe9';
+import { TransitionDirector } from './transitions.js?v=39bd00589fe9';
 
 export const SHELL_STATES = Object.freeze({
   BOOTING: 'BOOTING',
@@ -91,11 +91,9 @@ export class SceneManager {
 
   returnToRoom() {
     if (this.activeRoute === 'home' || this.locked || this.historyReturnPending) return;
-    if (this.enteredFromRoom && history.length > 1) {
-      this.historyReturnPending = true;
-      history.back();
-    }
-    else this.navigate('home');
+    // Room is a destination, not a synonym for browser Back.
+    // History may contain detail, professional, or previously cached pages.
+    this.navigate('home');
   }
 
   async navigate(route, { historyMode = 'push', historyState = null } = {}) {

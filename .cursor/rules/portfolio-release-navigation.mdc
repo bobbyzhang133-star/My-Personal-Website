@@ -1,0 +1,15 @@
+---
+description: Prevent stale portfolio versions and incorrect Room return routes
+alwaysApply: true
+---
+
+# Release and Navigation Consistency
+
+- All portfolio documents—including every project detail and professional route—must load the same content-derived release of shared JS and CSS.
+- After changing runtime JS or CSS, run `node scripts/sync-portfolio-release.mjs`. Never manually update only Home or category versions.
+- Run `node scripts/sync-portfolio-release.mjs --check` and the route regression suite before delivery; stale or unversioned entries block completion.
+- The Room action always targets `/`. Browser Back remains a separate action; never infer the Room destination from history length or a previous page.
+- Revalidate documents restored from the browser's back-forward cache, and use revalidating production headers and the no-store local preview server.
+- Verify Home → category → project detail → category → Room, browser Back/Forward, direct detail loads, and professional-page returns. Cover all five category families; ensure no legacy selector or mismatched release reappears.
+- Start preview with `python3 scripts/serve-portfolio.py`, rooted at `public/portfolio`. Do not serve the repository root or open HTML files directly.
+- Report the verified local or live link; do not call a cached page or an unverified deployment current.

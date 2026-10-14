@@ -1,17 +1,33 @@
-import { initAudio } from './audio.js?v=20261006-2';
-import { renderGameShell } from './game-shell.js?v=20261006-2';
-import { playerMenuMarkup, initPlayerMenu } from './player-menu.js?v=20261006-2';
-import { professionalChrome, professionalFooter, initProfessionalPage, renderProfessionalPage } from './professional-pages.js?v=20261006-2';
-import { SceneManager } from './scene-manager.js?v=20261006-2';
-import { sceneRegistry } from './scenes/index.js?v=20261006-2';
-import { isCreativePath, routeFromPath } from './utils.js?v=20261006-2';
+import { initAudio } from './audio.js?v=39bd00589fe9';
+import { renderGameShell } from './game-shell.js?v=39bd00589fe9';
+import { playerMenuMarkup, initPlayerMenu } from './player-menu.js?v=39bd00589fe9';
+import { professionalChrome, professionalFooter, initProfessionalPage, renderProfessionalPage } from './professional-pages.js?v=39bd00589fe9';
+import { SceneManager } from './scene-manager.js?v=39bd00589fe9';
+import { sceneRegistry } from './scenes/index.js?v=39bd00589fe9';
+import { isCreativePath, routeFromPath } from './utils.js?v=39bd00589fe9';
+import { gameWorldProject, renderGameWorld, mountGameWorld } from './game-world.js?v=39bd00589fe9';
 
 const legacyHashRoutes = { games: '/games/', films: '/films/', banddream: '/music/', research: '/research/', about: '/about/', contact: '/about/', now: '/skills-experience/' };
 const page = document.body.dataset.page || 'home';
 const app = document.querySelector('#app');
+// All game details enter their explorable setting; ?geometry preserves the art-free QA view.
+const worldProject = page === 'detail' ? gameWorldProject(document.body.dataset.project) : null;
+
+// Browser Back may restore a complete old document without fetching its assets.
+// Revalidate restored pages instead of reusing a previous application release.
+addEventListener('pageshow', event => {
+  if (event.persisted) location.reload();
+});
 
 if (page === 'home' && legacyHashRoutes[location.hash.slice(1)]) {
   location.replace(legacyHashRoutes[location.hash.slice(1)]);
+} else if (worldProject) {
+  document.body.classList.add('world-mode');
+  app.innerHTML = renderGameWorld(worldProject);
+  document.body.insertAdjacentHTML('beforeend', playerMenuMarkup());
+  initAudio(app.querySelector('.sound-button'));
+  initPlayerMenu({ onReturnRoom: () => location.assign('/') });
+  mountGameWorld(app.querySelector('[data-game-world]'), worldProject);
 } else if (isCreativePath(location.pathname)) {
   document.body.classList.add('game-mode');
   app.innerHTML = renderGameShell();

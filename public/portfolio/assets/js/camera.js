@@ -1,4 +1,4 @@
-import { isReducedMotion } from './utils.js?v=20261006-2';
+import { isReducedMotion } from './utils.js?v=39bd00589fe9';
 
 export const CAMERA_HOME = Object.freeze({ x: 0, y: 0, scale: 1 });
 
@@ -30,7 +30,8 @@ export function calculateTravelTransform(targetRect, viewportRect, worldRect, {
   scale = 1.7,
   compactScale = scale,
   focusX = 0.5,
-  focusY = 0.5
+  focusY = 0.5,
+  compactFocusY = focusY
 } = {}) {
   if (!targetRect || !viewportRect || !worldRect || targetRect.width <= 0 || targetRect.height <= 0 || viewportRect.width <= 0 || viewportRect.height <= 0) {
     return { ...CAMERA_HOME };
@@ -39,7 +40,8 @@ export function calculateTravelTransform(targetRect, viewportRect, worldRect, {
   const targetX = targetRect.left + targetRect.width / 2 - worldRect.left;
   const targetY = targetRect.top + targetRect.height / 2 - worldRect.top;
   const desiredX = viewportRect.left + viewportRect.width * focusX - worldRect.left - targetX * resolvedScale;
-  const desiredY = viewportRect.top + viewportRect.height * focusY - worldRect.top - targetY * resolvedScale;
+  const resolvedFocusY = viewportRect.width <= 700 ? compactFocusY : focusY;
+  const desiredY = viewportRect.top + viewportRect.height * resolvedFocusY - worldRect.top - targetY * resolvedScale;
   const viewportRight = Number.isFinite(viewportRect.right) ? viewportRect.right : viewportRect.left + viewportRect.width;
   const viewportBottom = Number.isFinite(viewportRect.bottom) ? viewportRect.bottom : viewportRect.top + viewportRect.height;
   const minX = viewportRight - worldRect.left - worldRect.width * resolvedScale;
@@ -58,11 +60,11 @@ export function cameraTransform({ x, y, scale }) {
 }
 
 export const CAMERA_TRAVEL_PROFILES = Object.freeze({
-  games: { scale: 1.72, compactScale: 1.58, focusX: 0.86, focusY: 0.62 },
+  games: { scale: 4.8, compactScale: 3.2, focusX: 0.5, focusY: 0.54 },
   films: { scale: 1.78, compactScale: 1.62, focusX: 0.58, focusY: 0.48 },
   research: { scale: 1.68, compactScale: 1.56, focusX: 0.5, focusY: 0.62 },
   music: { scale: 1.72, compactScale: 1.58, focusX: 0.5, focusY: 0.52 },
-  ai: { scale: 1.74, compactScale: 1.6, focusX: 0.55, focusY: 0.48 }
+  ai: { scale: 4.2, compactScale: 4.2, focusX: 0.5, focusY: 0.7, compactFocusY: 0.42 }
 });
 
 export class VirtualCamera {

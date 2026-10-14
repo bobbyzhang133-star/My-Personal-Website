@@ -1,7 +1,7 @@
-import { projects, researchNotes } from '../content.js?v=20261006-2';
-import { $$, esc, isReducedMotion } from '../utils.js?v=20261006-2';
-import { bindLinearKeys, sceneController } from './shared.js?v=20261006-2';
-import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=20261006-2';
+import { projects, researchNotes } from '../content.js?v=39bd00589fe9';
+import { $$, esc, isReducedMotion } from '../utils.js?v=39bd00589fe9';
+import { bindLinearKeys, sceneController } from './shared.js?v=39bd00589fe9';
+import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=39bd00589fe9';
 
 const chapters = projects.filter(project => project.category === 'research');
 

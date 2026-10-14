@@ -111,7 +111,7 @@ body.game-mode #app { overflow: hidden; }
 .object-label b { margin-left: auto; font-size: 9px; }
 .object-label i { width: 6px; height: 6px; border-radius: 50%; background: #8cf3c9; box-shadow: 0 0 10px #8cf3c9; }
 
-/* Games: the exact Room bird remains visible while a transparent character-select HUD engages around it. */
+/* Games: character art occupies the approached bird's place; only swap arrows remain. */
 .games-scene { color: #fff; }
 .games-object-stage { inset: max(58px,7vh) clamp(14px,3vw,46px) clamp(14px,2.5vh,28px); }
 .games-scene .games-character-ui { position: relative; inset: auto; display: grid; grid-template-columns: minmax(0,1.2fr) minmax(260px,.72fr) clamp(190px,24vw,330px); grid-template-rows: auto minmax(0,1fr) auto; gap: clamp(10px,1.6vw,22px); width: 100%; height: 100%; min-height: 0; overflow: visible; border: 0; background: transparent; }
@@ -417,3 +417,34 @@ body.game-mode #app { overflow: hidden; }
 html[data-motion="reduced"] .transition-effect,
 html[data-motion="reduced"] .bird-sprite,
 html[data-motion="reduced"] .studio-visual > img { animation: none !important; }
+
+/* Object-first Games view, shared across every viewport. */
+.game-shell:has(.games-scene) .room-backdrop .object-games { opacity: 0; }
+.games-object-stage { inset: 64px 12px 12px; }
+.games-scene .games-character-ui { display: block; }
+.games-roster-stage { position: absolute; inset: 0; border: 0; background: none; }
+.games-roster-stage::before { display: none; }
+.games-scene .character-track { inset: 0; }
+.games-scene .character { width: min(66vw,70dvh); background: none; border: 0; box-shadow: none; }
+.games-scene .character-frame { height: 70dvh; min-width: 0; max-width: 100%; aspect-ratio: auto; }
+.games-scene .character-frame img { min-width: 0; max-width: 100%; }
+.games-scene .character-frame { position: relative; }
+.character-animation { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; image-rendering: pixelated; filter: drop-shadow(0 16px 10px #080b1585); }
+.has-source-animation > img { opacity: 0; }
+.character-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.character-video[hidden] { display: none; }
+.games-scene .character[data-position="prev"],
+.games-scene .character[data-position="next"],
+.games-scene .character[data-position="hidden"] { visibility: hidden; opacity: 0; pointer-events: none; }
+.games-scene .character[data-position="active"] { transform: none; opacity: 1; }
+.games-scene .select-copy { position: absolute; width: 1px; height: 1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); }
+.games-scene .carousel-arrow { z-index: 5; }
+.games-scene .carousel-arrow.prev { left: 4vw; }
+.games-scene .carousel-arrow.next { right: 4vw; }
+.games-scene .game-select-action { position: absolute; z-index: 6; bottom: 12px; left: 50%; transform: translateX(-50%); min-height: 48px; max-width: calc(100% - 24px); width: max-content; text-align: center; padding: 12px 24px; white-space: normal; border: 2px solid #b7fff2; background: #151e31; color: #e5fff9; box-shadow: 4px 4px 0 #070d1b; }
+.games-scene .character-track { bottom: 66px; }
+.games-scene .character-frame { height: min(62dvh,calc(100dvh - 168px)); }
+@media (max-width: 700px) {
+  .games-scene .character { width: 76vw; }
+  .games-scene .character-frame { height: 60dvh; }
+}

@@ -1,7 +1,7 @@
-import { categories } from '../content.js?v=20261006-2';
-import { $$, esc, isReducedMotion } from '../utils.js?v=20261006-2';
-import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=20261006-2';
-import { alignRoomGeometry, watchRoomGeometry } from './room-geometry.js?v=20261006-2';
+import { categories } from '../content.js?v=39bd00589fe9';
+import { $$, esc, isReducedMotion } from '../utils.js?v=39bd00589fe9';
+import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=39bd00589fe9';
+import { alignRoomGeometry, watchRoomGeometry } from './room-geometry.js?v=39bd00589fe9';
 
 export { alignRoomGeometry };
 
@@ -16,11 +16,11 @@ const roomState = {
 function roomObjects() {
   return categories.map((category, index) => {
     const art = category.slug === 'games'
-      ? '<span class="bird-sprite" aria-hidden="true"></span>'
+      ? `<img class="bird-sprite" src="${ROOM_OBJECT_ASSETS.games}" alt="" aria-hidden="true">`
       : `<img src="${ROOM_OBJECT_ASSETS[category.slug]}" alt="" aria-hidden="true">`;
     const anchor = `<span class="transition-anchor anchor-${category.slug}" data-transition-anchor="${category.slug}" aria-hidden="true"></span>`;
     const birdAttributes = category.slug === 'games'
-      ? ' data-bird-route data-asset-status="temporary" data-state="idle"'
+      ? ' data-bird-route data-asset-status="original-game-sprite" data-state="idle"'
       : '';
     return `<a class="room-object object-${category.slug}" href="/${category.slug}/" data-scene-link="${category.slug}" data-transition-target="${category.slug}" data-room-object data-route-index="${index}" aria-label="${esc(`${category.title}: ${category.description}`)}"${birdAttributes}>
       <span class="object-parallax" data-depth="${({ games: 5, films: 4, research: 4, music: 3, ai: 3 })[category.slug]}"><span class="object-art">${art}${anchor}</span></span>

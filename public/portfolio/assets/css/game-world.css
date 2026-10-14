@@ -1,0 +1,126 @@
+@view-transition { navigation: auto; }
+body.world-mode { margin: 0; overflow: hidden; background: #10130d; color: #fff4df; }
+.game-world { position: fixed; inset: 0; overflow: hidden; isolation: isolate; background: #12100c; }
+.world-hud { position: absolute; z-index: 8; inset: 12px 14px auto; display: flex; gap: 8px; }
+.world-hud .sound-button { margin-left: auto; }
+.world-hud .menu-button::after { content: none; }
+.world-hud .game-control { text-decoration: none; background: #151c1aeb; color: #fff4df; border: 2px solid #afa887; border-radius: 3px; padding: 10px 14px; min-height: 44px; font: 600 11px/1.4 'JetBrains Mono',monospace; }
+.world-caption { position: absolute; z-index: 4; top: 78px; left: 24px; right: 24px; pointer-events: none; text-shadow: 0 3px 12px #000; }
+.world-caption p { margin: 0 0 5px; color: #e2ce9b; font: 10px 'JetBrains Mono',monospace; letter-spacing: .15em; text-transform: uppercase; }
+.world-caption h1 { margin: 0; font: 400 clamp(24px,3vw,38px)/1.1 'Instrument Serif',serif; }
+.world-viewport { position: absolute; inset: 0; overflow: hidden; cursor: crosshair; }
+.exploration-world { position: absolute; left: 0; top: 0; width: max(100vw,calc(100dvh * 1.77778)); height: 100%; will-change: transform; }
+.world-environment { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center bottom; }
+.world-player { position: absolute; z-index: 3; left: 24%; bottom: 16%; width: clamp(90px,12vh,170px); height: clamp(130px,23vh,245px); transform: translateX(-50%); pointer-events: none; }
+.world-player img { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 2px 2px #0008); }
+.world-player[data-direction="left"] img { transform: scaleX(-1); }
+.world-contact-shadow { position: absolute; z-index: 0; left: 26%; right: 15%; bottom: 1%; height: 8px; background: #0009; border-radius: 50%; filter: blur(3px); }
+.world-station { position: absolute; z-index: 2; left: var(--station-x); bottom: 19%; transform: translateX(-50%); display: grid; justify-items: center; gap: 4px; padding: 12px 14px; min-width: 48px; min-height: 48px; border: 0; background: transparent; color: #ffe8a4; cursor: pointer; text-shadow: 0 2px 8px #000; }
+.world-station > span { font-size: 32px; line-height: 1; }
+.world-station b,.world-station small { opacity: 0; font: 11px 'JetBrains Mono',monospace; transition: opacity .15s; white-space: nowrap; background: #10130de8; padding: 5px 7px; }
+.world-station[data-nearby="true"] b,.world-station[data-nearby="true"] small,.world-station:hover b,.world-station:focus-visible b { opacity: 1; }
+.world-station[data-visited="true"] > span { color: #a7d698; }
+.world-bottom { position: absolute; z-index: 5; inset: auto 18px 14px; display: flex; align-items: end; gap: 16px; pointer-events: none; font: 10px/1.5 'JetBrains Mono',monospace; color: #fff3dc; text-shadow: 0 2px 6px #000; }
+.world-bottom p { margin: 0; background: #11170ce0; padding: 8px 10px; }
+.world-bottom > span { margin-left: auto; opacity: .75; font-size: 9px; }
+.world-touch-controls { display: none; }
+.world-journal { position: fixed; width: min(560px,calc(100vw - 32px)); max-height: min(84dvh,760px); overflow-y: auto; padding: 28px; border: 2px solid #aa9975; border-radius: 3px; background: #17201a; color: #f3ebd5; box-shadow: 12px 12px 0 #0005; }
+.world-journal::backdrop { background: #050908a6; backdrop-filter: blur(3px); }
+.world-journal h2 { margin: 12px 32px 18px 0; font: 38px/1.05 'Instrument Serif',serif; }
+.journal-body p { font-size: 15px; line-height: 1.6; }
+.journal-body h3 { margin: 24px 0 6px; font-size: 18px; line-height: 1.3; }
+.journal-body .world-source-note { margin-top: 24px; padding-top: 12px; border-top: 1px solid #ffffff30; font-size: 12px; color: #c8c5b1; }
+.journal-close { position: absolute; right: 12px; top: 12px; min-width: 44px; min-height: 44px; background: #f3ebd5; color: #17201a; border: 0; cursor: pointer; }
+.world-evidence { max-width: 100%; height: auto; }
+.world-platform .world-environment { image-rendering: auto; }
+.world-platform .world-player { width: 70px; height: 70px; }
+.world-platform .world-player { bottom: 28%; }
+.world-platform .world-station { bottom: 31%; }
+.world-pixel-horror .world-player { bottom: 23%; }
+.world-pixel-horror .world-station { bottom: 26%; }
+.world-security,.world-pixel-horror,.world-unreal { color: #f8dfcb; }
+.world-security .world-environment,.world-pixel-horror .world-environment { image-rendering: pixelated; }
+.world-security .world-journal,.world-pixel-horror .world-journal,.world-unreal .world-journal { background: #1a1010; border-color: #ac6857; }
+.world-security .world-player,.world-pixel-horror .world-player { filter: brightness(.68); }
+.world-unreal .world-player { filter: brightness(.62); }
+.game-world button:focus-visible,.game-world a:focus-visible { outline: 3px solid #ffe8a4; outline-offset: 4px; }
+.games-scene .character[data-position="active"] img,.world-player img { view-transition-name: game-character; }
+::view-transition-group(game-character) { animation-duration: 1s; animation-timing-function: cubic-bezier(.4,0,.2,1); }
+@media (max-width:700px),(pointer:coarse) {
+  .world-touch-controls { position: absolute; z-index: 6; bottom: 50px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; }
+  .world-touch-controls button { width: 54px; height: 48px; border: 2px solid #afa887; background: #151c1aee; color: #fff4df; border-radius: 4px; touch-action: none; }
+  .world-touch-controls button:disabled { opacity: .4; }
+  .world-help { display: none; }
+  .world-hud { inset: 8px 8px auto; gap: 5px; }
+  .world-hud .game-control { padding: 10px 8px; font-size: 9px; }
+  .world-caption { top: 72px; left: 14px; }
+  .world-caption h1 { max-width: 28ch; }
+  .world-bottom { bottom: 12px; inset-inline: 12px; }
+  .exploration-world { width: max(100vw,calc(100dvh * 1.77778)); }
+  .world-player { height: 150px; width: 110px; }
+  .world-journal { padding: 20px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  ::view-transition-group(*) { animation-duration: .01s; }
+}
+.world-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
+.breakout-story-world { position: absolute; z-index: 2; inset: 0; transform-origin: 0 0; pointer-events: none; }
+.background-chapter { position: absolute; top: 225px; height: 400px; padding: 18px 22px; background: transparent; border: 0; color: #f8ebcf; text-shadow: 0 2px 5px #0008; pointer-events: auto; overflow-y: auto; }
+.background-chapter[hidden],.ocean-delivery[hidden],.ocean-page-body[hidden] { display: none; }
+.background-chapter h2 { font: 700 36px/1.15 monospace; margin: 10px 0 18px; }
+.chapter-body p { font: 24px/1.45 system-ui,sans-serif; margin: 0 0 16px; }
+.chapter-body .world-evidence { max-height: 145px; width: 100%; object-fit: contain; }
+.depth-status { position: absolute; z-index: 5; top: 140px; left: 24px; padding: 8px 12px; background: #101c29d9; color: #d9efe4; font: 11px/1.5 monospace; }
+.ocean-delivery { position: absolute; z-index: 3; top: 160px; right: 24px; width: min(44vw,520px); color: #e8efdd; }
+.fish-messenger { display: flex; align-items: center; gap: 14px; padding-left: 10px; }
+.fish-messenger .deck-picture { width: 140px; height: 72px; flex: 0 0 140px; }
+.fish-messenger .deck-picture { animation: fish-drift 3s ease-in-out infinite alternate; }
+@keyframes fish-drift { from { transform: translateY(-3px); } to { transform: translateY(3px); } }
+.bespoke-world[data-paused="true"] .fish-messenger .deck-picture { animation-play-state: paused; }
+:root[data-motion="reduced"] .fish-messenger .deck-picture { animation: none; }
+@media (prefers-reduced-motion:reduce) { .fish-messenger .deck-picture { animation: none; } }
+.fish-messenger span { font: 10px/1.5 monospace; letter-spacing: .08em; padding: 5px 8px; background: #091622e0; }
+.fish-messenger::after { content: ''; position: absolute; left: 96px; top: 61px; width: 1px; height: 24px; background: #d9d4a5; }
+.ocean-page { padding: 18px 22px; background: #101e2cdb; border: 1px solid #b5c8b688; box-shadow: 0 10px 28px #0004; }
+.ocean-page h2 { font: 30px/1.1 'Instrument Serif',serif; margin: 7px 0 16px; }
+.ocean-page-body { max-height: calc(100dvh - 350px); overflow-y: auto; scrollbar-width: thin; }
+.ocean-page-body p { font: 14px/1.6 system-ui,sans-serif; margin: 10px 0 18px; }
+.ocean-page-body h3 { font-size: 17px; margin: 18px 0 6px; }
+.ocean-page-body .world-source-note { color: #a0baa8; font-size: 11px; }
+.page-fold { float: right; padding: 5px 9px; border: 1px solid #d3dbc380; background: #20363dcf; color: #e6ead5; min-height: 36px; font: 10px monospace; }
+.deck-picture { display: block; width: 100%; height: 160px; image-rendering: pixelated; }
+.ocean-source-strip { width: 100%; height: auto; image-rendering: pixelated; }
+.ocean-page .world-evidence { display: block; width: 100%; }
+.rat-inventory { position: absolute; z-index: 4; left: 24px; top: 145px; background: #17212bdd; color: #fff0c5; padding: 10px 12px; font: 11px/1.5 monospace; }
+.rat-message { position: absolute; z-index: 4; left: 24px; top: 186px; max-width: min(420px,calc(100vw - 48px)); background: #17212bcc; color: #f0e9db; padding: 8px 12px; font: 12px/1.5 system-ui,sans-serif; }
+.rat-reset { position: absolute; z-index: 6; bottom: 78px; left: 18px; background: #17212be6; color: #f0e9db; border: 1px solid #abbbad; padding: 10px; min-height: 44px; font: 10px monospace; }
+@media (max-width:700px),(pointer:coarse) {
+  .depth-status { top: 114px; left: 14px; font-size: 10px; }
+  .ocean-delivery { top: 162px; left: 16px; right: 16px; width: auto; }
+  .ocean-page { padding: 12px 16px; }
+  .ocean-page h2 { font-size: 27px; }
+  .ocean-page-body { max-height: min(42dvh,calc(100dvh - 370px)); }
+  .fish-messenger .deck-picture { width: 110px; height: 54px; flex-basis: 110px; }
+  .fish-messenger::after { top: 47px; height: 14px; }
+  .rat-inventory { top: 130px; left: 12px; right: 12px; font-size: 10px; }
+  .rat-message { top: 178px; left: 12px; font-size: 11px; }
+  .rat-reset { bottom: 165px; left: 12px; }
+}
+@media (max-height:450px) {
+  .ocean-delivery { top: 72px; right: 12px; left: auto; width: 42vw; }
+  .ocean-page-body { max-height: 120px; }
+  .fish-messenger .deck-picture { height: 36px; }
+  .fish-messenger::after { display: none; }
+  .depth-status { top: 135px; font-size: 10px; }
+  .rat-inventory { top: 125px; }
+  .rat-message { top: 167px; }
+}
+.world-discovery-list { position: absolute; z-index: 9; bottom: 70px; left: 18px; width: min(340px,calc(100vw - 36px)); border: 1px solid #aca27a; padding: 8px; background: #111c1bef; }
+.world-discovery-list[hidden] { display: none; }
+.world-discovery-list button { display: flex; justify-content: space-between; gap: 16px; width: 100%; min-height: 48px; padding: 10px; border: 0; border-bottom: 1px solid #ffffff30; background: none; color: #f8ecd3; text-align: left; cursor: pointer; }
+.world-bottom { pointer-events: auto; }
+.world-progress,.world-inspect { background: #111c1bef; border: 1px solid #aca27a; color: #f8ecd3; padding: 12px; min-height: 44px; cursor: pointer; }
+.world-inspect { position: absolute; z-index: 6; left: 50%; bottom: 78px; transform: translateX(-50%); }
+.world-inspect:disabled { opacity: .65; cursor: default; }
+.world-touch-controls { gap: 6px; }
+@media (max-width:700px),(pointer:coarse) { .world-inspect { bottom: 116px; max-width: calc(100vw - 24px); white-space: nowrap; }.world-bottom > span { max-width: 110px; }.world-discovery-list { bottom: 162px; }.world-caption h1 { font-size: 23px; }.world-touch-controls button { width: 48px; } }
