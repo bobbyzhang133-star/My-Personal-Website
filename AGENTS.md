@@ -1,6 +1,8 @@
 # Site Design Guidance
 
+- Follow `.cursor/rules/clean-ui.mdc` for portfolio UI work: keep the normal view uncluttered, move secondary controls behind accessible disclosures, and preserve Cat/Rat's approved top-left character return and bottom-right inventory only.
 - Follow `.cursor/rules/portfolio-release-navigation.mdc` for every portfolio runtime change: synchronize all entry documents and module versions, verify the release check, and test detail/category/Room return paths.
+- Follow `.cursor/rules/game-route-progression.mdc` for game scenes: linear discovery order is not straight geometry or a camera lock; preserve source camera families and local observation freedom.
 
 - For future website design work in this project, use Material Design 3 as the baseline design skill set: color roles, surface containers, elevation, expressive shape, adaptive layout, accessible focus states, and restrained motion.
 - Preserve Bobby Zhang's portfolio identity when applying M3. The site should still feel cinematic, creative, and personal; M3 should improve structure, hierarchy, and usability rather than flatten the art direction.

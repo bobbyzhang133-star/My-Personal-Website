@@ -1,12 +1,14 @@
-import { projects } from '../content.js?v=39bd00589fe9';
-import { $$, esc } from '../utils.js?v=39bd00589fe9';
-import { bindLinearKeys, sceneController } from './shared.js?v=39bd00589fe9';
-import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=39bd00589fe9';
+import { projects, aiGroups } from '../content.js?v=1935067ad971';
+import { aiEvidence, aiActions } from '../ai-projects.js?v=1935067ad971';
+import { $$, esc } from '../utils.js?v=1935067ad971';
+import { bindLinearKeys, sceneController } from './shared.js?v=1935067ad971';
+import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=1935067ad971';
 
-const applications = projects.filter(project => project.category === 'ai');
+const applications = aiGroups.flatMap(group=>group.projectIds.map(id=>projects.find(project=>project.id===id)));
 
 function workspace(project) {
-  return `<p class="terminal-line"><span>user</span> open ${esc(project.slug)}</p><p class="terminal-line response"><span>system</span> application ready</p><div class="app-window"><p class="eyebrow">${esc(project.yearStatus)}</p><h2>${esc(project.title)}</h2><p>${esc(project.description)}</p><div class="tags">${project.technologies.map(technology => `<span>${esc(technology)}</span>`).join('')}</div><a class="select-button" href="${project.externalLinks[0].url}" target="_blank" rel="noreferrer">Launch live tool ↗</a></div>`;
+  const group=aiGroups.find(group=>group.projectIds.includes(project.id));
+  return `<div class="app-window"><p class="eyebrow">${esc(group.title)} · ${project.aiKind==='research'?'Research & journal':'Hugging Face Space'}</p><h2>${esc(project.aiKind==='research'?'Research & journal':project.title)}</h2><p>${esc(project.description)}</p><div class="ai-actions">${aiActions(project)}</div><details class="ai-evidence"><summary>Research & sources</summary>${aiEvidence(project)}</details></div>`;
 }
 
 export function renderAI({ preview = false } = {}) {
@@ -21,7 +23,7 @@ export function renderAI({ preview = false } = {}) {
         <div class="computer-screen-window" data-category-interface>
         <section class="ai-system computer-screen scene-surface" data-ai-system data-keyboard-surface aria-label="AI computer operating environment">
           <header><span class="system-light"></span><b>BZ / AI OS</b><time>LOCAL SESSION</time></header>
-          <nav aria-label="AI applications"><p>Applications</p>${applications.map((project, index) => `<button type="button" data-app="${index}" aria-current="${index === 0 ? 'page' : 'false'}" tabindex="${index === 0 ? 0 : -1}"><span>0${index + 1}</span><b>${esc(project.title)}</b><small>${esc(project.yearStatus)}</small></button>`).join('')}</nav>
+          <nav aria-label="AI projects grouped by purpose">${aiGroups.map(group=>`<section class="ai-app-group" aria-label="${esc(group.title)}"><h2>${esc(group.title)}</h2>${group.projectIds.map(id=>{const project=applications.find(project=>project.id===id),index=applications.indexOf(project);return `<button type="button" data-app="${index}" aria-current="${index===0?'page':'false'}" tabindex="${index===0?0:-1}"><span>${project.aiKind==='research'?'↳':String(index+1).padStart(2,'0')}</span><b>${esc(project.aiKind==='research'?'Research & journal':project.title)}</b></button>`;}).join('')}</section>`).join('')}</nav>
           <article class="ai-workspace" aria-live="polite">${workspace(applications[0])}</article>
           <aside><p class="eyebrow">System status</p><dl><div><dt>Runtime</dt><dd>External</dd></div><div><dt>Interface</dt><dd>Portfolio preview</dd></div><div><dt>Launch</dt><dd>On request</dd></div></dl></aside>
         </section>
@@ -46,6 +48,7 @@ export function mountAI(root) {
       button.tabIndex = active ? 0 : -1;
     });
     output.innerHTML = workspace(applications[index]);
+    output.scrollTop = 0;
     if (focus) buttons[index].focus({ preventScroll: true });
   };
   buttons.forEach((button, buttonIndex) => button.addEventListener('click', () => render(buttonIndex), { signal }));

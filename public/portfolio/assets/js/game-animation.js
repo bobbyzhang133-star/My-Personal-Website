@@ -1,5 +1,6 @@
-import { GAME_ANIMATIONS } from './game-animation-data.js?v=39bd00589fe9';
-import { isReducedMotion } from './utils.js?v=39bd00589fe9';
+import { GAME_ANIMATIONS } from './game-animation-data.js?v=1935067ad971';
+import { isReducedMotion } from './utils.js?v=1935067ad971';
+import { OCEAN_ANIMALS } from './ocean-animal-data.js?v=1935067ad971';
 
 export { GAME_ANIMATIONS };
 
@@ -9,7 +10,7 @@ export function sampleClip(clip, seconds, reduced = false) {
 }
 
 export function createSpritePlayer(id, ImageClass = Image) {
-  const data = GAME_ANIMATIONS[id];
+  const data = GAME_ANIMATIONS[id] || OCEAN_ANIMALS[id];
   if (!data) return null;
   const images = new Map();
   for (const clip of Object.values(data.clips)) for (const frame of clip.frames) {
@@ -41,6 +42,13 @@ export function drawSprite(ctx, sample, x, y, height, flip = sample.flip) {
   const targetWidth = height * width / sourceHeight;
   ctx.save(); ctx.translate(x, y); if (flip) ctx.scale(-1, 1);
   ctx.imageSmoothingEnabled = false;
+  if(sample.logicalSize){
+    // Variable native sprite rectangles are padded logically, not stretched or
+    // sampled past their atlas cell. Original pixel scale stays fixed per animal.
+    const scale=height/sample.logicalSize[1],trim=sample.trim;
+    ctx.drawImage(sample.image,sample.rect[0]+trim[0],sample.rect[1]+trim[1],trim[2],trim[3],(sample.offset[0]-sample.logicalSize[0]/2)*scale,sample.offset[1]*scale,trim[2]*scale,trim[3]*scale);
+    ctx.restore();return true;
+  }
   ctx.drawImage(sample.image, sample.rect[0] + left, sample.rect[1] + top,
     width, sourceHeight, -targetWidth / 2, 0, targetWidth, height);
   ctx.restore();

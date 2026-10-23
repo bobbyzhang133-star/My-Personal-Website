@@ -1,9 +1,9 @@
-import { renderRoom, mountRoom, alignRoomGeometry } from './room.js?v=39bd00589fe9';
-import { renderGames, mountGames } from './games.js?v=39bd00589fe9';
-import { renderFilms, mountFilms } from './films.js?v=39bd00589fe9';
-import { renderResearch, mountResearch } from './research.js?v=39bd00589fe9';
-import { renderMusic, mountMusic } from './music.js?v=39bd00589fe9';
-import { renderAI, mountAI } from './ai.js?v=39bd00589fe9';
+import { renderRoom, mountRoom, alignRoomGeometry } from './room.js?v=1935067ad971';
+import { renderGames, mountGames } from './games.js?v=1935067ad971';
+import { renderFilms, mountFilms } from './films.js?v=1935067ad971';
+import { renderResearch, mountResearch } from './research.js?v=1935067ad971';
+import { renderMusic, mountMusic } from './music.js?v=1935067ad971';
+import { renderAI, mountAI } from './ai.js?v=1935067ad971';
 
 export const sceneRegistry = {
   home: { path: '/', title: 'Creative Room', render: renderRoom, mount: mountRoom, align: alignRoomGeometry },

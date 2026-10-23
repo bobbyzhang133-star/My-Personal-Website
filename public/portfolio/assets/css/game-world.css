@@ -1,13 +1,14 @@
 @view-transition { navigation: auto; }
+@font-face { font-family: 'Pixelify Sans'; src: url('/assets/fonts/PixelifySans.ttf') format('truetype'); font-weight: 400 700; font-style: normal; font-display: swap; }
 body.world-mode { margin: 0; overflow: hidden; background: #10130d; color: #fff4df; }
 .game-world { position: fixed; inset: 0; overflow: hidden; isolation: isolate; background: #12100c; }
 .world-hud { position: absolute; z-index: 8; inset: 12px 14px auto; display: flex; gap: 8px; }
 .world-hud .sound-button { margin-left: auto; }
 .world-hud .menu-button::after { content: none; }
 .world-hud .game-control { text-decoration: none; background: #151c1aeb; color: #fff4df; border: 2px solid #afa887; border-radius: 3px; padding: 10px 14px; min-height: 44px; font: 600 11px/1.4 'JetBrains Mono',monospace; }
-.world-caption { position: absolute; z-index: 4; top: 78px; left: 24px; right: 24px; pointer-events: none; text-shadow: 0 3px 12px #000; }
+.world-caption { position: absolute; z-index: 4; top: 66px; left: 16px; right: 16px; pointer-events: none; text-shadow: 0 2px 6px #000; }
 .world-caption p { margin: 0 0 5px; color: #e2ce9b; font: 10px 'JetBrains Mono',monospace; letter-spacing: .15em; text-transform: uppercase; }
-.world-caption h1 { margin: 0; font: 400 clamp(24px,3vw,38px)/1.1 'Instrument Serif',serif; }
+.world-caption h1 { margin: 0; max-width: 42ch; font: 600 clamp(13px,1.5vw,17px)/1.4 system-ui,sans-serif; }
 .world-viewport { position: absolute; inset: 0; overflow: hidden; cursor: crosshair; }
 .exploration-world { position: absolute; left: 0; top: 0; width: max(100vw,calc(100dvh * 1.77778)); height: 100%; will-change: transform; }
 .world-environment { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center bottom; }
@@ -24,7 +25,7 @@ body.world-mode { margin: 0; overflow: hidden; background: #10130d; color: #fff4
 .world-bottom p { margin: 0; background: #11170ce0; padding: 8px 10px; }
 .world-bottom > span { margin-left: auto; opacity: .75; font-size: 9px; }
 .world-touch-controls { display: none; }
-.world-journal { position: fixed; width: min(560px,calc(100vw - 32px)); max-height: min(84dvh,760px); overflow-y: auto; padding: 28px; border: 2px solid #aa9975; border-radius: 3px; background: #17201a; color: #f3ebd5; box-shadow: 12px 12px 0 #0005; }
+.world-journal { box-sizing: border-box; position: fixed; width: min(560px,calc(100vw - 32px)); max-height: min(84dvh,760px); overflow-y: auto; padding: 28px; border: 2px solid #aa9975; border-radius: 3px; background: #17201a; color: #f3ebd5; box-shadow: 12px 12px 0 #0005; }
 .world-journal::backdrop { background: #050908a6; backdrop-filter: blur(3px); }
 .world-journal h2 { margin: 12px 32px 18px 0; font: 38px/1.05 'Instrument Serif',serif; }
 .journal-body p { font-size: 15px; line-height: 1.6; }
@@ -46,14 +47,13 @@ body.world-mode { margin: 0; overflow: hidden; background: #10130d; color: #fff4
 .game-world button:focus-visible,.game-world a:focus-visible { outline: 3px solid #ffe8a4; outline-offset: 4px; }
 .games-scene .character[data-position="active"] img,.world-player img { view-transition-name: game-character; }
 ::view-transition-group(game-character) { animation-duration: 1s; animation-timing-function: cubic-bezier(.4,0,.2,1); }
-@media (max-width:700px),(pointer:coarse) {
+@media (max-width:700px),(pointer:coarse),(max-height:450px) {
   .world-touch-controls { position: absolute; z-index: 6; bottom: 50px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; }
   .world-touch-controls button { width: 54px; height: 48px; border: 2px solid #afa887; background: #151c1aee; color: #fff4df; border-radius: 4px; touch-action: none; }
-  .world-touch-controls button:disabled { opacity: .4; }
-  .world-help { display: none; }
+  .world-touch-controls button:disabled { display: none; }
   .world-hud { inset: 8px 8px auto; gap: 5px; }
   .world-hud .game-control { padding: 10px 8px; font-size: 9px; }
-  .world-caption { top: 72px; left: 14px; }
+  .world-caption { top: 62px; left: 12px; }
   .world-caption h1 { max-width: 28ch; }
   .world-bottom { bottom: 12px; inset-inline: 12px; }
   .exploration-world { width: max(100vw,calc(100dvh * 1.77778)); }
@@ -64,14 +64,17 @@ body.world-mode { margin: 0; overflow: hidden; background: #10130d; color: #fff4
   ::view-transition-group(*) { animation-duration: .01s; }
 }
 .world-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; outline: none; }
+.game-world[data-movement="first-person"] .world-canvas,.game-world[data-experience="rat-collection"] .world-canvas { touch-action: none; cursor: grab; }
+.game-world[data-movement="first-person"] .world-canvas:active,.game-world[data-experience="rat-collection"] .world-canvas:active { cursor: grabbing; }
+.world-canvas:focus-visible { outline: 3px solid #ffe8a4; outline-offset: -4px; }
 .breakout-story-world { position: absolute; z-index: 2; inset: 0; transform-origin: 0 0; pointer-events: none; }
-.background-chapter { position: absolute; top: 225px; height: 400px; padding: 18px 22px; background: transparent; border: 0; color: #f8ebcf; text-shadow: 0 2px 5px #0008; pointer-events: auto; overflow-y: auto; }
+.background-chapter { position: absolute; top: 190px; height: 370px; padding: 16px; background: #080e12e8; border: 3px solid #73f0f5; color: #eafafa; box-shadow: 5px 5px 0 #113a40; pointer-events: auto; overflow-y: auto; }
 .background-chapter[hidden],.ocean-delivery[hidden],.ocean-page-body[hidden] { display: none; }
-.background-chapter h2 { font: 700 36px/1.15 monospace; margin: 10px 0 18px; }
-.chapter-body p { font: 24px/1.45 system-ui,sans-serif; margin: 0 0 16px; }
+.background-chapter h2 { font: 700 28px/1.15 monospace; margin: 10px 0 18px; }
+.chapter-body p { font: 18px/1.5 'JetBrains Mono',monospace; margin: 0 0 16px; }
 .chapter-body .world-evidence { max-height: 145px; width: 100%; object-fit: contain; }
-.depth-status { position: absolute; z-index: 5; top: 140px; left: 24px; padding: 8px 12px; background: #101c29d9; color: #d9efe4; font: 11px/1.5 monospace; }
-.ocean-delivery { position: absolute; z-index: 3; top: 160px; right: 24px; width: min(44vw,520px); color: #e8efdd; }
+.depth-status { position: absolute; z-index: 5; top: 96px; left: 16px; padding: 6px 10px; background: #101c29ed; color: #d9efe4; font: 12px/1.5 monospace; }
+.ocean-delivery { position: absolute; z-index: 3; top: 100px; right: 24px; width: min(44vw,520px); color: #e8efdd; }
 .fish-messenger { display: flex; align-items: center; gap: 14px; padding-left: 10px; }
 .fish-messenger .deck-picture { width: 140px; height: 72px; flex: 0 0 140px; }
 .fish-messenger .deck-picture { animation: fish-drift 3s ease-in-out infinite alternate; }
@@ -83,7 +86,7 @@ body.world-mode { margin: 0; overflow: hidden; background: #10130d; color: #fff4
 .fish-messenger::after { content: ''; position: absolute; left: 96px; top: 61px; width: 1px; height: 24px; background: #d9d4a5; }
 .ocean-page { padding: 18px 22px; background: #101e2cdb; border: 1px solid #b5c8b688; box-shadow: 0 10px 28px #0004; }
 .ocean-page h2 { font: 30px/1.1 'Instrument Serif',serif; margin: 7px 0 16px; }
-.ocean-page-body { max-height: calc(100dvh - 350px); overflow-y: auto; scrollbar-width: thin; }
+.ocean-page-body { max-height: calc(100dvh - 330px); overflow-y: auto; scrollbar-width: thin; }
 .ocean-page-body p { font: 14px/1.6 system-ui,sans-serif; margin: 10px 0 18px; }
 .ocean-page-body h3 { font-size: 17px; margin: 18px 0 6px; }
 .ocean-page-body .world-source-note { color: #a0baa8; font-size: 11px; }
@@ -91,36 +94,391 @@ body.world-mode { margin: 0; overflow: hidden; background: #10130d; color: #fff4
 .deck-picture { display: block; width: 100%; height: 160px; image-rendering: pixelated; }
 .ocean-source-strip { width: 100%; height: auto; image-rendering: pixelated; }
 .ocean-page .world-evidence { display: block; width: 100%; }
-.rat-inventory { position: absolute; z-index: 4; left: 24px; top: 145px; background: #17212bdd; color: #fff0c5; padding: 10px 12px; font: 11px/1.5 monospace; }
+.rat-inventory { position: absolute; z-index: 4; right: 16px; top: 66px; background: #17212bed; color: #fff0c5; padding: 6px 10px; font: 12px/1.5 system-ui,sans-serif; }
 .rat-message { position: absolute; z-index: 4; left: 24px; top: 186px; max-width: min(420px,calc(100vw - 48px)); background: #17212bcc; color: #f0e9db; padding: 8px 12px; font: 12px/1.5 system-ui,sans-serif; }
-.rat-reset { position: absolute; z-index: 6; bottom: 78px; left: 18px; background: #17212be6; color: #f0e9db; border: 1px solid #abbbad; padding: 10px; min-height: 44px; font: 10px monospace; }
+.rat-reset { background: #17212be6; color: #f0e9db; border: 1px solid #abbbad; padding: 10px; min-height: 44px; font: 13px system-ui,sans-serif; }
 @media (max-width:700px),(pointer:coarse) {
-  .depth-status { top: 114px; left: 14px; font-size: 10px; }
-  .ocean-delivery { top: 162px; left: 16px; right: 16px; width: auto; }
+  .depth-status { top: 88px; left: 12px; font-size: 12px; }
+  .ocean-delivery { top: 126px; left: 16px; right: 16px; width: auto; }
   .ocean-page { padding: 12px 16px; }
   .ocean-page h2 { font-size: 27px; }
   .ocean-page-body { max-height: min(42dvh,calc(100dvh - 370px)); }
   .fish-messenger .deck-picture { width: 110px; height: 54px; flex-basis: 110px; }
   .fish-messenger::after { top: 47px; height: 14px; }
-  .rat-inventory { top: 130px; left: 12px; right: 12px; font-size: 10px; }
-  .rat-message { top: 178px; left: 12px; font-size: 11px; }
-  .rat-reset { bottom: 165px; left: 12px; }
+  .rat-inventory { top: 112px; left: 12px; right: auto; font-size: 12px; }
 }
 @media (max-height:450px) {
   .ocean-delivery { top: 72px; right: 12px; left: auto; width: 42vw; }
   .ocean-page-body { max-height: 120px; }
   .fish-messenger .deck-picture { height: 36px; }
   .fish-messenger::after { display: none; }
-  .depth-status { top: 135px; font-size: 10px; }
-  .rat-inventory { top: 125px; }
-  .rat-message { top: 167px; }
+  .depth-status { top: 100px; font-size: 12px; }
+  .rat-inventory { top: 64px; left: auto; right: 12px; }
 }
-.world-discovery-list { position: absolute; z-index: 9; bottom: 70px; left: 18px; width: min(340px,calc(100vw - 36px)); border: 1px solid #aca27a; padding: 8px; background: #111c1bef; }
+.world-discovery-list { margin-top: 18px; }
 .world-discovery-list[hidden] { display: none; }
-.world-discovery-list button { display: flex; justify-content: space-between; gap: 16px; width: 100%; min-height: 48px; padding: 10px; border: 0; border-bottom: 1px solid #ffffff30; background: none; color: #f8ecd3; text-align: left; cursor: pointer; }
+.world-discovery-list button { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 10px 0; border: 0; border-bottom: 1px solid #ffffff30; background: none; color: #f8ecd3; text-align: left; font: 14px/1.5 system-ui,sans-serif; cursor: pointer; }
 .world-bottom { pointer-events: auto; }
+.route-coach { color: #f1eddb; font: 14px/1.55 system-ui,sans-serif; }
+.route-coach .game-control { display: block; margin-top: 10px; min-height: 44px; padding: 8px 10px; border: 1px solid #e1cc90; background: #24352b; color: #f1eddb; cursor: pointer; }
+.route-coach small { display: block; margin-top: 8px; font-size: 12px; color: #d4c8b6; }
+.world-discovery-list button:disabled,.route-coach button:disabled { opacity: .5; cursor: default; }
+/* Each dossier belongs to its game's material/palette rather than website chrome. */
+.world-woodland .world-journal { background: #ede1b5; color: #263d23; border: 4px solid #674930; box-shadow: 6px 6px 0 #2e462abf; border-radius: 0; }
+.world-woodland .world-journal h2,.world-woodland .journal-body { font-family: 'JetBrains Mono',monospace; }
+.world-woodland .world-journal h2 { font-size: 27px; }
+.world-woodland .world-source-note { color: #3d5436; }
+.world-ocean .ocean-page { border: 4px solid #a6caff; background: #112b53ee; color: #eef4ff; border-radius: 0; box-shadow: 5px 5px 0 #0d183b; }
+.world-ocean .ocean-page h2 { font: 700 24px/1.2 'JetBrains Mono',monospace; }
+.world-ocean .ocean-page-body { font-family: 'JetBrains Mono',monospace; }
+.world-ocean .page-fold { min-height: 44px; border: 2px solid #a6caff; background: #264785; border-radius: 0; }
+.world-ocean .ocean-page-body p { font-family: 'JetBrains Mono',monospace; font-size: 13px; }
+.world-security .world-journal,.world-pixel-horror .world-journal { background: #0a0a0a; color: #fff; border: 4px solid #eee; border-top: 8px solid #f1de00; box-shadow: 8px 8px 0 #000; border-radius: 0; }
+.world-security .world-journal h2,.world-pixel-horror .world-journal h2 { color: #fff300; font: 700 28px/1.2 'JetBrains Mono',monospace; }
+.world-security .journal-body,.world-pixel-horror .journal-body { font-family: 'JetBrains Mono',monospace; }
+.world-security .journal-close,.world-pixel-horror .journal-close { background: #e7dd00; color: #080808; }
+.world-security .route-coach,.world-pixel-horror .route-coach { border-color: #fff000; }
+.world-kitchen .world-journal { background: #f5dfbd; color: #4b3327; border: 5px solid #b46a38; border-radius: 12px; box-shadow: 5px 7px 0 #653e2590; }
+.world-kitchen .world-journal h2 { font: 700 29px/1.2 system-ui,sans-serif; color: #704022; }
+.world-kitchen .journal-close { background: #b46a38; color: #fff6e4; border-radius: 50%; }
+.world-kitchen .world-source-note { color: #654632; }
+.world-unreal .world-journal { background: #dad2ba; color: #312b26; border: 1px solid #8c887d; border-top: 18px solid #67696a; border-radius: 2px; box-shadow: 0 8px 24px #0008; }
+.world-unreal .world-journal h2 { color: #352c23; font: 700 30px/1.2 Georgia,serif; }
+.world-unreal .journal-close { background: #464b4b; color: #fff; }
+.world-unreal .world-source-note { color: #4a453e; }
 .world-progress,.world-inspect { background: #111c1bef; border: 1px solid #aca27a; color: #f8ecd3; padding: 12px; min-height: 44px; cursor: pointer; }
 .world-inspect { position: absolute; z-index: 6; left: 50%; bottom: 78px; transform: translateX(-50%); }
 .world-inspect:disabled { opacity: .65; cursor: default; }
 .world-touch-controls { gap: 6px; }
-@media (max-width:700px),(pointer:coarse) { .world-inspect { bottom: 116px; max-width: calc(100vw - 24px); white-space: nowrap; }.world-bottom > span { max-width: 110px; }.world-discovery-list { bottom: 162px; }.world-caption h1 { font-size: 23px; }.world-touch-controls button { width: 48px; } }
+/* One task per HUD region. The guide contains all secondary instruction/settings. */
+.game-world { --hud-surface: #101917f5; --hud-border: #aab9a570; --hud-accent: #e1cc90; }
+.world-platform { --hud-accent: #73f0f5; }
+.world-ocean { --hud-accent: #a6caff; }
+.world-security,.world-pixel-horror { --hud-accent: #fff000; }
+.world-kitchen { --hud-accent: #f4cb8e; }
+.world-hud .game-control { border-width: 1px; border-color: var(--hud-border); background: var(--hud-surface); font-size: 12px; }
+.world-field-guide { position: absolute; z-index: 10; left: 16px; bottom: 16px; }
+.world-field-guide > summary { display: flex; align-items: center; min-height: 44px; list-style: none; user-select: none; }
+.world-field-guide > summary::-webkit-details-marker { display: none; }
+.world-field-guide[open] > summary { border-color: var(--hud-accent); }
+.world-guide-body { box-sizing: border-box; position: absolute; left: 0; bottom: 58px; width: min(360px,calc(100vw - 32px)); max-height: calc(100dvh - 165px); overflow-y: auto; overscroll-behavior: contain; padding: 20px; background: var(--hud-surface); border: 1px solid var(--hud-border); border-top: 3px solid var(--hud-accent); box-shadow: 0 12px 40px #0008; }
+.world-guide-body h2 { font: 600 21px/1.3 system-ui,sans-serif; margin: 0 0 18px; }
+.world-guide-body h3 { font: 600 13px/1.4 system-ui,sans-serif; color: var(--hud-accent); margin: 0 0 8px; }
+.world-controls-help { margin-top: 20px; }
+.world-guide-body .world-help { display: block; font: 14px/1.65 system-ui,sans-serif; margin: 0; }
+.world-guide-body .world-source-note { color: #d4c8b6; font: 12px/1.55 system-ui,sans-serif; margin: 20px 0; }
+.world-guide-body .game-control { min-height: 44px; padding: 10px 12px; border: 1px solid var(--hud-border); background: #24352b; color: #fff4df; font: 14px/1.4 system-ui,sans-serif; cursor: pointer; }
+.world-restart { margin-top: 18px; font: 13px/1.5 system-ui,sans-serif; }
+.world-restart > summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; }
+.world-objective { position: absolute; z-index: 4; bottom: 22px; right: 16px; max-width: min(48vw,400px); margin: 0; padding: 6px 10px; color: #fff4df; background: var(--hud-surface); font: 13px/1.5 system-ui,sans-serif; pointer-events: none; }
+.world-inspect[hidden] { display: none; }
+.game-world:has(.world-journal[open]) > :is(.world-hud,.world-caption,.world-field-guide,.world-objective,.world-inspect,.rat-inventory,.world-touch-controls),.game-world:has(.world-field-guide[open]) > :is(.world-inspect,.world-touch-controls) { visibility: hidden; }
+.game-world:has(.ocean-delivery:not([hidden]) .ocean-page-body:not([hidden])) > .world-touch-controls { visibility: hidden; }
+@media (max-width:700px),(pointer:coarse),(max-height:450px) {
+  .world-inspect { bottom: 140px; max-width: calc(100vw - 24px); white-space: normal; text-align: center; }
+  .world-caption h1 { font-size: 14px; }
+  .world-touch-controls { bottom: 74px; }
+  .world-touch-controls button { width: 48px; }
+  .world-field-guide { left: 12px; bottom: 12px; }
+  .world-guide-body { max-height: calc(100dvh - 140px); width: min(360px,calc(100vw - 24px)); }
+  .world-objective { right: 12px; bottom: 19px; font-size: 12px; }
+}
+@media (max-width:420px) { .world-hud .game-control { padding-inline: 7px; font-size: 11px; }.world-caption { right: 12px; }.world-kitchen .world-caption { max-width: 30ch; } }
+
+/* Expanded, bounded information; the native animal and its tow-line move together. */
+.ocean-towed-note { left: 50%; right: auto; top: 124px; transform: translateX(-50%); width: min(760px,calc(100vw - 32px)); display: flex; align-items: center; gap: 0; z-index: 7; }
+.ocean-towed-note[hidden] { display: none; }
+.ocean-towed-note[data-direction="left"] { flex-direction: row-reverse; }
+.ocean-towed-note .fish-messenger { flex: 0 0 144px; display: grid; justify-items: center; padding: 0; gap: 4px; }
+.ocean-towed-note .fish-messenger::after { display: none; }
+.ocean-towed-note .fish-messenger canvas { display: block; width: 144px; height: 58px; image-rendering: pixelated; }
+.ocean-towed-note .tow-line { flex: 0 0 30px; height: 2px; background: #d3d1b3; }
+.ocean-towed-note .ocean-page { min-width: 0; flex: 1; padding: 18px; margin: 0; overflow: visible; box-shadow: 6px 6px 0 #0c193e; }
+.ocean-towed-note .ocean-page h2 { margin: 8px 0 14px; font-size: 24px; }
+.ocean-towed-note .ocean-page .eyebrow { font: 11px/1.5 monospace; margin: 0; color: #b9dbff; }
+.ocean-note-layout { display: grid; grid-template-columns: 120px minmax(0,1fr); gap: 16px; align-items: center; }
+.ocean-note-layout img { width: 120px; height: 100px; object-fit: contain; image-rendering: pixelated; }
+.ocean-note-layout p { font: 16px/1.55 system-ui,sans-serif; margin: 0; overflow-wrap: anywhere; }
+.ocean-archive { display: block; margin-top: 12px; color: #e6eeff; min-height: 44px; font: 14px/1.5 system-ui,sans-serif; }
+.ocean-archive[hidden] { display: none; }
+.ocean-ink { position: absolute; z-index: 6; bottom: 16px; right: 16px; min-height: 44px; padding: 12px 20px; color: #ecfffb; border: 2px solid #a2eadc; background: #243661; }
+.ocean-boss-status { position: absolute; z-index: 5; top: 132px; right: 16px; width: max-content; max-width: calc(100vw - 32px); padding: 8px 12px; text-align: center; font: 13px/1.5 system-ui,sans-serif; background: #0a1239eb; }
+.ocean-ink[hidden],.ocean-boss-status[hidden] { display: none; }
+.game-world:has([data-ocean-reading]:not([hidden])) > :is(.world-caption,.depth-status) { visibility: hidden; }
+.ocean-towed-note { will-change: translate; }
+.ocean-encounter-log { margin: 16px 0; }
+[data-ocean-log] { display: grid; gap: 8px; margin-top: 12px; }
+[data-ocean-log] button { text-align: left; }
+.ocean-depth-gauge { position: absolute; z-index: 6; right: 16px; bottom: 18px; width: 186px; padding: 8px; background: #101a40e8; color: #e5e5ff; font: 14px/1.35 var(--board-font,monospace); pointer-events: none; }
+.ocean-depth-gauge[hidden] { display: none; }
+.ocean-depth-gauge meter { display: block; width: 100%; height: 9px; margin-top: 5px; accent-color: #9eddd8; }
+.world-ocean .ocean-page .ocean-source { margin: 12px 0 0; font: 400 13px/1.3 var(--board-font); color: #3c3b70; }
+.rat-surveillance-video { display: block; width: 100%; max-height: 190px; margin-top: 14px; }
+.rat-surveillance-video[hidden] { display: none; }
+@media(max-width:700px) and (min-height:451px) {
+  .ocean-towed-note,.ocean-towed-note[data-direction="left"] { top: 108px; flex-direction: column; width: calc(100vw - 28px); }
+  .ocean-towed-note .fish-messenger { flex-basis: auto; height: 76px; }
+  .ocean-towed-note .tow-line { flex: 0 0 16px; width: 2px; }
+  .ocean-towed-note .ocean-page { width: 100%; padding: 16px; box-sizing: border-box; }
+  .ocean-note-layout { grid-template-columns: 1fr; gap: 12px; }
+  .ocean-note-layout img { width: 100%; height: 78px; }
+  .ocean-note-layout p { font-size: 16px; }
+  .world-ocean .ocean-note-layout { display: flow-root; }
+  .world-ocean .ocean-note-layout img { float: left; width: 110px; height: 74px; margin: 0 12px 6px 0; }
+}
+@media(max-height:450px) {
+  .world-ocean .world-touch-controls { bottom: 8px; }
+  .ocean-towed-note { top: 74px; width: calc(100vw - 32px); }
+  .ocean-towed-note .fish-messenger { flex-basis: 110px; }
+  .ocean-towed-note .fish-messenger canvas { width: 110px; height: 44px; }
+  .ocean-towed-note .ocean-page { padding: 12px; }
+  .ocean-towed-note .ocean-page h2 { font-size: 20px; margin: 6px 0 8px; }
+  .ocean-note-layout img { height: 75px; }
+  .ocean-note-layout p { font-size: 14px; line-height: 1.4; }
+  .ocean-archive { min-height: 30px; margin-top: 6px; }
+}
+
+/* Game-specific information materials. These are UI skins, never world furniture.
+   SVG nine-slice corners stay on a fixed 2px grid as the readable center expands. */
+.world-ocean { --board-font: 'Pixelify Sans',monospace; --board-ink: #172445; --board-edge: #7164c3; }
+.world-ocean .ocean-towed-note[data-depth="2"],.world-ocean .ocean-towed-note[data-depth="3"] { --board-ink: #291348; --board-edge: #7446a8; }
+.world-ocean .ocean-towed-note .ocean-page {
+  border: 12px solid transparent; border-image: url('/assets/game-ui/ocean-board.svg') 12 fill / 12px / 0 stretch;
+  background: none; color: var(--board-ink); box-shadow: none; border-radius: 0; padding: 14px;
+}
+.world-ocean .ocean-towed-note:is([data-depth="2"],[data-depth="3"]) .ocean-page { border-image-source: url('/assets/game-ui/ocean-deep-board.svg'); }
+.world-ocean .ocean-towed-note .ocean-page h2 { font: 700 28px/1.1 var(--board-font); margin: 8px 0 14px; color: var(--board-ink); }
+.world-ocean .ocean-towed-note .ocean-page .eyebrow { font: 500 13px/1.3 var(--board-font); color: #3c3b70; letter-spacing: .04em; }
+.world-ocean .ocean-note-layout p { font: 400 19px/1.4 var(--board-font); color: var(--board-ink); }
+.world-ocean .ocean-archive { color: var(--board-ink); font: 500 17px/1.4 var(--board-font); }
+.world-ocean .ocean-page button:focus-visible,.world-ocean .ocean-page a:focus-visible { outline-color: #251547; outline-offset: 3px; }
+.world-ocean .fish-messenger span { font: 400 14px/1.2 var(--board-font); letter-spacing: 0; background: #191c49; color: #e5e5ff; }
+.world-ocean .tow-line { height: 4px; background: #dadcff; box-shadow: 0 2px #726493; }
+.world-ocean .world-guide-body { background: #202246; border: 4px solid #9283cb; border-radius: 0; box-shadow: 4px 4px #090b28; }
+.world-ocean .world-guide-body :is(h2,h3),.world-ocean .world-progress,.world-ocean .ocean-ink { font-family: var(--board-font); }
+.world-ocean .ocean-ink { border-color: #d2ccff; background: #604c9c; font-size: 18px; box-shadow: inset 2px 2px #9e89ca,inset -2px -2px #31264e; }
+
+.world-woodland .world-journal {
+  border: 12px solid transparent; border-image: url('/assets/game-ui/woodland-board.svg') 12 fill / 12px / 0 stretch;
+  background: none; color: #273927; box-shadow: none;
+}
+.world-woodland .world-journal :is(h2,h3,.eyebrow) { font-family: 'Pixelify Sans',monospace; }
+.world-woodland .world-journal h2 { font-size: 32px; }
+.world-woodland .journal-body p { font: 400 19px/1.5 'Pixelify Sans',monospace; }
+.world-woodland .world-journal .eyebrow { color: #43523a; }
+.world-woodland .journal-close { background: #496749; color: #fff5cb; border: 2px solid #283c29; box-shadow: inset 2px 2px #73946b; }
+.world-woodland .world-guide-body { background: #293f29; border: 4px solid #89653d; border-radius: 0; box-shadow: 4px 4px #192419; }
+
+.world-platform .background-chapter { height: auto; min-height: 280px; max-height: 425px; background: #071416; border: 4px solid #248991; border-top-color: #8ce7e8; border-left-color: #73cbcd; color: #e0ffff; box-shadow: 4px 4px 0 #0f4e57; border-radius: 0; }
+.world-platform .background-chapter :is(h2,.eyebrow),.world-platform .world-guide-body :is(h2,h3) { font-family: 'Pixelify Sans',monospace; }
+.world-platform .background-chapter h2 { color: #75f8f8; font-size: 32px; }
+.world-platform .chapter-body p { font: 400 20px/1.45 'Pixelify Sans',monospace; }
+.world-platform .background-chapter .eyebrow { color: #a4d8d9; }
+.world-platform .world-guide-body { background: #071416; border: 4px solid #248991; box-shadow: 4px 4px #000; }
+.world-platform { --hud-accent: #73f0f5; }
+
+.world-security .world-journal,.world-pixel-horror .world-journal { border: 4px solid #9c874d; border-top: 8px solid #b79b57; background: #100e0b; color: #e5dabe; box-shadow: 6px 6px 0 #000; }
+.world-security .world-journal :is(h2,h3),.world-pixel-horror .world-journal :is(h2,h3) { font: 600 28px/1.2 'Pixelify Sans',monospace; color: #d8bd6e; }
+.world-security .world-journal .eyebrow,.world-pixel-horror .world-journal .eyebrow { color: #bdb39b; }
+.world-security .journal-body p,.world-pixel-horror .journal-body p { font: 400 18px/1.5 'Pixelify Sans',monospace; }
+.world-security .journal-close,.world-pixel-horror .journal-close { background: #7a2924; border: 2px solid #ad554a; color: #fff0d3; font-family: 'Pixelify Sans',monospace; }
+.world-security .world-guide-body,.world-pixel-horror .world-guide-body { background: #100e0b; border: 4px solid #9c874d; box-shadow: 4px 4px #000; }
+.world-security,.world-pixel-horror { --hud-accent: #d8bd6e; }
+.world-security .world-journal::backdrop,.world-pixel-horror .world-journal::backdrop,.world-woodland .world-journal::backdrop { backdrop-filter: none; background: #050606a6; }
+
+.world-unreal .world-journal { background: #dfd5bc; border: 8px solid #4c3b2d; border-top-color: #806448; border-left-color: #70553c; border-right-color: #332a25; border-bottom-color: #332a25; border-radius: 0; box-shadow: 4px 6px 12px #0008; }
+.world-unreal .world-journal .eyebrow { color: #5b4432; }
+.world-unreal .world-guide-body { background: #302a24; border: 3px solid #816a52; }
+.world-journal .select-button { display: inline-flex; align-items: center; min-height: 44px; margin-block: 6px; border-radius: 0; box-shadow: none; }
+.world-woodland .world-journal .select-button { background: #496749; border: 2px solid #283c29; color: #fff5cb; font: 500 18px 'Pixelify Sans',monospace; }
+.world-security .world-journal .select-button,.world-pixel-horror .world-journal .select-button { background: #2a2017; border: 2px solid #9c874d; color: #e5dabe; font: 500 18px 'Pixelify Sans',monospace; }
+.world-unreal .world-journal .select-button { background: #4c443b; border: 2px solid #82715e; color: #f1e7cf; }
+
+/* Kitchen guide uses the same chunky matte wood as the room. */
+.world-kitchen .world-guide-body { background: #354e59; border: 4px solid #8b6948; border-top-color: #bc9568; box-shadow: 4px 4px #28343b; }
+
+@media(max-width:700px) and (min-height:451px) {
+  .world-ocean .ocean-towed-note .ocean-page { padding: 12px; }
+  .world-ocean .ocean-towed-note .ocean-page h2 { font-size: 26px; }
+  .world-ocean .ocean-note-layout p { font-size: 18px; }
+}
+@media(max-height:450px) {
+  .world-ocean .ocean-towed-note .ocean-page { padding: 8px; }
+  .world-ocean .ocean-towed-note .ocean-page h2 { font-size: 22px; margin: 6px 0 8px; }
+  .world-ocean .ocean-note-layout p { font-size: 16px; line-height: 1.35; }
+  .world-ocean .ocean-archive { font-size: 16px; min-height: 32px; }
+}
+
+/* Original-UI references skin the entire exploration HUD and pause menu.
+   Scope tokens to game-detail bodies, so neither Home nor other categories inherit them. */
+body.world-mode {
+  --game-ui-font: 'Pixelify Sans',monospace; --game-ui-face: #101616; --game-ui-ink: #eef6ed;
+  --game-ui-edge: #697669; --game-ui-light: #a1afa1; --game-ui-shade: #253225;
+  --game-ui-panel: #18221b; --game-ui-accent: #bce2aa; --game-ui-muted: #c1cbbd;
+  --game-ui-radius: 0; --game-ui-shadow: 3px 3px 0 #0006;
+}
+body.world-mode:has(.world-woodland) {
+  /* Source UIFont is bold Bahnschrift; native black SPACE keycap is reused. */
+  --game-ui-font: 'Bahnschrift','Arial Narrow',system-ui,sans-serif; --game-ui-face: #080b09; --game-ui-ink: #f6f7ef;
+  --game-ui-edge: #4a5148; --game-ui-light: #768071; --game-ui-shade: #20261f;
+  --game-ui-panel: #101d15; --game-ui-accent: #b6e49d; --game-ui-muted: #ccd8c5;
+}
+body.world-mode:has(.world-platform) {
+  --game-ui-face: #071416; --game-ui-ink: #ddffff; --game-ui-edge: #248991;
+  --game-ui-light: #8ce7e8; --game-ui-shade: #0f4e57; --game-ui-panel: #071416;
+  --game-ui-accent: #75f8f8; --game-ui-muted: #a4d8d9;
+}
+body.world-mode:has(.world-ocean) {
+  --game-ui-face: #24345e; --game-ui-ink: #edecff; --game-ui-edge: #8580c8;
+  --game-ui-light: #d2ddff; --game-ui-shade: #3b3165; --game-ui-panel: #102c3c;
+  --game-ui-accent: #7cffe2; --game-ui-muted: #c1e3e8;
+}
+body.world-mode:has(.world-security) {
+  --game-ui-font: 'JetBrains Mono',monospace; --game-ui-face: #11100d; --game-ui-ink: #f0e7d3;
+  --game-ui-edge: #9c874d; --game-ui-light: #c5af77; --game-ui-shade: #4b4127;
+  --game-ui-panel: #100e0b; --game-ui-accent: #ddc37e; --game-ui-muted: #cbbfa6;
+}
+body.world-mode:has(.world-pixel-horror) {
+  /* Extracted native dialogue/menu art uses black fields, white frames, yellow KUN title. */
+  --game-ui-font: 'Arial Narrow',system-ui,sans-serif; --game-ui-face: #070707; --game-ui-ink: #f4f4ef;
+  --game-ui-edge: #efefed; --game-ui-light: #ffffff; --game-ui-shade: #4d4d49;
+  --game-ui-panel: #080808; --game-ui-accent: #fff300; --game-ui-muted: #c4c4be;
+}
+body.world-mode:has(.world-unreal) {
+  --game-ui-font: system-ui,sans-serif; --game-ui-face: #353738; --game-ui-ink: #f2eadb;
+  --game-ui-edge: #747975; --game-ui-light: #a5a79c; --game-ui-shade: #222725;
+  --game-ui-panel: #272725; --game-ui-accent: #e3c8a3; --game-ui-muted: #d2cabc;
+}
+body.world-mode:has(.world-kitchen) {
+  --game-ui-font: system-ui,sans-serif; --game-ui-face: #f1dfb5; --game-ui-ink: #533a24;
+  --game-ui-edge: #ae743e; --game-ui-light: #fff1d4; --game-ui-shade: #785029;
+  --game-ui-panel: #f1dfb5; --game-ui-accent: #74451c; --game-ui-muted: #695037;
+  --game-ui-radius: 10px; --game-ui-shadow: 3px 3px 0 #513b2e66;
+}
+body.world-mode .world-hud .game-control,body.world-mode .world-progress,body.world-mode .world-inspect,body.world-mode .world-touch-controls button,body.world-mode .world-guide-body .game-control {
+  min-height: 44px; padding: 9px 12px; font: 600 16px/1.3 var(--game-ui-font);
+  background: var(--game-ui-face); color: var(--game-ui-ink); border: 2px solid var(--game-ui-edge);
+  border-top-color: var(--game-ui-light); border-left-color: var(--game-ui-light); border-radius: var(--game-ui-radius);
+  box-shadow: var(--game-ui-shadow); text-decoration: none; transition: filter .12s;
+}
+/* The shared website Menu/Sound !important defaults must not leak into game HUDs. */
+body.world-mode .world-hud :is(.menu-button,.sound-button) { min-height: 44px !important; background: var(--game-ui-face) !important; color: var(--game-ui-ink) !important; border-color: var(--game-ui-edge) !important; }
+body.world-mode .world-hud .sound-button[aria-pressed="true"] { color: var(--game-ui-accent) !important; border-color: var(--game-ui-accent) !important; }
+body.world-mode :is(.world-hud .game-control,.world-progress,.world-inspect,.world-touch-controls button,.world-guide-body .game-control):hover { filter: brightness(1.14); }
+body.world-mode :is(.world-hud .game-control,.world-inspect,.world-touch-controls button,.world-guide-body .game-control):active { box-shadow: none; }
+body.world-mode .world-caption h1 { display: inline-block; padding: 3px 8px; border-radius: var(--game-ui-radius); font: 700 20px/1.3 var(--game-ui-font); background: var(--game-ui-face); color: var(--game-ui-accent); text-shadow: none; }
+body.world-mode .world-objective,body.world-mode .depth-status,body.world-mode .ocean-boss-status { font: 500 15px/1.4 var(--game-ui-font); background: var(--game-ui-face); color: var(--game-ui-ink); border: 2px solid var(--game-ui-edge); border-radius: var(--game-ui-radius); }
+body.world-mode .depth-status { top: 106px; }
+body.world-mode .world-guide-body { background: var(--game-ui-panel); color: var(--game-ui-ink); border-color: var(--game-ui-edge); box-shadow: var(--game-ui-shadow); border-radius: var(--game-ui-radius); }
+body.world-mode .world-guide-body :is(h2,h3) { font-family: var(--game-ui-font); color: var(--game-ui-accent); }
+body.world-mode .world-guide-body h2 { font-size: 26px; }
+body.world-mode .world-guide-body h3 { font-size: 17px; }
+body.world-mode .world-guide-body :is(.route-coach,.route-coach small,.world-help,.world-source-note) { color: var(--game-ui-muted); }
+body.world-mode .world-discovery-list button { border-color: var(--game-ui-edge); color: var(--game-ui-ink); font: 500 16px/1.4 var(--game-ui-font); }
+body.world-mode .world-discovery-list button:not(:disabled):hover { background: var(--game-ui-face); color: var(--game-ui-accent); }
+body.world-mode .world-touch-controls button { padding: 0; width: 48px; height: 48px; font-size: 24px; }
+body.world-mode :is(.game-world,.player-menu) :is(button,a,summary):focus-visible { outline: 3px solid var(--game-ui-accent); outline-offset: 3px; }
+
+body.world-mode .world-woodland :is(.world-hud .game-control,.world-progress,.world-inspect,.world-touch-controls button) { border: 6px solid transparent; border-image: url('/assets/game-ui/bird-keycap.png') 6 fill / 6px / 0 stretch; background: none; font-size: 14px; }
+body.world-mode .world-ocean .world-progress { border: 8px solid transparent; border-image: url('/assets/game-ui/ocean-board.svg') 12 fill / 8px / 0 stretch; background: none; color: #172445; padding: 6px 10px; box-shadow: none; }
+body.world-mode .world-ocean .world-caption h1 { color: #7cffe2; }
+body.world-mode .world-kitchen .world-touch-controls button { border-radius: 50%; background: #e5a158; border: 3px solid #f4dfb5; color: #50361f; box-shadow: 2px 3px #784e2f; }
+.world-kitchen .rat-inventory { display: flex; gap: 6px; background: none; padding: 0; }
+.world-kitchen .inventory-slot { display: flex; align-items: center; gap: 6px; padding: 5px 7px; background: #f1dfb5; border: 2px solid #b8864f; border-radius: 8px; box-shadow: 2px 2px #543e2f66; color: #533a24; }
+.world-kitchen .inventory-slot img { width: 30px; height: 30px; object-fit: contain; }
+.world-kitchen .inventory-slot > span { display: grid; gap: 0; }
+.world-kitchen .inventory-slot b { font: 800 16px/1 system-ui,sans-serif; }
+.world-kitchen .inventory-slot small { font: 600 10px/1.4 system-ui,sans-serif; }
+body.world-mode .world-ocean .ocean-page :is(button,a):focus-visible { outline-color: #251547; }
+body.world-mode .world-woodland .world-journal :is(button,a):focus-visible { outline-color: #283c29; }
+body.world-mode .world-pixel-horror .world-journal { background: #070707; color: #f4f4ef; border: 4px solid #f4f4ef; }
+body.world-mode .world-pixel-horror .world-journal :is(h2,h3) { font-family: var(--game-ui-font); color: #fff300; }
+body.world-mode .world-pixel-horror .journal-body p { font-family: var(--game-ui-font); }
+body.world-mode .world-pixel-horror .journal-close { color: #f4f4ef; background: #070707; border: 2px solid #efefed; }
+
+/* One shared accessible menu; its active game's visual language follows body tokens. */
+body.world-mode .player-menu { inset: 50% auto auto 50%; transform: translate(-50%,-50%); width: min(590px,calc(100% - 32px)); max-height: calc(100dvh - 32px); padding: 24px; border: 4px solid var(--game-ui-edge); border-top-color: var(--game-ui-light); border-left-color: var(--game-ui-light); border-radius: var(--game-ui-radius); background: var(--game-ui-panel); color: var(--game-ui-ink); box-shadow: var(--game-ui-shadow); font-family: var(--game-ui-font); }
+body.world-mode .player-menu::before { display: none; }
+body.world-mode .player-menu .pause-status { color: var(--game-ui-muted); }
+body.world-mode .player-menu .status-dot { border-radius: 0; background: var(--game-ui-accent); box-shadow: none; }
+body.world-mode .player-menu .menu-heading { margin: 24px 0 18px; }
+body.world-mode .player-menu .menu-heading h2 { font: 700 34px/1.1 var(--game-ui-font); color: var(--game-ui-accent); letter-spacing: 0; text-transform: uppercase; }
+body.world-mode .player-menu :is(.menu-heading p,.menu-help,.menu-panel p,.menu-heading .eyebrow) { color: var(--game-ui-muted); }
+body.world-mode .player-menu .menu-close,body.world-mode .player-menu .menu-panel-back,body.world-mode .player-menu .setting-toggle { min-height: 44px; color: var(--game-ui-ink); background: var(--game-ui-face); border: 2px solid var(--game-ui-edge); border-radius: var(--game-ui-radius); }
+body.world-mode .player-menu .menu-close { top: 12px; right: 12px; }
+body.world-mode .player-menu .setting-toggle[aria-pressed="true"] { border-color: var(--game-ui-accent); box-shadow: inset 4px 0 var(--game-ui-accent); }
+body.world-mode .player-menu nav :is(a,button) { min-height: 48px; gap: 14px; padding: 10px 4px; border-color: var(--game-ui-edge); color: var(--game-ui-ink); }
+body.world-mode .player-menu nav :is(a,button):is(:hover,:focus-visible) { padding-left: 12px; color: var(--game-ui-accent); background: var(--game-ui-face); }
+body.world-mode .player-menu nav b { font: 600 18px/1.3 var(--game-ui-font); }
+body.world-mode .player-menu :is(nav span,.setting-toggle span) { color: var(--game-ui-muted); }
+body.world-mode .player-menu .menu-help { margin: 18px 0 0; }
+body.world-mode .player-menu .menu-panel { min-height: 0; }
+body.world-mode .player-menu .menu-panel h3 { font: 700 26px/1.2 var(--game-ui-font); color: var(--game-ui-accent); }
+body.world-mode .player-menu .menu-panel a { color: var(--game-ui-accent); }
+body.world-mode .menu-backdrop { backdrop-filter: none; background: #060909b8; }
+
+@media(max-width:700px),(max-height:450px) {
+  body.world-mode .world-hud .game-control { padding: 7px 8px; font-size: 14px; }
+  body.world-mode .world-caption h1 { font-size: 17px; }
+  body.world-mode .depth-status { top: 100px; }
+  body.world-mode .world-woodland .world-hud .game-control { padding: 5px 7px; font-size: 12px; }
+  body.world-mode .player-menu { padding: 18px; }
+  body.world-mode .player-menu nav { grid-template-columns: 1fr; }
+  .world-kitchen .inventory-slot { padding: 4px 6px; }
+  .world-kitchen .inventory-slot img { width: 26px; height: 26px; }
+}
+@media(max-width:700px) and (min-height:451px) {
+  body.world-mode .ocean-boss-status { top: 148px; }
+}
+@media(max-height:450px) {
+  body.world-mode .player-menu nav { grid-template-columns: 1fr 1fr; gap: 0 20px; }
+  body.world-mode .player-menu nav :is(a,button) { grid-template-columns: 1fr; gap: 0; }
+  body.world-mode .player-menu nav span { display: none; }
+  body.world-mode .player-menu .menu-heading { margin: 10px 44px 10px 0; }
+  body.world-mode .player-menu .menu-heading h2 { font-size: 26px; }
+  body.world-mode .player-menu .menu-heading p:last-child { display: none; }
+}
+@media(max-width:380px) {
+  body.world-mode .world-hud .game-control { padding-inline: 6px; font-size: 12px; }
+}
+
+/* Cat/Rat discoveries are physical wall surfaces, never viewport-sized pages.
+   All four corners use the world's camera projection; no responsive clamping. */
+.kitchen-wall-displays { position: absolute; inset: 0; z-index: 2; overflow: hidden; pointer-events: none; }
+.kitchen-wall-display { position: absolute; left: 0; top: 0; width: 600px; box-sizing: border-box; transform-origin: 0 0; padding: 22px 28px; border: 9px solid #8b6545; border-top-color: #caa077; border-bottom-color: #4d392b; background: #e7d5af; color: #3a3226; font: 26px/1.35 system-ui,sans-serif; backface-visibility: hidden; }
+.kitchen-wall-display[hidden] { display: none; }
+.kitchen-wall-display .eyebrow { margin: 0 0 8px; font: 700 14px/1.2 monospace; letter-spacing: .06em; color: inherit; }
+.kitchen-wall-display h2 { margin: 0 0 12px; font: 800 34px/1.1 system-ui,sans-serif; color: inherit; }
+.kitchen-wall-display [data-wall-copy] { margin: 0; font: inherit; }
+.kitchen-wall-display .wall-material-label { position: absolute; right: 18px; bottom: 10px; font: 700 11px/1 monospace; opacity: .7; }
+.kitchen-wall-display[data-kind="blueprint"] { background: #669caa; color: #102b35; border-color: #355265; border-top-color: #89b7bd; }
+.kitchen-wall-display[data-kind="cabinet"] { background: #c08e60; color: #30251c; border-color: #775333; border-top-color: #e0b17b; }
+.kitchen-wall-display[data-kind="surveillance"] { background: #293e47; color: #ecdfbb; border-color: #526a70; border-top-color: #81959a; }
+.kitchen-wall-display[data-kind="home"] { background: #e7bc68; color: #42341e; border-color: #87602e; border-top-color: #f1dba2; font-size: 26px; line-height: 1.25; padding-block: 12px; }
+.kitchen-wall-display[data-kind="home"] h2 { font-size: 28px; margin-bottom: 8px; }
+.kitchen-wall-display[data-kind="blueprint"] [data-wall-copy] { padding-right: 115px; }
+.wall-blueprint { position: absolute; right: 22px; top: 100px; width: 98px; height: 135px; object-fit: contain; }
+.kitchen-wall-display[data-kind="surveillance"] [data-wall-copy] { font-size: 23px; }
+.kitchen-wall-display .rat-surveillance-video { display: block; width: 235px; height: 130px; float: right; max-height: none; margin: 12px 0 0 15px; pointer-events: auto; background: #111; }
+.kitchen-wall-display[data-kind="surveillance"] { display: grid; grid-template-columns: 1fr 240px; gap: 0 10px; }
+.kitchen-wall-display[data-kind="surveillance"] > :is(.eyebrow,h2) { grid-column: 1 / -1; }
+.kitchen-wall-display[data-kind="surveillance"] video { grid-column: 2; grid-row: 3; }
+.wall-delivered-cheese { position: absolute; left: 22px; bottom: 10px; display: flex; gap: 10px; }
+.wall-delivered-cheese img { width: 26px; height: 26px; }
+
+/* Cat/Rat's resting HUD has exactly two anchors. Help/travel is tucked into
+   the inventory, not another permanent badge or coaching strip. */
+.world-kitchen .world-hud { right: auto; }
+.world-kitchen .rat-pack { position: absolute; z-index: 11; right: max(14px,env(safe-area-inset-right)); bottom: max(14px,env(safe-area-inset-bottom)); border: 0; padding: 0; background: none; color: inherit; cursor: pointer; min-height: 44px; }
+.world-kitchen .rat-pack .rat-inventory { position: static; display: flex; gap: 5px; padding: 0; background: none; }
+.world-kitchen > :is(.world-objective,.world-inspect,.world-touch-controls) { display: none; }
+.world-kitchen .world-field-guide > summary { display: none; }
+.world-kitchen .world-field-guide { left: auto; right: max(14px,env(safe-area-inset-right)); bottom: 76px; }
+.world-kitchen .world-field-guide:not([open]) { display: none; }
+.world-kitchen .world-guide-body { left: auto; right: 0; bottom: 0; max-height: calc(100dvh - 150px); }
+.world-kitchen .rat-pack:focus-visible { outline: 3px solid #f4dfb5; outline-offset: 5px; border-radius: 8px; }
+@media(max-width:420px) {
+  .world-kitchen .inventory-slot { padding: 5px; gap: 4px; }
+  .world-kitchen .inventory-slot img { width: 24px; height: 24px; }
+  .world-kitchen .inventory-slot small { font-size: 10px; }
+}

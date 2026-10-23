@@ -1,0 +1,19 @@
+---
+description: Design ordered game discoveries with varied routes, local observation freedom and source-appropriate cameras
+globs: public/portfolio/assets/js/game-*.js,public/portfolio/assets/js/world-engine.js,public/portfolio/assets/js/experience-state.js,public/portfolio/assets/css/game-world.css
+alwaysApply: false
+---
+
+# Linear Progression, Not Straight Geometry
+
+- One understandable discovery order is not a single-axis movement or camera lock. Compact routes may bend, pass through rooms, change elevation when supported by the model, and frame new scenes.
+- Preserve the original camera family: fixed-camera/2D games remain fixed-camera/2D. Do not invent free-walking 3D for Five Nights or the GameMaker horror game.
+- In genuine 3D interpretations, allow looking, turning, approaching objects and safe local/backward movement. Gate the next unread area through understandable doorways, not by snapping the player to a line or resetting camera yaw every frame.
+- Use source-appropriate landmarks, openings, lighting and contrast to guide attention. A turn should conceal/reveal a meaningful setting, not merely add distance. Keep routes short and recognizable as portfolio interpretations, not claimed native map replicas.
+- Follow move → notice → investigate → understand → continue. Manual exploration opens information only after deliberate interaction; optional accessible guided travel stops at the next eligible object.
+- Pause movement while reading; preserve camera location and orientation on close. Reopening read information never teleports the player backward. Reduced motion may skip assisted travel but must preserve ordering.
+- Teach walking, looking and inspecting safely at the entrance. Provide keyboard, touch and an optional next-discovery alternative without disabling normal observation controls.
+- Keep complete footprints, supports, eye height and occlusion in one world-unit projection. Build and test geometry before fitting art; no floating note boards or inconsistent scale.
+- Test every checkpoint, no-skipping gates, manual turning/backtracking, interrupted assisted travel, pause/close, restored inventory, reset and Characters/Room returns. Review desktop, 390px portrait and short landscape.
+
+References: [Valve: navigation lighting/readability](https://cdn.steamstatic.com/apps/valve/2008/MIGS08_ConnectingVisualsToGameplay.pdf), [GDC: layout/flow as storytelling](https://media.gdcvault.com/gdcchina14/presentations/833762_JoelBurgess_MattScott_LeePerry_5_Narrative_Part01_EN.pdf), [Celia Hodent: onboarding](https://celiahodent.com/gamers-brain-ux-onboarding/).

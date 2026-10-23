@@ -1,7 +1,7 @@
-import { categories } from '../content.js?v=39bd00589fe9';
-import { $$, esc, isReducedMotion } from '../utils.js?v=39bd00589fe9';
-import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=39bd00589fe9';
-import { alignRoomGeometry, watchRoomGeometry } from './room-geometry.js?v=39bd00589fe9';
+import { categories } from '../content.js?v=1935067ad971';
+import { $$, esc, isReducedMotion } from '../utils.js?v=1935067ad971';
+import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=1935067ad971';
+import { alignRoomGeometry, watchRoomGeometry } from './room-geometry.js?v=1935067ad971';
 
 export { alignRoomGeometry };
 

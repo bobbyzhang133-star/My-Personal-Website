@@ -1,0 +1,17 @@
+{
+  "asset": "cat-rat-duo-original.png",
+  "status": "original-game-model-posed-render",
+  "source": "Supplied CatEatRat_Final Unity build, level1 and sharedassets1.assets",
+  "extractor": "UnityPy 1.25.4",
+  "renderer": "Deterministic offline native-rig orthographic renderer",
+  "copyright": "Supplied game assets; no CC0 or independent redistribution license claimed",
+  "characters": [
+    { "name": "cat", "mesh": "MainBody", "vertices": 998, "triangles": 666, "bones": 21, "texture": "CERRFB_Cat_2_openPBR_shader1_AlbedoTransparency", "height": 1.630499626093553, "floorError": 0, "footContacts": { "bn_l_toe": 0.0036741741632358403, "bn_r_toe": 0.002902504777318727, "bn_l_hand": 0.009665345487468256, "bn_r_hand": 0 } },
+    { "name": "rat", "mesh": "Rat", "vertices": 1500, "triangles": 756, "bones": 20, "texture": "Texture_Rat_Normal_Darker", "height": 0.5859275934418605, "floorError": 0, "footContacts": { "bn_l_toe": 0, "bn_r_toe": 0.0003268750785083447 } }
+  ],
+  "pose": "Body yaw, neck/tail rotations and original-joint CCD foot placement; no limb scaling",
+  "camera": "Nearly eye-level orthographic, 3.6 degrees downward",
+  "dimensions": [1024, 768],
+  "opaqueBounds": [47, 118, 977, 650],
+  "scale": "Recovered model-parent scales preserved between characters"
+}

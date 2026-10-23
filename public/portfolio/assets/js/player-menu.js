@@ -1,4 +1,4 @@
-import { $, $$, isReducedMotion } from './utils.js?v=39bd00589fe9';
+import { $, $$, esc, isReducedMotion } from './utils.js?v=1935067ad971';
 
 const MOTION_KEY = 'bz-portfolio-motion';
 
@@ -10,10 +10,10 @@ function storedMotion() {
   }
 }
 
-export function playerMenuMarkup() {
+export function playerMenuMarkup({gameProject=null}={}) {
   return `<div class="menu-backdrop" data-menu-backdrop hidden></div>
     <aside class="player-menu" id="player-menu" aria-labelledby="player-menu-title" aria-modal="true" role="dialog" hidden>
-      <div class="pause-status"><span class="status-dot"></span> Player Menu</div>
+      <div class="pause-status"><span class="status-dot"></span> ${gameProject?esc(gameProject.title):'Player Menu'}</div>
       <button class="menu-close" type="button" aria-label="Close Player Menu">×</button>
       <div class="menu-heading"><p class="eyebrow">Game paused</p><h2 id="player-menu-title">Player Menu</h2><p>Choose a route or return to the world.</p></div>
       <nav aria-label="Player Menu" data-menu-main>
@@ -29,7 +29,7 @@ export function playerMenuMarkup() {
       <section class="menu-panel" data-menu-panel="credits" tabindex="-1" hidden>
         <button class="menu-panel-back" type="button" data-menu-view="main">← Player Menu</button>
         <p class="eyebrow">Credits</p><h3>Built from a small, credited toolkit.</h3>
-        <p>Room tiles and furniture use NettySvit’s Cool School tileset under CC0. Room ambience is leonelmail’s “Roomtone Bedroom Yew,” also CC0. Camera, guitar, rug, lighting, and the temporary bird proxy were made for this portfolio.</p>
+        <p>${gameProject?'This game UI references the supplied artwork and original menus/HUDs where available. It controls a shortened portfolio interpretation, not the original executable. Supplied game assets are not claimed as CC0; source details and the UI font license are recorded in the complete credits.':'Room tiles and furniture use NettySvit’s Cool School tileset under CC0. Room ambience is leonelmail’s “Roomtone Bedroom Yew,” also CC0. Camera, guitar, rug, lighting, and the temporary bird proxy were made for this portfolio.'}</p>
         <a href="/CREDITS.md" target="_blank" rel="noreferrer">Read complete asset credits ↗</a>
       </section>
       <section class="menu-panel" data-menu-panel="settings" tabindex="-1" hidden>

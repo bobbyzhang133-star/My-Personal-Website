@@ -1,0 +1,15 @@
+---
+description: Keep portfolio UI uncluttered and immersive, with secondary controls available on demand
+alwaysApply: true
+---
+
+# Clean UI, World First
+
+- For UI work in this portfolio, keep the normal view focused on the content or game world. Every persistent control must support an immediate user task; do not add decorative HUD, duplicate navigation, redundant titles, coaching strips or competing status panels.
+- Cat Eat Rat's approved resting HUD has exactly two anchors: **Return to characters at top left** and **real inventory at bottom right**. Do not restore permanent Menu, Sound, Room, Guide, objective, Inspect or touch-arrow overlays without Bobby's explicit request.
+- Put secondary controls, instructions, guided travel, reset and settings behind an intentional, accessible disclosure. For Cat/Rat, inventory opens exploration help; Escape provides pause and closes open controls. Do not open these panels automatically.
+- For other scenes, apply the same restraint while preserving their approved game-specific controls and visual language. A rule update is not permission to redesign or remove functionality from unrelated pages.
+- Keep information in its approved presentation medium. Cat/Rat discoveries belong on persistent kitchen walls, not viewport description dialogs. Do not replace distinctive game experiences with a generic website panel.
+- Removing visible UI must not remove functionality: preserve discoverable keyboard/touch alternatives, accessible names, focus indicators, at least 44px interaction targets, focus return, and movement/pause behavior. Never hide essential controls without a usable alternative.
+- Reserve safe screen corners for necessary HUD; keep it clear of readable information, characters and interactable objects. Use real inventory/progress only, never invented health, lives or timers.
+- Before completion, review the resting view and open/close states on desktop, 390 × 844 portrait and 844 × 390 landscape. Check overlap, clipping, safe-area placement, navigation and input regressions. Remove elements that do not improve comprehension or interaction.

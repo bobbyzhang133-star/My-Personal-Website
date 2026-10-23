@@ -228,6 +228,20 @@ body.game-mode #app { overflow: hidden; }
 .ai-scene .app-window h2 { font-size: clamp(26px,3vw,42px); }
 .ai-scene .app-window > p:not(.eyebrow) { font-size: clamp(11px,1.2vw,15px); line-height: 1.45; }
 .ai-scene .ai-system > aside { display: none; }
+.ai-app-group { min-width: 0; }
+.ai-app-group + .ai-app-group { margin-top: 18px; }
+.ai-scene .ai-app-group > h2 { margin: 0 0 7px; padding: 0 6px; color: #88aaa9; font: 600 10px/1.4 'JetBrains Mono',monospace; }
+.ai-scene .ai-system .ai-app-group button { width: 100%; min-height: 44px; }
+.ai-scene .ai-system .ai-app-group button b { font-size: 13px; }
+.ai-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+.ai-scene .ai-workspace .ai-actions .select-button { min-height: 44px; padding: 10px 14px; font-size: 13px; }
+.ai-evidence { margin-top: 18px; border-top: 1px solid #29414a; padding-top: 8px; }
+.ai-evidence > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: #8ad8ca; font-size: 13px; }
+.ai-evidence section { margin-top: 14px; }
+.ai-evidence h3 { font: 600 15px/1.4 system-ui,sans-serif; margin: 0 0 6px; }
+.ai-evidence p,.ai-evidence li { font: 13px/1.55 system-ui,sans-serif; color: #bbcecf; }
+.ai-evidence a { color: #8ad8ca; }
+.ai-source { margin-top: 16px; }
 
 /* The transition layer stays available for measurement/recovery; normal navigation morphs the shared object without a viewport fade. */
 .transition-layer { position: fixed; inset: 0; z-index: 28; display: none; overflow: hidden; pointer-events: none; }
@@ -320,6 +334,8 @@ body.game-mode #app { overflow: hidden; }
   .ai-scene .ai-system > header time { display: none; }
   .ai-scene .ai-system > nav { display: flex; gap: 4px; min-height: 0; overflow-x: auto; overflow-y: hidden; padding: 4px; border-right: 0; border-bottom: 1px solid #29414a; }
   .ai-scene .ai-system > nav > p { display: none; }
+  .ai-scene .ai-app-group { display: contents; }
+  .ai-scene .ai-app-group > h2 { display: none; }
   .ai-scene .ai-system nav button { grid-template-columns: 20px 1fr; min-width: 136px; min-height: 38px; padding: 4px 6px; font-size: 9px; }
   .ai-scene .ai-system nav button small { display: none; }
   .ai-scene .ai-workspace { padding: 9px 10px 12px; }
@@ -414,6 +430,13 @@ body.game-mode #app { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .transition-effect,.bird-sprite,.studio-visual > img { animation: none !important; }
 }
+
+/* Group wrappers stay semantic while compact app selectors remain a single rail. */
+@media(max-width:680px) and (orientation:portrait),(max-height:500px) and (orientation:landscape) {
+  .ai-scene .ai-app-group { display: contents; }
+  .ai-scene .ai-app-group > h2 { display: none; }
+  .ai-scene .ai-system .ai-app-group button { width: auto; flex: 0 0 152px; }
+}
 html[data-motion="reduced"] .transition-effect,
 html[data-motion="reduced"] .bird-sprite,
 html[data-motion="reduced"] .studio-visual > img { animation: none !important; }
@@ -428,6 +451,7 @@ html[data-motion="reduced"] .studio-visual > img { animation: none !important; }
 .games-scene .character { width: min(66vw,70dvh); background: none; border: 0; box-shadow: none; }
 .games-scene .character-frame { height: 70dvh; min-width: 0; max-width: 100%; aspect-ratio: auto; }
 .games-scene .character-frame img { min-width: 0; max-width: 100%; }
+.games-scene .character-frame img[data-asset-status="original-game-model-posed-render"] { image-rendering: auto; }
 .games-scene .character-frame { position: relative; }
 .character-animation { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; image-rendering: pixelated; filter: drop-shadow(0 16px 10px #080b1585); }
 .has-source-animation > img { opacity: 0; }
@@ -447,4 +471,87 @@ html[data-motion="reduced"] .studio-visual > img { animation: none !important; }
 @media (max-width: 700px) {
   .games-scene .character { width: 76vw; }
   .games-scene .character-frame { height: 60dvh; }
+}
+
+/* Research reader: a constrained soft-paper fold follows both cursor axes.
+   Keep perspective on an unflattened local stage, not the Room camera. */
+.research-scene .book-object-shell { top: max(72px,9vh); bottom: 28px; max-width: 1280px; margin-inline: auto; }
+.research-scene .flipbook.open-book { display: block; inset: 0 9px 15px; filter: none; overflow: visible; outline-offset: 5px; }
+.flipbook-viewport { position: absolute; inset: 0 0 76px; perspective: 2200px; touch-action: pan-y; }
+.book-resting-pages { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; }
+.research-scene .flipbook .journal-page { position: relative; min-width: 0; min-height: 0; height: 100%; padding: 0; overflow: hidden; border-radius: 2px; background-color: #f4e9ca; background-image: linear-gradient(#846b3c0c 1px,transparent 1px); background-size: 100% 28px; }
+.book-page-content { position: absolute; inset: 0 0 35px; padding: clamp(24px,3.1vw,45px) clamp(27px,3.6vw,52px) 20px; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #ac9470 transparent; }
+.page-left { box-shadow: inset -22px 0 28px -25px #59402080; }
+.page-right { box-shadow: inset 22px 0 28px -25px #59402080; }
+.research-scene .flipbook .book-spine { display: block; z-index: 2; left: calc(50% - 7px); right: auto; top: 0; bottom: 0; width: 14px; height: auto; pointer-events: none; background: linear-gradient(90deg,#614a341c,#3b2a232e 45%,#fff8dd70 65%,transparent); box-shadow: none; }
+.research-scene .flipbook .book-page h2 { margin: 18px 0 24px; font: italic clamp(32px,3.6vw,49px)/1.02 'Instrument Serif',serif; letter-spacing: -.025em; }
+.flipbook .eyebrow { margin: 0; color: #755e42; font-size: 9px; letter-spacing: .12em; }
+.book-intro { font: italic 23px/1.3 'Instrument Serif',serif; color: #786749; }
+.book-summary { margin: 0 0 22px; font-size: clamp(14px,1.35vw,17px); line-height: 1.65; color: #514b3e; }
+.book-contents { display: grid; margin-top: 30px; }
+.book-contents button { display: grid; grid-template-columns: 25px 1fr 16px; align-items: center; gap: 9px; min-height: 54px; padding: 15px 0; border: 0; border-top: 1px solid #78674940; background: transparent; text-align: left; color: #383b30; cursor: pointer; font: 500 15px/1.35 'Space Grotesk',sans-serif; }
+.book-contents button > span:first-child,.book-contents small { color: #887659; font: 10px 'JetBrains Mono',monospace; }
+.book-contents button:hover { color: #27604d; background: #46644409; }
+.book-handnote { margin-top: 28px; color: #8a6b44; font: italic 18px/1.3 'Instrument Serif',serif; }
+.flipbook .tags { margin-bottom: 22px; gap: 6px; }
+.flipbook .tags span { border-color: #78674955; font-size: 11px; padding: 5px 9px; color: #5d563f; }
+.book-read-link,.book-source-link { display: flex; align-items: center; justify-content: space-between; min-height: 44px; width: fit-content; gap: 20px; color: #27604d; font-size: 14px; font-weight: 600; text-decoration: underline; text-underline-offset: 5px; }
+.book-source-link { font-size: 12px; }
+.book-availability { max-width: 35ch; margin-top: 15px; color: #81745d; font-size: 11px; line-height: 1.5; }
+.book-research-notes { margin: 28px 0; padding: 0; list-style: none; counter-reset: note; }
+.book-research-notes li { counter-increment: note; padding: 18px 0; border-top: 1px solid #78674940; color: #514b3e; font-size: clamp(14px,1.35vw,17px); line-height: 1.65; }
+.book-research-notes li::before { content: '0' counter(note) ' / '; color: #8a6b44; font: 10px 'JetBrains Mono',monospace; }
+.book-folio { position: absolute; bottom: 0; left: 0; right: 0; height: 35px; display: flex; justify-content: space-between; align-items: center; padding: 0 30px; border-top: 1px solid #78674920; color: #8e7958; font: 8px 'JetBrains Mono',monospace; letter-spacing: .13em; }
+.book-turning-leaf { position: absolute; z-index: 4; top: 0; bottom: 0; left: 50%; width: var(--paper-width); pointer-events: none; }
+.book-turning-leaf[hidden] { display: none; }
+.book-leaf-face { position: absolute; inset: 0; overflow: hidden; transform-origin: 0 0; will-change: transform,clip-path; }
+.book-leaf-face.leaf-front { z-index: 1; }
+.book-leaf-face.leaf-back { z-index: 2; }
+.research-scene .flipbook .book-leaf-face .journal-page { position: absolute; top: 0; left: 0; width: var(--paper-width); height: 100%; box-shadow: none; }
+.book-fold-shade { position: absolute; z-index: 3; top: 0; left: 0; width: 90px; pointer-events: none; background: linear-gradient(90deg,transparent 8%,#4f372918 38%,#4f372947 49%,#fff9d957 56%,transparent 92%); }
+.leaf-back .book-fold-shade { background: linear-gradient(90deg,transparent 5%,#fff9dc55 30%,#5b45263b 50%,transparent 96%); }
+.book-edge { position: absolute; z-index: 5; top: 0; bottom: 0; width: 30px; min-height: 44px; border: 0; padding: 0; background: transparent; cursor: grab; touch-action: pan-y; }
+.book-edge-prev { left: 0; }.book-edge-next { right: 0; }
+.book-edge:not(:disabled):hover { background: linear-gradient(90deg,transparent,#8a6b4418); }
+.book-edge-prev:not(:disabled):hover { background: linear-gradient(90deg,#8a6b4418,transparent); }
+.book-edge:disabled { pointer-events: none; }
+.flipbook[data-turning] .book-edge { cursor: grabbing; }
+.book-reader-controls { position: absolute; inset: auto 0 20px; height: 50px; display: flex; align-items: center; gap: 7px; padding: 0 12px; color: #f6e8cc; }
+.book-reader-controls button { min-width: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 2px; background: transparent; color: inherit; opacity: .72; cursor: pointer; font: 16px 'JetBrains Mono',monospace; transition: opacity 160ms ease; }
+.book-reader-controls button:hover:not(:disabled),.book-reader-controls button:focus-visible { opacity: 1; background: transparent; }
+.book-reader-controls button:disabled { opacity: .2; cursor: default; }
+.book-reader-controls button[data-book-direction] span { display: block; font: 20px/1 Georgia,serif; }
+.book-reader-controls .book-contents-control { padding-inline: 4px; font-size: 9px; }
+.book-counter { margin-left: auto; padding-right: 10px; opacity: .7; font: 9px 'JetBrains Mono',monospace; letter-spacing: .04em; }
+.book-help { position: absolute; bottom: 0; left: 0; right: 0; margin: 0; color: #f4e9caa6; text-align: center; font: 8px/20px 'JetBrains Mono',monospace; }
+.flipbook :is(button,a):focus-visible { outline: 3px solid #346f61; outline-offset: 2px; }
+.book-reader-controls button:focus-visible { outline-color: #fff6dd; }
+.flipbook[data-book-mode="single"] .book-resting-pages { grid-template-columns: 1fr; }
+.flipbook[data-book-mode="single"] .book-spine { display: none; }
+.flipbook[data-book-mode="single"] .book-turning-leaf { left: 0; }
+.flipbook[data-book-mode="single"] .book-turning-leaf[data-direction="-1"] { left: 100%; }
+@media (max-width: 680px) and (orientation: portrait) {
+  .research-scene .book-object-shell { top: 72px; bottom: 22px; left: 9px; right: 9px; }
+  .research-scene .flipbook.open-book { inset: 0 6px 12px; }
+  .book-page-content { padding: 28px 30px 20px; }
+  .research-scene .flipbook .book-page h2 { font-size: clamp(34px,9vw,44px); }
+  .book-summary,.book-research-notes li { font-size: 15px; }
+  .book-counter { font-size: 9px; padding-right: 0; }
+  .book-reader-controls { padding-inline: 3px; gap: 4px; }
+  .book-help { font-size: 8px; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .research-scene .book-object-shell { top: 64px; bottom: 10px; left: 45px; right: 45px; }
+  .flipbook-viewport { bottom: 62px; }
+  .book-page-content { padding: 18px 28px; }
+  .research-scene .flipbook .book-page h2 { margin: 10px 0 14px; font-size: 29px; }
+  .book-contents,.book-research-notes { margin-block: 18px; }
+  .book-reader-controls { bottom: 15px; height: 44px; }
+  .book-help { line-height: 15px; }
+}
+
+/* Paper-backed summaries must remain readable, never hidden or ellipsized. */
+.ai-scene .ai-workspace .app-window > p:not(.eyebrow) { display: block; overflow: visible; -webkit-line-clamp: unset; font-size: clamp(13px,1.2vw,15px); line-height: 1.5; }
+@media(max-height:500px) and (orientation:landscape) {
+  .ai-scene .ai-workspace .app-window h2 { font-size: 24px; line-height: 1.05; margin: 4px 0 8px; }
 }

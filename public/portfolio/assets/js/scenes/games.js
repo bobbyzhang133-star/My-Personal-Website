@@ -1,14 +1,14 @@
-import { projects } from '../content.js?v=39bd00589fe9';
-import { $$, esc } from '../utils.js?v=39bd00589fe9';
-import { addSwipe, bindLinearKeys, sceneController, setRoving } from './shared.js?v=39bd00589fe9';
-import { GAME_ANIMATIONS, mountCharacterAnimations } from '../game-animation.js?v=39bd00589fe9';
+import { projects } from '../content.js?v=1935067ad971';
+import { $$, esc } from '../utils.js?v=1935067ad971';
+import { addSwipe, bindLinearKeys, sceneController, setRoving } from './shared.js?v=1935067ad971';
+import { GAME_ANIMATIONS, mountCharacterAnimations } from '../game-animation.js?v=1935067ad971';
 
 const games = projects.filter(project => project.category === 'games');
 
 function characterArt(project) {
   const animation = GAME_ANIMATIONS[project.id];
   const status = animation ? 'original-game-animation' : project.characterAssetStatus || project.artworkStatus || 'generated-concept';
-  const alt = animation || status === 'original-game-sprite' ? 'original game character' : status.includes('generated') ? 'character concept' : 'gameplay preview';
+  const alt = animation || status === 'original-game-sprite' ? 'original game character' : status === 'original-game-model-posed-render' ? 'original Cat and Rat models posed together' : status.includes('generated') ? 'character concept' : 'gameplay preview';
   return `<img src="${project.characterArtwork || project.artwork}" alt="${esc(project.title)} ${alt}" data-asset-status="${status}">${animation ? `<canvas class="character-animation" data-character-animation="${project.id}" aria-hidden="true"></canvas>` : ''}${project.characterVideo ? `<video class="character-video" src="${project.characterVideo}" muted loop playsinline preload="none" poster="${project.artwork}" aria-hidden="true" hidden></video>` : ''}`;
 }
 

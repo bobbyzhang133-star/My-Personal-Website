@@ -1,11 +1,11 @@
-import { initAudio } from './audio.js?v=39bd00589fe9';
-import { renderGameShell } from './game-shell.js?v=39bd00589fe9';
-import { playerMenuMarkup, initPlayerMenu } from './player-menu.js?v=39bd00589fe9';
-import { professionalChrome, professionalFooter, initProfessionalPage, renderProfessionalPage } from './professional-pages.js?v=39bd00589fe9';
-import { SceneManager } from './scene-manager.js?v=39bd00589fe9';
-import { sceneRegistry } from './scenes/index.js?v=39bd00589fe9';
-import { isCreativePath, routeFromPath } from './utils.js?v=39bd00589fe9';
-import { gameWorldProject, renderGameWorld, mountGameWorld } from './game-world.js?v=39bd00589fe9';
+import { initAudio } from './audio.js?v=1935067ad971';
+import { renderGameShell } from './game-shell.js?v=1935067ad971';
+import { playerMenuMarkup, initPlayerMenu } from './player-menu.js?v=1935067ad971';
+import { professionalChrome, professionalFooter, initProfessionalPage, renderProfessionalPage } from './professional-pages.js?v=1935067ad971';
+import { SceneManager } from './scene-manager.js?v=1935067ad971';
+import { sceneRegistry } from './scenes/index.js?v=1935067ad971';
+import { isCreativePath, routeFromPath } from './utils.js?v=1935067ad971';
+import { gameWorldProject, renderGameWorld, mountGameWorld } from './game-world.js?v=1935067ad971';
 
 const legacyHashRoutes = { games: '/games/', films: '/films/', banddream: '/music/', research: '/research/', about: '/about/', contact: '/about/', now: '/skills-experience/' };
 const page = document.body.dataset.page || 'home';
@@ -24,8 +24,9 @@ if (page === 'home' && legacyHashRoutes[location.hash.slice(1)]) {
 } else if (worldProject) {
   document.body.classList.add('world-mode');
   app.innerHTML = renderGameWorld(worldProject);
-  document.body.insertAdjacentHTML('beforeend', playerMenuMarkup());
-  initAudio(app.querySelector('.sound-button'));
+  document.body.insertAdjacentHTML('beforeend', playerMenuMarkup({gameProject:worldProject}));
+  const gameSoundButton=app.querySelector('.sound-button');
+  if(gameSoundButton)initAudio(gameSoundButton);
   initPlayerMenu({ onReturnRoom: () => location.assign('/') });
   mountGameWorld(app.querySelector('[data-game-world]'), worldProject);
 } else if (isCreativePath(location.pathname)) {
