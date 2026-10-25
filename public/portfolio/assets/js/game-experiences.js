@@ -1,9 +1,9 @@
-import { esc, isReducedMotion } from './utils.js?v=1935067ad971';
-import { createWorldEngine, bindWorldLook } from './world-engine.js?v=1935067ad971';
-import { BREAKOUT_CHAPTERS, orderedChapters, OCEAN_LEVELS, RAT_OBJECTS, newRatState, validRatState, ratAction } from './experience-state.js?v=1935067ad971';
-import { renderFieldGuide, renderRatInventory, mountWorldUI, closeFieldGuide, worldInputBlocked, worldUIBlocked, bindRatTouch } from './game-ui.js?v=1935067ad971';
-import { renderOceanExpedition, mountOceanExpedition, oceanCards } from './ocean-expedition.js?v=1935067ad971';
-import { renderKitchenReveal, mountKitchenReveal } from './kitchen-reveal.js?v=1935067ad971';
+import { esc, isReducedMotion } from './utils.js?v=5d56ac3eab02';
+import { createWorldEngine, bindWorldLook } from './world-engine.js?v=5d56ac3eab02';
+import { BREAKOUT_CHAPTERS, orderedChapters, OCEAN_LEVELS, RAT_OBJECTS, newRatState, validRatState, ratAction } from './experience-state.js?v=5d56ac3eab02';
+import { renderFieldGuide, renderRatInventory, mountWorldUI, closeFieldGuide, worldInputBlocked, worldUIBlocked, bindRatTouch } from './game-ui.js?v=5d56ac3eab02';
+import { renderOceanExpedition, mountOceanExpedition, oceanCards } from './ocean-expedition.js?v=5d56ac3eab02';
+import { renderKitchenReveal, mountKitchenReveal } from './kitchen-reveal.js?v=5d56ac3eab02';
 
 export const CUSTOM_GAMES = new Set(['chickens-breakout','plasteroids','cat-eat-rat']);
 const controls=`<div class="world-touch-controls" role="group" aria-label="Movement controls"><button type="button" data-move="left" aria-label="Move left or turn left">←</button><button type="button" data-move="up" aria-label="Move up, forward or jump">↑</button><button type="button" data-move="down" aria-label="Move down or backward">↓</button><button type="button" data-move="right" aria-label="Move right or turn right">→</button></div>`;

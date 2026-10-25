@@ -1,5 +1,5 @@
-import { CAMERA_HOME, VirtualCamera } from './camera.js?v=1935067ad971';
-import { isReducedMotion, nextFrame } from './utils.js?v=1935067ad971';
+import { CAMERA_HOME, VirtualCamera } from './camera.js?v=5d56ac3eab02';
+import { isReducedMotion, nextFrame } from './utils.js?v=5d56ac3eab02';
 
 export const OBJECT_TRANSITIONS = Object.freeze({
   games: { cameraDuration: 940, interfaceDuration: 320, exitInterfaceDuration: 220, restoreDuration: 820 },
@@ -76,6 +76,21 @@ export class TransitionDirector {
 
   alignSceneObject(route) {
     if (route !== 'ai') return;
+    const masterObject=this.backdrop?.querySelector('.master-room .object-ai .master-object-image');
+    const masterComputer=this.host.querySelector('.computer-object');
+    if(masterObject && masterComputer) {
+      const art=masterObject.getBoundingClientRect(),host=this.host.getBoundingClientRect();
+      masterComputer.dataset.masterAligned='true';
+      Object.assign(masterComputer.style,{width:`${art.width}px`,height:`${art.height}px`,left:`${art.left-host.left+art.width/2}px`,top:`${art.top-host.top}px`,bottom:'auto'});
+      const screen=masterComputer.querySelector('.computer-screen-window');
+      if(screen) {
+        const glassLeft=art.left+art.width*54/406,glassRight=glassLeft+art.width*293/406;
+        const visibleLeft=Math.max(glassLeft,host.left+12),visibleRight=Math.min(glassRight,host.right-12);
+        screen.style.left=`${visibleLeft-art.left}px`;
+        screen.style.width=`${Math.max(0,visibleRight-visibleLeft)}px`;
+      }
+      return;
+    }
     const support = this.backdrop?.querySelector('[data-support-anchor="ai"]');
     const computer = this.host.querySelector('.computer-object');
     if (!support || !computer) return;
@@ -110,7 +125,18 @@ export class TransitionDirector {
     update();
     requestAnimationFrame(update);
     document.fonts?.ready?.then(update);
-    window.addEventListener('resize', update, { signal: this.alignmentController.signal });
+    window.addEventListener('resize', () => {
+      const room=this.backdrop?.querySelector('.master-room');
+      const viewport=room?.querySelector('[data-camera-viewport]'),world=room?.querySelector('[data-room-world]');
+      const target=room && this.roomCameraTarget(route,room);
+      if(viewport && world && target) {
+        // Recompute from unscaled source coordinates; never compound the previous zoom.
+        world.style.transform='';
+        const camera=new VirtualCamera(viewport,world);
+        this.backdropState=camera.focusInstant(target,route);
+      }
+      update();
+    }, { signal: this.alignmentController.signal });
   }
 
   sanitizeBackdrop(root, route) {

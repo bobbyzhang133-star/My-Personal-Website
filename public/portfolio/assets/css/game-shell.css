@@ -243,6 +243,76 @@ body.game-mode #app { overflow: hidden; }
 .ai-evidence a { color: #8ad8ca; }
 .ai-source { margin-top: 16px; }
 
+/* Approved master-room pipeline. Every visible pixel is from one source camera. */
+.master-room { background: #192c32; user-select: none; -webkit-user-select: none; }
+.master-room .master-composition { width: min(100vw,calc(100dvh * 1.77683316)); height: min(100dvh,calc(100vw / 1.77683316)); overflow: visible; }
+.master-room .room-world { background: #192c32; }
+.master-room .room-layer { inset: 0; opacity: 1; transform: none; }
+.master-room .room-layer > img { display: block; width: 100%; height: 100%; object-fit: fill; }
+.master-room .master-background { z-index: 0; clip-path: inset(0 0 55.579171%); }
+.master-room .master-workstation { z-index: 1; clip-path: inset(44.420829% 0 0); }
+.master-floor-patch { position: absolute; z-index: 2; pointer-events: none; }
+.master-room .master-foreground { z-index: 6; clip-path: inset(55.260361% 0 39.957492% 16.985646%); }
+.master-room .master-lighting { z-index: 7; pointer-events: none; }
+.master-room .room-objects { z-index: 5; }
+.master-room .room-object { display: block; cursor: pointer; margin: 0; padding: 0; min-width: 0; min-height: 0; }
+.master-room .room-object::before { content: ''; position: absolute; z-index: 4; left: 50%; top: 50%; width: 100%; height: 100%; min-width: 44px; min-height: 44px; transform: translate(-50%,-50%); }
+.master-room .object-art { position: absolute; inset: 0; display: block; filter: none; transform: none; transition: filter 120ms ease; pointer-events: none; }
+.master-room .object-art > .master-object-image { display: block; width: 100%; height: 100%; object-fit: fill; object-position: initial; filter: none; transition: filter 120ms ease; }
+.master-room .room-object:is(:hover,:focus-visible) :is(.object-art,.master-object-image) { filter: none; }
+.master-room .object-art::after { display: none; }
+.master-room .transition-anchor { inset: 0; width: auto; height: auto; border-radius: 0; }
+.master-room .anchor-ai { left: 13.3%; top: 8.56%; width: 72.17%; height: 57.2%; }
+.master-room .object-games { transition: left 1800ms linear; }
+.master-room .bird-contact-shadow { position: absolute; inset: 0; width: 100%; height: 100%; }
+.master-room .object-games[data-state="walk-left"] :is(.bird-sprite,.bird-outline) { transform: scaleX(-1); }
+.master-room .object-idle-cue { position: absolute; pointer-events: none; }
+.master-room .object-films .object-idle-cue { left: 56%; top: 48%; width: 5%; height: 5%; background: #fff0c7; clip-path: polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%); animation: master-lens-glint 9s ease-in-out infinite; }
+.master-room .object-research .object-idle-cue { left: 21%; top: 72%; width: 28%; height: 2%; background: #fff0c7; transform: rotate(-10deg); animation: master-page-light 11s ease-in-out infinite; }
+.master-room .object-music .object-idle-cue { left: 50%; top: 37%; width: 1%; height: 39%; background: #ffe4ac; animation: master-lens-glint 13s ease-in-out infinite; }
+.master-room .object-ai .object-idle-cue { left: 13.3%; top: 8.56%; width: 72.17%; height: 57.2%; background: linear-gradient(135deg,transparent 15%,rgba(157,206,194,.1) 50%,transparent 85%); animation: master-screen-light 10s ease-in-out infinite; }
+.master-room .master-object-outline { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; opacity: 0; pointer-events: none; transition: opacity 120ms ease; }
+.master-object-outline path { vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+.master-object-outline .outline-keyline { stroke: #19252c; stroke-width: 5; }
+.master-object-outline .outline-rim { stroke: #fff1c8; stroke-width: 2; }
+.master-room[data-reveal-interactables="true"] .master-object-outline,.master-room .room-object:focus-visible .master-object-outline { opacity: 1; }
+.master-room .room-object:focus-visible::before { outline: none; }
+.master-room .room-object:focus-visible .outline-rim { stroke-width: 3; stroke-dasharray: 7 4; }
+.master-room .room-object:active .object-art { filter: brightness(1.16); }
+.master-room .room-discovery-control { position: absolute; z-index: 20; left: max(12px,env(safe-area-inset-left)); bottom: max(12px,env(safe-area-inset-bottom)); display: grid; place-items: center; width: 44px; height: 44px; min-height: 44px; padding: 0; border: 1px solid rgba(255,240,205,.35); border-radius: 3px; background: rgba(23,35,39,.82); color: #f8e5c2; cursor: pointer; font: 17px/1 'JetBrains Mono',monospace; }
+.master-room .room-discovery-control:focus-visible { outline: 3px solid #fff1c8; outline-offset: 3px; }
+.master-geometry-guides { display: none; position: absolute; inset: 0; width: 100%; height: 100%; z-index: 25; fill: none; stroke: #ffdb82; stroke-width: 2; stroke-dasharray: 8 5; pointer-events: none; }
+.master-room.show-grounding-guides .master-geometry-guides { display: block; }
+.room-backdrop:has(.master-room)::before,.room-backdrop:has(.master-room)::after { display: none; }
+.room-backdrop:has(.master-room) { background: #192c32; }
+.room-backdrop .master-room .room-discovery-control { display: none; }
+.room-backdrop .master-room [data-room-object][data-shared-object="games"] { opacity: 0; }
+.room-backdrop .master-room .master-object-image,.room-backdrop .master-room .object-art { filter: none !important; outline: none !important; }
+.room-backdrop .master-room .object-idle-cue { animation: none; opacity: 0; }
+.room-backdrop .master-object-outline,.game-shell[aria-busy="true"] .master-object-outline { opacity: 0 !important; transition: none; }
+.game-shell[aria-busy="true"] .master-room .object-art,.game-shell[aria-busy="true"] .master-room .master-object-image { filter: none !important; }
+.game-shell[aria-busy="true"] .master-room .room-object::before { outline: none; }
+.game-shell[aria-busy="true"] .master-room .room-discovery-control { visibility: hidden; }
+.game-shell[aria-busy="true"] .master-room .object-idle-cue,body.menu-open .master-room .object-idle-cue,.master-room[data-idle-paused="true"] .object-idle-cue { animation-play-state: paused; }
+.computer-object[data-master-aligned="true"] { aspect-ratio: 406 / 257; }
+.computer-object[data-master-aligned="true"] .computer-screen-window { top: 8.56%; left: 13.3%; width: 72.17%; height: 57.2%; }
+@media (hover: hover) {
+  .master-room .room-object:hover .master-object-outline { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .master-room .object-games { transition: none; }
+  .master-room .master-object-outline { transition: none; }
+  .master-room .object-idle-cue { animation: none !important; opacity: .12; }
+}
+@keyframes master-lens-glint { 0%,82%,100% { opacity: 0; } 87% { opacity: .65; } 94% { opacity: 0; } }
+@keyframes master-page-light { 0%,80%,100% { opacity: 0; } 88% { opacity: .35; } }
+@keyframes master-screen-light { 0%,100% { opacity: .35; } 55% { opacity: .8; } }
+@media (max-width:700px) and (orientation:portrait) {
+  .master-room .room-world { width: calc(100dvh * 1.77683316); height: 100%; left: calc((100vw - 100dvh * 1.77683316) * var(--room-pan,.5)); right: auto; touch-action: pan-y; }
+  .master-room .master-composition { width: 100%; height: 100%; left: 0; top: 0; transform: none; }
+  .master-room[data-reveal-interactables="true"]::after { content: 'Drag sideways to look around'; position: absolute; z-index: 20; left: 50%; bottom: max(72px,env(safe-area-inset-bottom)); max-width: 90%; padding: 8px 12px; transform: translateX(-50%); border-radius: 3px; background: rgba(20,31,35,.9); color: #fff0cc; font: 12px/1.4 'Space Grotesk',sans-serif; white-space: nowrap; pointer-events: none; }
+}
+
 /* The transition layer stays available for measurement/recovery; normal navigation morphs the shared object without a viewport fade. */
 .transition-layer { position: fixed; inset: 0; z-index: 28; display: none; overflow: hidden; pointer-events: none; }
 .transition-measure-probe { position: absolute; inset: 0; width: 100vw; height: 100dvh; overflow: hidden; }

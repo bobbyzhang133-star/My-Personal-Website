@@ -1,11 +1,11 @@
-import { initAudio } from './audio.js?v=1935067ad971';
-import { renderGameShell } from './game-shell.js?v=1935067ad971';
-import { playerMenuMarkup, initPlayerMenu } from './player-menu.js?v=1935067ad971';
-import { professionalChrome, professionalFooter, initProfessionalPage, renderProfessionalPage } from './professional-pages.js?v=1935067ad971';
-import { SceneManager } from './scene-manager.js?v=1935067ad971';
-import { sceneRegistry } from './scenes/index.js?v=1935067ad971';
-import { isCreativePath, routeFromPath } from './utils.js?v=1935067ad971';
-import { gameWorldProject, renderGameWorld, mountGameWorld } from './game-world.js?v=1935067ad971';
+import { initAudio } from './audio.js?v=5d56ac3eab02';
+import { renderGameShell } from './game-shell.js?v=5d56ac3eab02';
+import { playerMenuMarkup, initPlayerMenu } from './player-menu.js?v=5d56ac3eab02';
+import { professionalChrome, professionalFooter, initProfessionalPage, renderProfessionalPage } from './professional-pages.js?v=5d56ac3eab02';
+import { SceneManager } from './scene-manager.js?v=5d56ac3eab02';
+import { sceneRegistry } from './scenes/index.js?v=5d56ac3eab02';
+import { isCreativePath, routeFromPath } from './utils.js?v=5d56ac3eab02';
+import { gameWorldProject, renderGameWorld, mountGameWorld } from './game-world.js?v=5d56ac3eab02';
 
 const legacyHashRoutes = { games: '/games/', films: '/films/', banddream: '/music/', research: '/research/', about: '/about/', contact: '/about/', now: '/skills-experience/' };
 const page = document.body.dataset.page || 'home';

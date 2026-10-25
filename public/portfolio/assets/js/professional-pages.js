@@ -1,6 +1,6 @@
-import { about, categories, experience, projects } from './content.js?v=1935067ad971';
-import { aiEvidence, aiActions } from './ai-projects.js?v=1935067ad971';
-import { $$, esc } from './utils.js?v=1935067ad971';
+import { about, categories, experience, projects } from './content.js?v=5d56ac3eab02';
+import { aiEvidence, aiActions } from './ai-projects.js?v=5d56ac3eab02';
+import { $$, esc } from './utils.js?v=5d56ac3eab02';
 
 function categoryHeader(kicker, title, description) {
   return `<header class="experience-header"><div><p class="eyebrow">${esc(kicker)}</p><h1>${esc(title)}</h1><p>${esc(description)}</p></div><a class="back-link" href="/">← Return to room</a></header>`;

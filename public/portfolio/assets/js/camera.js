@@ -1,4 +1,4 @@
-import { isReducedMotion } from './utils.js?v=1935067ad971';
+import { isReducedMotion } from './utils.js?v=5d56ac3eab02';
 
 export const CAMERA_HOME = Object.freeze({ x: 0, y: 0, scale: 1 });
 
@@ -31,16 +31,19 @@ export function calculateTravelTransform(targetRect, viewportRect, worldRect, {
   compactScale = scale,
   focusX = 0.5,
   focusY = 0.5,
-  compactFocusY = focusY
+  compactFocusY = focusY,
+  shortScale = scale,
+  shortFocusY = focusY
 } = {}) {
   if (!targetRect || !viewportRect || !worldRect || targetRect.width <= 0 || targetRect.height <= 0 || viewportRect.width <= 0 || viewportRect.height <= 0) {
     return { ...CAMERA_HOME };
   }
-  const resolvedScale = Math.max(1, viewportRect.width <= 700 ? compactScale : scale);
+  const short = viewportRect.height <= 500 && viewportRect.width > 700;
+  const resolvedScale = Math.max(1, viewportRect.width <= 700 ? compactScale : short ? shortScale : scale);
   const targetX = targetRect.left + targetRect.width / 2 - worldRect.left;
   const targetY = targetRect.top + targetRect.height / 2 - worldRect.top;
   const desiredX = viewportRect.left + viewportRect.width * focusX - worldRect.left - targetX * resolvedScale;
-  const resolvedFocusY = viewportRect.width <= 700 ? compactFocusY : focusY;
+  const resolvedFocusY = viewportRect.width <= 700 ? compactFocusY : short ? shortFocusY : focusY;
   const desiredY = viewportRect.top + viewportRect.height * resolvedFocusY - worldRect.top - targetY * resolvedScale;
   const viewportRight = Number.isFinite(viewportRect.right) ? viewportRect.right : viewportRect.left + viewportRect.width;
   const viewportBottom = Number.isFinite(viewportRect.bottom) ? viewportRect.bottom : viewportRect.top + viewportRect.height;
@@ -64,7 +67,7 @@ export const CAMERA_TRAVEL_PROFILES = Object.freeze({
   films: { scale: 1.78, compactScale: 1.62, focusX: 0.58, focusY: 0.48 },
   research: { scale: 1.68, compactScale: 1.56, focusX: 0.5, focusY: 0.62 },
   music: { scale: 1.72, compactScale: 1.58, focusX: 0.5, focusY: 0.52 },
-  ai: { scale: 4.2, compactScale: 4.2, focusX: 0.5, focusY: 0.7, compactFocusY: 0.42 }
+  ai: { scale: 3.6, compactScale: 9.4, shortScale: 2.6, focusX: 0.5, focusY: 0.44, compactFocusY: 0.42, shortFocusY: 0.52 }
 });
 
 export class VirtualCamera {
@@ -76,11 +79,14 @@ export class VirtualCamera {
   }
 
   measure(target, route) {
+    const viewportRect=this.viewport.getBoundingClientRect(),worldRect=this.world.getBoundingClientRect();
+    const profile={...CAMERA_TRAVEL_PROFILES[route]};
+    if(route==='ai' && viewportRect.width<=700 && worldRect.width>viewportRect.width*1.01) profile.compactScale=2.45;
     return calculateTravelTransform(
       target.getBoundingClientRect(),
-      this.viewport.getBoundingClientRect(),
-      this.world.getBoundingClientRect(),
-      CAMERA_TRAVEL_PROFILES[route]
+      viewportRect,
+      worldRect,
+      profile
     );
   }
 

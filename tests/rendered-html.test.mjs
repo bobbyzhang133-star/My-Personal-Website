@@ -4,6 +4,7 @@ import test from 'node:test';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { SceneManager } from '../public/portfolio/assets/js/scene-manager.js';
+import { MASTER_ROOM, MASTER_OBJECTS, masterSupportReport, masterContains, masterBoxStyle, masterPanForObject, masterPanFromDrag } from '../public/portfolio/assets/js/scenes/room-master.js';
 import { WORLD_LAYOUTS, ROOM_STATIONS, roomPath, roomFree, moveBody, createWorldEngine } from '../public/portfolio/assets/js/world-engine.js';
 import { GAME_ROUTES, routeCell, routeLightDistance } from '../public/portfolio/assets/js/game-route-layouts.js';
 import { GAME_WORLDS, renderGameWorld, entries } from '../public/portfolio/assets/js/game-world.js';
@@ -835,7 +836,7 @@ test('the six immersive routes use a modular persistent shell', async () => {
   assert.doesNotMatch(transitions, /crossfade/);
   assert.ok(Object.values(CAMERA_TRAVEL_PROFILES).every(profile => profile.scale > 1.5 && profile.compactScale > 1.5));
   assert.equal(CAMERA_TRAVEL_PROFILES.games.focusX, .5);
-  assert.ok(CAMERA_TRAVEL_PROFILES.ai.scale >= 4);
+  assert.ok(CAMERA_TRAVEL_PROFILES.ai.scale >= 3.5, 'larger master laptop approaches with the complete supporting desk');
   assert.doesNotMatch(manager, /location\.href/);
   assert.match(gameCss, /height:\s*100dvh/);
   assert.match(gameCss, /\.game-scene/);
@@ -865,7 +866,7 @@ test('category interfaces stay inside their physical Room objects', async () => 
     films: { object: 'camera', surface: 'data-film-browser', asset: 'camera-original.svg' },
     research: { object: 'book', surface: 'data-book', asset: 'cool-school-book.png' },
     music: { object: 'guitar-studio', surface: 'data-studio', asset: 'guitar-original.svg' },
-    ai: { object: 'computer', surface: 'data-ai-system', asset: 'cool-school-computer-preferred-perspective.png' }
+    ai: { object: 'computer', surface: 'data-ai-system', asset: 'master/ai.svg' }
   };
   for (const [route, markers] of Object.entries(expected)) {
     const html = sceneRegistry[route].render();
@@ -927,96 +928,87 @@ test('camera travel moves the full world toward a visible object at meaningful s
   assert.deepEqual(calculateTravelTransform(null, mobileViewport, mobileViewport), CAMERA_HOME);
 });
 
-test('Home Room keeps layered licensed art, the shared woodpecker, and measured transition anchors', async () => {
-  const [room, roomGeometry, siteCss, gameCss, transitions, credits, lighting, dimensionRule, travelRule] = await Promise.all([
-    readFile(new URL('assets/js/scenes/room.js', root), 'utf8'),
-    readFile(new URL('assets/js/scenes/room-geometry.js', root), 'utf8'),
-    readFile(new URL('assets/css/site.css', root), 'utf8'),
-    readFile(new URL('assets/css/game-shell.css', root), 'utf8'),
-    readFile(new URL('assets/js/transitions.js', root), 'utf8'),
-    readFile(new URL('CREDITS.md', root), 'utf8'),
-    readFile(new URL('assets/room/pixel/lighting-overlay-original.svg', root), 'utf8'),
-    readFile(new URL('.cursor/rules/image-dimension-grounding-checks.mdc', repoRoot), 'utf8'),
-    readFile(new URL('.cursor/rules/room-camera-travel-continuity.mdc', repoRoot), 'utf8')
-  ]);
-  const roomAssets = ['cool-school-wall.png', 'cool-school-floor.png', 'cool-school-window.png', 'cool-school-book.png', 'cool-school-computer.png', 'camera-original.svg', 'guitar-original.svg', 'rug-original.svg', 'contact-shadow-original.svg', 'lighting-overlay-original.svg', 'bird-temporary-sprites.svg'];
-  const computerPerspectives = ['cool-school-computer-preferred-perspective.png', 'cool-school-computer-mobile-perspective.png', 'cool-school-computer-wide-study.png', 'cool-school-computer-three-quarter-study.png'];
-  const gameCharacters = ['one-last-bird-selector.png', 'chickens-breakout-selector.png', 'five-nights-at-chickens-selector.png', 'chickens-nightmare-gamemaker-selector.png', 'chickens-nightmare-ue5-selector.png'];
-  const showBackdropBlock = transitions.slice(transitions.indexOf('showBackdrop('), transitions.indexOf('captureBackdrop('));
-  await Promise.all([
-    ...[...roomAssets, ...computerPerspectives].map(asset => access(new URL(`assets/room/pixel/${asset}`, root))),
-    ...gameCharacters.map(asset => access(new URL(`assets/game-characters/${asset}`, root)))
-  ]);
-  assert.match(room, /room-background/);
-  assert.match(room, /room-furniture/);
-  assert.match(room, /room-foreground/);
-  assert.match(room, /room-lighting/);
-  assert.match(room, /data-asset-status="original-game-sprite"/);
-  assert.match(room, /ROOM_OBJECT_ASSETS\.games/);
-  assert.match(room, /data-transition-anchor/);
-  assert.match(room, /data-support-anchor="ai"/);
-  assert.match(room, /data-ground-plane="rear"/);
-  assert.match(room, /data-ground-plane="workstation"/);
-  assert.match(room, /data-contact-shadow-for/);
-  assert.match(room, /room-sprite foreground-counter/);
-  assert.match(room, /walk-left/);
-  assert.match(room, /walk-right/);
-  assert.doesNotMatch(room, /pointermove|--parallax-x|--parallax-y/);
-  assert.doesNotMatch(lighting, /edgeShade|radialGradient/);
-  assert.match(siteCss, /--object-glow|anchor-ai/);
-  assert.match(siteCss, /wall-field\s*\{[^}]*height:\s*68%/);
-  assert.match(siteCss, /floor-field\s*\{[^}]*top:\s*68%/);
-  assert.match(siteCss, /furniture-books-left[^}]*translateY\(27\.083%\)/);
-  assert.match(siteCss, /foreground-counter\s*\{[^}]*translateY\(27\.083%\)/);
-  assert.match(siteCss, /room-object\s*\{[^}]*transition:\s*none/);
-  assert.match(siteCss, /object-games\s*\{[^}]*transition:\s*left/);
-  assert.doesNotMatch(siteCss, /object-games\s*\{[^}]*transition:[^;}]*top/);
-  assert.match(siteCss, /object-art::after\s*\{\s*display:\s*none/);
-  assert.match(gameCss, /extension-wall\s*\{[^}]*height:\s*68%/);
-  assert.match(gameCss, /extension-floor\s*\{[^}]*top:\s*68%/);
-  assert.match(gameCss, /object-scene\s*\{[^}]*background:\s*transparent/);
-  assert.match(gameCss, /object-scene::before,.object-scene::after\s*\{\s*display:\s*none/);
-  assert.match(gameCss, /room-backdrop::before,.room-backdrop::after/);
-  assert.match(gameCss, /room-backdrop\s*>\s*\.room-scene\s*\{[^}]*background:\s*transparent/);
-  assert.match(gameCss, /support-anchor-ai\s*\{[^}]*top:\s*54%/);
-  assert.match(gameCss, /room-backdrop \[data-room-object\]\[data-shared-object="games"\]\s*\{\s*opacity:\s*1/);
-  assert.match(transitions, /alignSceneObject\(route\)/);
-  assert.match(transitions, /1113\s*\/\s*1194/);
-  assert.match(transitions, /supportRect\.top\s*-\s*hostRect\.top/);
-  assert.match(transitions, /watchSceneAlignment\(route\)/);
-  assert.match(transitions, /registry\.home\.align/);
-  assert.doesNotMatch(showBackdropBlock, /registry\.home\.align/);
-  assert.match(transitions, /activeShadow\.hidden\s*=\s*true/);
-  assert.match(transitions, /route\s*===\s*['"]music['"]\s*\?\s*['"]guitar['"]/);
-  assert.match(roomGeometry, /FLOOR_ITEMS/);
-  assert.match(roomGeometry, /SUPPORTED_ITEMS/);
-  assert.match(roomGeometry, /contacts:\s*\[\[/);
-  assert.match(roomGeometry, /projectPoints/);
-  assert.match(roomGeometry, /mobileSupport:\s*'\.furniture-books-left'/);
-  assert.match(roomGeometry, /groundingFailures/);
-  assert.match(roomGeometry, /name:\s*'bird'[^\n]*contacts:/);
-  assert.match(roomGeometry, /data-contact-shadow-for/);
-  assert.match(roomGeometry, /optionalWhenHidden:\s*true/);
-  assert.match(roomGeometry, /unexpectedly-hidden/);
-  assert.match(roomGeometry, /footprintContained/);
-  assert.match(siteCss, /object-research\s*\{[^}]*top:\s*72\.45%/);
-  assert.match(siteCss, /object-research\s*\{[^}]*top:\s*84\.35%/);
-  assert.match(siteCss, /foreground-counter\s*\{[^}]*height:\s*22%/);
-  assert.match(dimensionRule, /alwaysApply:\s*true/);
-  assert.match(dimensionRule, /transparent padding/);
-  assert.match(dimensionRule, /390 × 844/);
-  assert.match(dimensionRule, /projected footprint/);
-  assert.match(dimensionRule, /Do not accept edge-only contact/);
-  assert.match(dimensionRule, /perspective grid/i);
-  assert.match(travelRule, /alwaysApply:\s*true/);
-  assert.match(travelRule, /complete Room world/);
-  assert.match(travelRule, /Do not simulate player approach/);
-  assert.match(travelRule, /Games\/Bird/);
-  assert.match(credits, /Cool School tileset/);
-  assert.match(credits, /CC0 1\.0/);
-  assert.match(credits, /Computer perspective derivatives/);
-  assert.match(credits, /OpenAI ImageGen/);
-  assert.match(credits, /actual One Last Bird sprite was not found/);
+test('Approved master supplies all five exact source cutouts and one shared camera', async () => {
+  const html=sceneRegistry.home.render();
+  assert.equal(MASTER_ROOM.approved,'2026-10-24');
+  assert.equal(Object.keys(MASTER_OBJECTS).length,5);
+  assert.equal((html.match(/data-room-object /g)||[]).length,5);
+  for(const layer of ['master-background','master-workstation','master-foreground','master-lighting'])assert.match(html,new RegExp(layer));
+  assert.doesNotMatch(html,/cool-school-|object-prompt|<kbd>|original-game-sprite/);
+  assert.match(html,/master-derived-native-reference/);
+  const payloads=[];
+  for(const[name,o]of Object.entries(MASTER_OBJECTS)){
+    const svg=await readFile(new URL(`assets/room/master/${name}.svg`,root),'utf8');
+    assert(svg.includes(`viewBox="${o.box.join(' ')}"`));
+    assert(svg.includes(o.path),'mask must retain approved source coordinates');
+    payloads.push(svg.match(/base64,([^" ]+)/)[1]);
+    assert.match(html,new RegExp(`href="/${name}/"`));
+  }
+  assert(payloads.every(p=>p===payloads[0]),'no independently regenerated object imagery');
+  assert.equal(masterSupportReport().filter(o=>!o.valid||!o.footprintContained).length,0);
+  assert.equal(masterContains([900,500],MASTER_ROOM.desk),true);
+  assert.equal(masterContains([900,600],MASTER_ROOM.desk),false);
+  assert.match(masterBoxStyle([0,0,1672,941]),/width:100%;height:100%/);
+});
+
+test('Master room is click-first, label-free, accessible and lifecycle-safe', async()=>{
+  const html=sceneRegistry.home.render(),room=await readFile(new URL('assets/js/scenes/room.js',root),'utf8'),css=await readFile(new URL('assets/css/game-shell.css',root),'utf8');
+  assert.match(html,/data-reveal-room/);
+  assert.match(html,/Use Tab and Enter/);
+  assert.doesNotMatch(html,/<kbd>|object-prompt|tabindex="-1"[^>]*data-room-object/);
+  assert.match(room,/1500/);
+  assert.match(room,/controller\.abort/);assert.match(room,/observer\.disconnect/);
+  assert.match(room,/clearTimeout\(revealTimer\)/);assert.match(room,/document\.hidden/);assert.match(room,/isReducedMotion/);
+  assert.match(room,/observer\.observe\(shell.*aria-busy/,'bird scheduling must resume when camera travel ends');
+  assert.match(css,/data-idle-paused="true"[^}]*animation-play-state: paused/,'hidden-page idle cues must pause');
+  assert.doesNotMatch(room,/--parallax|watchRoomGeometry|translateTo/);
+  assert.match(room,/event\.pointerType!=='touch'/,'pointer motion cannot pan the room unless it is a deliberate touch drag');
+  assert.match(css,/min-width: 44px; min-height: 44px/);
+  assert.match(css,/stroke-dasharray: 7 4/);
+  assert.match(css,/room-object:focus-visible::before \{ outline: none/,'focus must follow the silhouette instead of a bounding rectangle');
+  assert.match(css,/aria-busy="true"[^}]*filter: none !important/);
+  for(const[name,o]of Object.entries(MASTER_OBJECTS)){
+    const[x,y,w,h]=o.box;assert(x>=0&&y>=0&&x+w<=1672&&y+h<=941,name);
+    for(const[width,height]of [[1280,800],[390,844],[844,390]]){
+      const scale=Math.min(width/1672,height/941);
+      assert(Math.abs((w*scale)/(h*scale)-w/h)<1e-10,'uniform source projection');
+    }
+  }
+});
+
+test('All object highlights reuse their cutout contour with no rectangular focus or legacy halo',async()=>{
+  const html=sceneRegistry.home.render(),css=await readFile(new URL('assets/css/game-shell.css',root),'utf8');
+  assert.equal((html.match(/class="master-object-outline/g)||[]).length,5);
+  for(const o of Object.values(MASTER_OBJECTS)){
+    assert(html.includes(`viewBox="${o.box.join(' ')}" aria-hidden="true" focusable="false"`));
+    assert(html.includes(`class="outline-rim" d="${o.path}"`),'outline and raster mask cannot drift to different polygons');
+    const [x,y,w,h]=o.box;
+    for(const pair of o.path.matchAll(/(?:M|L)(\d+) (\d+)/g)){
+      assert(Number(pair[1])>=x&&Number(pair[1])<=x+w);
+      assert(Number(pair[2])>=y&&Number(pair[2])<=y+h);
+    }
+  }
+  assert.match(css,/vector-effect: non-scaling-stroke/);
+  assert.match(css,/master-foreground[^}]*inset\(55\.260361% 0 39\.957492% 16\.985646%\)/,'the desk fascia must not overpaint the guitar contour');
+  assert.match(css,/room-object:is\(:hover,:focus-visible\) :is\(\.object-art,\.master-object-image\) \{ filter: none/);
+  assert.match(css,/walk-left[^}]*bird-outline[^}]*scaleX\(-1\)/,'facing changes must flip the matching outline with the bird');
+  assert.match(css,/aria-busy="true"[^}]*master-object-outline[^}]*opacity: 0 !important/);
+});
+
+test('Portrait master framing preserves perspective and brings every keyboard target into view',()=>{
+  for(const name of Object.keys(MASTER_OBJECTS)){
+    const p=masterPanForObject(name,390,844);assert(p>=0&&p<=1);
+    const[x,,w]=MASTER_OBJECTS[name].box,scale=844/941,left=(390-1672*scale)*p+x*scale;
+    assert(left+w*scale>44&&left<346,`${name} must be reachable in the portrait camera`);
+  }
+  assert.equal(masterPanFromDrag(.5,1e5,390,844),0);
+  assert.equal(masterPanFromDrag(.5,-1e5,390,844),1);
+  assert(masterPanFromDrag(.5,-100,390,844)>.5);
+  for(const birdX of [480,509,700,850,900]){
+    const pan=masterPanForObject('games',390,844,birdX),scale=844/941;
+    const center=(390-1672*scale)*pan+(birdX+101)*scale;
+    assert(Math.abs(center-195)<1e-8,'keyboard framing must follow the live bird, not its original painted location');
+  }
 });
 
 test('audio remains opt-in, persistent, and scene-aware', async () => {

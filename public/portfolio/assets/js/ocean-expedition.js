@@ -1,7 +1,7 @@
-import { isReducedMotion } from './utils.js?v=1935067ad971';
-import { OCEAN_LEVELS, OCEAN_WORLD } from './experience-state.js?v=1935067ad971';
-import { createSpritePlayer, drawSprite } from './game-animation.js?v=1935067ad971';
-import { closeFieldGuide } from './game-ui.js?v=1935067ad971';
+import { isReducedMotion } from './utils.js?v=5d56ac3eab02';
+import { OCEAN_LEVELS, OCEAN_WORLD } from './experience-state.js?v=5d56ac3eab02';
+import { createSpritePlayer, drawSprite } from './game-animation.js?v=5d56ac3eab02';
+import { closeFieldGuide } from './game-ui.js?v=5d56ac3eab02';
 
 export function textPages(text, budget = 28) {
   const words = text.trim().split(/\s+/).filter(Boolean), pages = [];

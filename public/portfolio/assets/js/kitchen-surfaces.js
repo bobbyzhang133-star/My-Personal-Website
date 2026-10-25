@@ -1,5 +1,5 @@
-import { projectRatPoint, worldFocal } from './experience-state.js?v=1935067ad971';
-import { GAME_ROUTES, routeCell } from './game-route-layouts.js?v=1935067ad971';
+import { projectRatPoint, worldFocal } from './experience-state.js?v=5d56ac3eab02';
+import { GAME_ROUTES, routeCell } from './game-route-layouts.js?v=5d56ac3eab02';
 
 // Every display is a decal on a real wall face, in the same units as the rat.
 // Normals point into the kitchen; .015 clearance avoids coplanar wall flicker.

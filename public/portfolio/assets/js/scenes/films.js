@@ -1,7 +1,7 @@
-import { projects } from '../content.js?v=1935067ad971';
-import { $$, esc } from '../utils.js?v=1935067ad971';
-import { addSwipe, bindLinearKeys, sceneController } from './shared.js?v=1935067ad971';
-import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=1935067ad971';
+import { projects } from '../content.js?v=5d56ac3eab02';
+import { $$, esc } from '../utils.js?v=5d56ac3eab02';
+import { addSwipe, bindLinearKeys, sceneController } from './shared.js?v=5d56ac3eab02';
+import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=5d56ac3eab02';
 
 const films = projects.filter(project => project.category === 'films');
 
