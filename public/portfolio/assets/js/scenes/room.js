@@ -1,6 +1,6 @@
-import {categories} from '../content.js?v=5d56ac3eab02';
-import {$$,esc,isReducedMotion} from '../utils.js?v=5d56ac3eab02';
-import {MASTER_ROOM,MASTER_OBJECTS,masterBoxStyle,alignMasterRoom,masterPanForObject,masterPanFromDrag} from './room-master.js?v=5d56ac3eab02';
+import {categories} from '../content.js?v=0985987b2294';
+import {$$,esc,isReducedMotion} from '../utils.js?v=0985987b2294';
+import {MASTER_ROOM,MASTER_OBJECTS,masterBoxStyle,alignMasterRoom,masterPanForObject,masterPanFromDrag} from './room-master.js?v=0985987b2294';
 export function alignRoomGeometry(root){const scene=root?.matches?.('.master-room')?root:root?.querySelector?.('.master-room');if(scene)scene.style.setProperty('--room-pan',roomState.pan);return alignMasterRoom(root);}
 const assetRoot='/assets/room/master/',roomState={activeIndex:0,birdX:509,pan:.65};
 function objectOutline(o,bird){return `<svg class="master-object-outline${bird?' bird-outline':''}" viewBox="${o.box.join(' ')}" aria-hidden="true" focusable="false"><path class="outline-keyline" d="${o.path}"/><path class="outline-rim" d="${o.path}"/></svg>`;}

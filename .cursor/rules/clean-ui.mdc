@@ -5,6 +5,7 @@ alwaysApply: true
 
 # Clean UI, World First
 
+- Match UI to the active scene's art style as defined in `scene-ui-art-style.mdc`; visual consistency and restraint apply to menus and settings as well as the resting HUD.
 - For UI work in this portfolio, keep the normal view focused on the content or game world. Every persistent control must support an immediate user task; do not add decorative HUD, duplicate navigation, redundant titles, coaching strips or competing status panels.
 - Cat Eat Rat's approved resting HUD has exactly two anchors: **Return to characters at top left** and **real inventory at bottom right**. Do not restore permanent Menu, Sound, Room, Guide, objective, Inspect or touch-arrow overlays without Bobby's explicit request.
 - Put secondary controls, instructions, guided travel, reset and settings behind an intentional, accessible disclosure. For Cat/Rat, inventory opens exploration help; Escape provides pause and closes open controls. Do not open these panels automatically.

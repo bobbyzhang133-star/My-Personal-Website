@@ -1,5 +1,5 @@
-import { CAMERA_HOME, VirtualCamera } from './camera.js?v=5d56ac3eab02';
-import { isReducedMotion, nextFrame } from './utils.js?v=5d56ac3eab02';
+import { CAMERA_HOME, VirtualCamera } from './camera.js?v=0985987b2294';
+import { isReducedMotion, nextFrame } from './utils.js?v=0985987b2294';
 
 export const OBJECT_TRANSITIONS = Object.freeze({
   games: { cameraDuration: 940, interfaceDuration: 320, exitInterfaceDuration: 220, restoreDuration: 820 },

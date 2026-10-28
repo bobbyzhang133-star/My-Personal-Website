@@ -1,8 +1,8 @@
-import { projects } from './content.js?v=5d56ac3eab02';
-import { esc, isReducedMotion } from './utils.js?v=5d56ac3eab02';
-import { createWorldEngine, WORLD_LAYOUTS, bindWorldLook } from './world-engine.js?v=5d56ac3eab02';
-import { CUSTOM_GAMES, renderExperience, mountExperience } from './game-experiences.js?v=5d56ac3eab02';
-import { renderFieldGuide, mountWorldUI, closeFieldGuide, worldInputBlocked } from './game-ui.js?v=5d56ac3eab02';
+import { projects } from './content.js?v=0985987b2294';
+import { esc, isReducedMotion } from './utils.js?v=0985987b2294';
+import { createWorldEngine, WORLD_LAYOUTS, bindWorldLook } from './world-engine.js?v=0985987b2294';
+import { CUSTOM_GAMES, renderExperience, mountExperience } from './game-experiences.js?v=0985987b2294';
+import { renderFieldGuide, mountWorldUI, closeFieldGuide, worldInputBlocked } from './game-ui.js?v=0985987b2294';
 
 const assetRoot='/assets/game-source/';
 const nativeFrame=(page,crop,target=[0,0,...crop.slice(2)],width=1366,height=768)=>({src:assetRoot+`security-cameras/atlas-${page}.png`,crop,target,width,height});

@@ -202,6 +202,8 @@ All seven game detail routes now enter interactive portfolio worlds. These are o
 
 ## Approved Home Room master and derivatives (October 24)
 
+- Studio menu follow-through (October 28): original interface code uses the approved room's teal/walnut/ivory palette, crisp bevels and the existing self-hosted Pixelify Sans font (SIL Open Font License, retained in `assets/fonts/PixelifySans-OFL.txt`). No new generated artwork, furniture, icon pack or third-party raster source was introduced. Explicit studio scope preserves the separate game-specific and professional menu styles.
+
 - Outline correction: the five source-contour SVG paths were refined against the unchanged approved master, including guitar tuning pegs/body, camera strap, page edges, bird feet/beak and laptop casing. Hover/reveal/focus now stroke those same paths instead of expanding image alpha or drawing a rectangular focus box. No image generation, new artwork, palette change or additional third-party asset was used for this correction.
 
 - Bobby approved candidate B, `artifacts/home-room-master-approval/master-room-candidate-b.png`, 1672 × 941, generated with built-in OpenAI ImageGen from the actual One Last Bird standing sprite and the existing CC0-derived mint laptop perspective as identity references. This approval supersedes the old modular Cool School Home Room and earlier native-sprite-in-Home statements above. Native sprites/animation in the Games interfaces remain unchanged.

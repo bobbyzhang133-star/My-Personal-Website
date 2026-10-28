@@ -1,6 +1,6 @@
-import { GAME_ANIMATIONS } from './game-animation-data.js?v=5d56ac3eab02';
-import { isReducedMotion } from './utils.js?v=5d56ac3eab02';
-import { OCEAN_ANIMALS } from './ocean-animal-data.js?v=5d56ac3eab02';
+import { GAME_ANIMATIONS } from './game-animation-data.js?v=0985987b2294';
+import { isReducedMotion } from './utils.js?v=0985987b2294';
+import { OCEAN_ANIMALS } from './ocean-animal-data.js?v=0985987b2294';
 
 export { GAME_ANIMATIONS };
 

@@ -1,11 +1,11 @@
-import { initAudio } from './audio.js?v=5d56ac3eab02';
-import { renderGameShell } from './game-shell.js?v=5d56ac3eab02';
-import { playerMenuMarkup, initPlayerMenu } from './player-menu.js?v=5d56ac3eab02';
-import { professionalChrome, professionalFooter, initProfessionalPage, renderProfessionalPage } from './professional-pages.js?v=5d56ac3eab02';
-import { SceneManager } from './scene-manager.js?v=5d56ac3eab02';
-import { sceneRegistry } from './scenes/index.js?v=5d56ac3eab02';
-import { isCreativePath, routeFromPath } from './utils.js?v=5d56ac3eab02';
-import { gameWorldProject, renderGameWorld, mountGameWorld } from './game-world.js?v=5d56ac3eab02';
+import { initAudio } from './audio.js?v=0985987b2294';
+import { renderGameShell } from './game-shell.js?v=0985987b2294';
+import { playerMenuMarkup, initPlayerMenu } from './player-menu.js?v=0985987b2294';
+import { professionalChrome, professionalFooter, initProfessionalPage, renderProfessionalPage } from './professional-pages.js?v=0985987b2294';
+import { SceneManager } from './scene-manager.js?v=0985987b2294';
+import { sceneRegistry } from './scenes/index.js?v=0985987b2294';
+import { isCreativePath, routeFromPath } from './utils.js?v=0985987b2294';
+import { gameWorldProject, renderGameWorld, mountGameWorld } from './game-world.js?v=0985987b2294';
 
 const legacyHashRoutes = { games: '/games/', films: '/films/', banddream: '/music/', research: '/research/', about: '/about/', contact: '/about/', now: '/skills-experience/' };
 const page = document.body.dataset.page || 'home';
@@ -32,7 +32,7 @@ if (page === 'home' && legacyHashRoutes[location.hash.slice(1)]) {
 } else if (isCreativePath(location.pathname)) {
   document.body.classList.add('game-mode');
   app.innerHTML = renderGameShell();
-  document.body.insertAdjacentHTML('beforeend', playerMenuMarkup());
+  document.body.insertAdjacentHTML('beforeend', playerMenuMarkup({sceneStyle:'studio'}));
   const shell = document.querySelector('[data-game-shell]');
   const audio = initAudio(shell.querySelector('.sound-button'), {
     ambience: true,

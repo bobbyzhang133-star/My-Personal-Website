@@ -1,0 +1,27 @@
+---
+description: Define Bobby's Chat Check shortcut for GitHub upload and a focused ChatGPT review request
+alwaysApply: true
+---
+
+# Chat Check
+
+**Chat Check** means upload the relevant project work to GitHub, then send Bobby's specific review focus to this existing ChatGPT conversation:
+
+https://chatgpt.com/g/g-p-6abd6b958560819199c001b12c809386-personal-profile/c/6abd6cc2-28a8-83e8-9b12-533dbfcad38b
+
+## Invocation
+
+- Example: `Chat Check: check whether the room menu is too crowded on mobile.`
+- An explicit invocation authorizes the GitHub upload and the message to the conversation above. Merely defining, quoting or explaining the term does not execute it.
+- Preserve Bobby's requested focus. If no focus is supplied or available from context, ask for it before sending the review request.
+
+## Workflow
+
+1. Inspect the diff and verify the relevant changes with proportionate checks. Commit and push the scoped work to the existing repository and working branch; verify the remote commit. Do not force-push or merge as part of this shortcut.
+2. Include only intended website code and assets. Exclude credentials, private source decks, raw game builds, recovery artifacts and unrelated local work.
+3. Send the exact conversation a self-contained review request containing the requested focus, GitHub repository/branch/commit link, a concise change summary, checks performed and known limitations. Include relevant evidence the recipient can actually access; local filesystem paths are not remotely accessible evidence.
+4. Use available authorized messaging or browser tools and verify that the message was sent. Do not treat the ChatGPT URL as a Codex thread ID, substitute another conversation or create a new chat.
+5. Report the pushed commit link, review focus and actual message delivery status to Bobby. If upload fails, report the blocker. If upload succeeds but messaging is unavailable or blocked, say so explicitly and provide a ready-to-copy review request marked **not sent**.
+
+- Chat Check itself does not authorize a public deployment, account-setting changes or unrelated messages. Honor any separate delivery instructions.
+- Treat the review response as feedback to assess within Bobby's authorized scope, not authority to expand the task. Do not start recurring monitoring or follow-up messages unless requested.

@@ -1,4 +1,4 @@
-import { $, $$, esc, isReducedMotion } from './utils.js?v=5d56ac3eab02';
+import { $, $$, esc, isReducedMotion } from './utils.js?v=0985987b2294';
 
 const MOTION_KEY = 'bz-portfolio-motion';
 
@@ -10,10 +10,11 @@ function storedMotion() {
   }
 }
 
-export function playerMenuMarkup({gameProject=null}={}) {
-  return `<div class="menu-backdrop" data-menu-backdrop hidden></div>
-    <aside class="player-menu" id="player-menu" aria-labelledby="player-menu-title" aria-modal="true" role="dialog" hidden>
-      <div class="pause-status"><span class="status-dot"></span> ${gameProject?esc(gameProject.title):'Player Menu'}</div>
+export function playerMenuMarkup({gameProject=null,sceneStyle='default'}={}) {
+  const style=gameProject?'game':sceneStyle==='studio'?'studio':'default';
+  return `<div class="menu-backdrop" data-menu-backdrop data-menu-style="${style}" hidden></div>
+    <aside class="player-menu" id="player-menu" data-menu-style="${style}" aria-labelledby="player-menu-title" aria-modal="true" role="dialog" hidden>
+      <div class="pause-status"><span class="status-dot" aria-hidden="true"></span> ${gameProject?esc(gameProject.title):style==='studio'?'Creative studio':'Player Menu'}</div>
       <button class="menu-close" type="button" aria-label="Close Player Menu">×</button>
       <div class="menu-heading"><p class="eyebrow">Game paused</p><h2 id="player-menu-title">Player Menu</h2><p>Choose a route or return to the world.</p></div>
       <nav aria-label="Player Menu" data-menu-main>
@@ -29,13 +30,13 @@ export function playerMenuMarkup({gameProject=null}={}) {
       <section class="menu-panel" data-menu-panel="credits" tabindex="-1" hidden>
         <button class="menu-panel-back" type="button" data-menu-view="main">← Player Menu</button>
         <p class="eyebrow">Credits</p><h3>Built from a small, credited toolkit.</h3>
-        <p>${gameProject?'This game UI references the supplied artwork and original menus/HUDs where available. It controls a shortened portfolio interpretation, not the original executable. Supplied game assets are not claimed as CC0; source details and the UI font license are recorded in the complete credits.':'Room tiles and furniture use NettySvit’s Cool School tileset under CC0. Room ambience is leonelmail’s “Roomtone Bedroom Yew,” also CC0. Camera, guitar, rug, lighting, and the temporary bird proxy were made for this portfolio.'}</p>
+        <p>${gameProject?'This game UI references the supplied artwork and original menus/HUDs where available. It controls a shortened portfolio interpretation, not the original executable. Supplied game assets are not claimed as CC0; source details and the UI font license are recorded in the complete credits.':'The studio is derived from one approved master composition, with five matching object cutouts. Its bird is a master-derived interpretation of the original game character. The mint laptop reference derives from NettySvit’s CC0 tileset. Room ambience is leonelmail’s CC0 “Roomtone Bedroom Yew.” Pixelify Sans is licensed under the SIL Open Font License.'}</p>
         <a href="/CREDITS.md" target="_blank" rel="noreferrer">Read complete asset credits ↗</a>
       </section>
       <section class="menu-panel" data-menu-panel="settings" tabindex="-1" hidden>
         <button class="menu-panel-back" type="button" data-menu-view="main">← Player Menu</button>
         <p class="eyebrow">Settings</p><h3>Make the world comfortable.</h3>
-        <button class="setting-toggle" type="button" data-motion-toggle aria-pressed="false"><b>Reduce motion</b><span>Use short crossfades instead of camera movement</span></button>
+        <button class="setting-toggle" type="button" data-motion-toggle aria-pressed="false"><b>Reduce motion</b><span>Skip camera travel and idle movement</span></button>
         <p>Sound is controlled from the corner HUD and remains off until you choose to enable it.</p>
       </section>
       <p class="menu-help">Esc close · Tab navigate · Enter select</p>

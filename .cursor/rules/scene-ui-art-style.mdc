@@ -1,0 +1,15 @@
+---
+description: Match every UI surface to the active scene's approved art style
+alwaysApply: true
+---
+
+# Scene-Matched UI
+
+- Before creating or changing UI, inspect the active scene's approved artwork and a current screenshot. Identify its palette, pixel density/rendering style, materials, lighting, edge/shading treatment, typography and motion language.
+- Menus, HUD, buttons, inventory, settings, credits, tooltips and information surfaces must belong to that scene. Reuse source UI references and scoped theme tokens; do not apply a generic website or unrelated sci-fi skin over the artwork.
+- Example: the Home studio uses walnut framing, dark teal surfaces, warm ivory/sage accents, crisp edges and restrained pixel typography. A different game's ocean, horror or 3D UI must follow that game's references, not inherit the studio skin indiscriminately.
+- Shared UI keeps its semantics and behavior but uses an explicit scene/theme scope. Check direct loads, scene changes and browser history so one scene's skin cannot leak into another.
+- Use HIG/M3 for clear hierarchy, behavior and accessibility, not as a reason to replace the scene's visual identity. Preserve readable text, contrast, 44px targets, keyboard focus, Escape/focus return, reduced motion and touch access.
+- Keep the normal view uncluttered. Do not add decorative HUD, fake stats, duplicate headings or unrelated icons merely to make it feel game-like.
+- Review resting, hover/focus, open/close and settings/credits states on desktop, portrait and short landscape. Keep the world recognizable behind overlays; avoid blur/glass/neon unless supported by the current scene.
+- A rule addition is not authorization to redesign unrelated scenes. Preserve approved game-specific UI and professional pages unless they are explicitly in scope.

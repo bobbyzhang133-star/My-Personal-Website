@@ -1,5 +1,7 @@
 # Site Design Guidance
 
+- Follow `.cursor/rules/chat-check.mdc` when Bobby invokes **Chat Check**: verify and upload the relevant work to GitHub, then send the specified review focus to the designated ChatGPT conversation. Defining the term does not invoke it.
+- Follow `.cursor/rules/scene-ui-art-style.mdc` for every UI change: match the active scene's approved palette, rendering style, materials and typography; do not impose one generic skin across different scenes.
 - Follow `.cursor/rules/clean-ui.mdc` for portfolio UI work: keep the normal view uncluttered, move secondary controls behind accessible disclosures, and preserve Cat/Rat's approved top-left character return and bottom-right inventory only.
 - Follow `.cursor/rules/portfolio-release-navigation.mdc` for every portfolio runtime change: synchronize all entry documents and module versions, verify the release check, and test detail/category/Room return paths.
 - Follow `.cursor/rules/game-route-progression.mdc` for game scenes: linear discovery order is not straight geometry or a camera lock; preserve source camera families and local observation freedom.

@@ -242,6 +242,37 @@ test('Game pause credits identify the current game while other page menus stay u
   assert.match(playerMenuMarkup({gameProject:{title:'<script>'}}),/&lt;script&gt;/);
 });
 
+test('Studio menu has an explicit safe theme scope without changing game or professional skins',async()=>{
+  const studio=playerMenuMarkup({sceneStyle:'studio'}),normal=playerMenuMarkup();
+  assert.equal((studio.match(/data-menu-style="studio"/g)||[]).length,2,'dialog and backdrop share the studio skin');
+  assert.match(studio,/role="dialog" hidden/);assert.match(studio,/aria-modal="true"/);
+  for(const destination of ['/projects/','/skills-experience/','/resume/','/about/'])assert(studio.includes(`href="${destination}"`));
+  assert.match(studio,/data-motion-toggle aria-pressed="false"/);
+  assert.match(studio,/approved master composition/);assert.doesNotMatch(studio,/temporary bird proxy|short crossfades/);
+  assert.match(normal,/data-menu-style="default"/);
+  assert.match(playerMenuMarkup({sceneStyle:'"><script>'}),/data-menu-style="default"/);
+  const game=playerMenuMarkup({gameProject:projects.find(p=>p.id==='plasteroids'),sceneStyle:'studio'});
+  assert.match(game,/data-menu-style="game"/);assert.doesNotMatch(game,/data-menu-style="studio"/);
+  const site=await readFile(new URL('assets/js/site.js',root),'utf8');
+  const creative=site.split('else if (isCreativePath(location.pathname))')[1].split('} else {')[0];
+  assert.match(creative,/playerMenuMarkup\(\{sceneStyle:'studio'\}\)/);
+  assert.match(site,/playerMenuMarkup\(\{gameProject:worldProject\}\)/);
+  assert.match(site,/professional-mode[\s\S]*playerMenuMarkup\(\)/);
+});
+
+test('Studio UI uses room materials, accessible responsive controls, and a persistent scene-art rule',async()=>{
+  const css=await readFile(new URL('assets/css/game-shell.css',root),'utf8');
+  const theme=css.split('/* The studio pause UI belongs')[1];assert(theme);
+  for(const color of ['#20393e','#f6edcf','#9c623f','#d49b60'])assert(theme.includes(color));
+  assert.match(theme,/\.menu-backdrop\[data-menu-style="studio"\][^}]*backdrop-filter: none/);
+  assert.match(theme,/font-family: 'Pixelify Sans'/);assert.match(theme,/outline: 3px dashed/);
+  assert.match(theme,/min-height: 44px/);assert.match(theme,/@media\(max-width:600px\)/);assert.match(theme,/@media\(max-height:500px\)/);
+  assert.doesNotMatch(theme,/linear-gradient\(|backdrop-filter:\s*blur|0 30px 100px/);
+  await access(new URL('assets/fonts/PixelifySans.ttf',root));
+  const projectRule=await readFile(new URL('../../.cursor/rules/scene-ui-art-style.mdc',root),'utf8');
+  assert.match(projectRule,/alwaysApply: true/);assert.match(projectRule,/active scene/);assert.match(projectRule,/44px/);
+});
+
 test('Information boards use source-family skins and a self-hosted licensed pixel font',async()=>{
   const css=await readFile(new URL('assets/css/game-world.css',root),'utf8');
   const skins=css.split('/* Game-specific information materials.')[1];assert(skins);

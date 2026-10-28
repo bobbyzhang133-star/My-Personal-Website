@@ -1,5 +1,5 @@
-import { projects, aiResearchNotes } from './content.js?v=5d56ac3eab02';
-import { esc } from './utils.js?v=5d56ac3eab02';
+import { projects, aiResearchNotes } from './content.js?v=0985987b2294';
+import { esc } from './utils.js?v=0985987b2294';
 
 export const AI_PROFILE_SOURCE='https://github.com/bobbyzhang133-star/bobbyzhang133-star/blob/main/README.md';
 
