@@ -1,4 +1,4 @@
-import { isReducedMotion } from './utils.js?v=0985987b2294';
+import { isReducedMotion } from './utils.js?v=43292090dc3e';
 
 export const CAMERA_HOME = Object.freeze({ x: 0, y: 0, scale: 1 });
 

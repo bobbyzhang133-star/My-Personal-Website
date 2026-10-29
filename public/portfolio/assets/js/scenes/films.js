@@ -1,12 +1,13 @@
-import { projects } from '../content.js?v=0985987b2294';
-import { $$, esc } from '../utils.js?v=0985987b2294';
-import { addSwipe, bindLinearKeys, sceneController } from './shared.js?v=0985987b2294';
-import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=0985987b2294';
+import { projects } from '../content.js?v=43292090dc3e';
+import { $$, esc } from '../utils.js?v=43292090dc3e';
+import { addSwipe, bindLinearKeys, sceneController } from './shared.js?v=43292090dc3e';
+import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=43292090dc3e';
+import { sourceLinks } from '../project-sources.js?v=43292090dc3e';
 
 const films = projects.filter(project => project.category === 'films');
 
-function copy(project, index) {
-  return `<p class="eyebrow">Frame ${index + 1} / ${films.length} · ${esc(project.yearStatus)}</p><h2>${esc(project.title)}</h2><p>${esc(project.description)}</p><p class="role-line">${project.roles.map(esc).join(' · ')}</p><a class="select-button" href="${project.detailRoute}">Open film project ↗</a>`;
+export function filmCopy(project, index) {
+  return `<p class="eyebrow">Frame ${index + 1} / ${films.length} · ${esc(project.yearStatus)}</p><h2>${esc(project.title)}</h2><p>${esc(project.description)}</p><p class="role-line">${project.roles.map(esc).join(' · ')}</p><div class="film-source-actions">${sourceLinks(project, 'select-button')}<a class="${project.externalLinks.length ? 'text-link' : 'select-button'}" href="${project.detailRoute}">Film project ↗</a></div>`;
 }
 
 export function renderFilms({ preview = false } = {}) {
@@ -24,7 +25,7 @@ export function renderFilms({ preview = false } = {}) {
             <button class="film-arrow prev" type="button" aria-label="Previous film">←</button>
             <div class="film-strip" role="listbox" aria-label="Film projects">${films.map((project, index) => `<button class="film-frame" type="button" role="option" aria-selected="${index === 0}" tabindex="${index === 0 ? 0 : -1}" data-index="${index}"><span class="perfs" aria-hidden="true"></span><img src="${project.artwork}" alt="${esc(project.title)} poster"><span>Frame ${String(index + 1).padStart(2, '0')}</span></button>`).join('')}</div>
             <button class="film-arrow next" type="button" aria-label="Next film">→</button>
-            <div class="film-copy" aria-live="polite">${copy(films[0], 0)}</div>
+            <div class="film-copy" aria-live="polite">${filmCopy(films[0], 0)}</div>
           </section>
         </div>
         <div class="camera-controls" aria-hidden="true"><span></span><span></span><i></i><b>ISO 400</b></div>
@@ -50,7 +51,7 @@ export function mountFilms(root) {
       frame.tabIndex = active ? 0 : -1;
       frame.dataset.position = frameIndex - index;
     });
-    output.innerHTML = copy(films[index], index);
+    output.innerHTML = filmCopy(films[index], index);
     if (focus) frames[index].focus({ preventScroll: true });
   };
   surface.querySelector('.prev').addEventListener('click', () => render(index - 1, true), { signal });

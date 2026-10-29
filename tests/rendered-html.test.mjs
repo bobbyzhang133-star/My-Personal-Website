@@ -3,13 +3,17 @@ import { access, readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 import { SceneManager } from '../public/portfolio/assets/js/scene-manager.js';
 import { MASTER_ROOM, MASTER_OBJECTS, masterSupportReport, masterContains, masterBoxStyle, masterPanForObject, masterPanFromDrag } from '../public/portfolio/assets/js/scenes/room-master.js';
+import { createRoomDiscovery } from '../public/portfolio/assets/js/scenes/room-discovery.js';
 import { WORLD_LAYOUTS, ROOM_STATIONS, roomPath, roomFree, moveBody, createWorldEngine } from '../public/portfolio/assets/js/world-engine.js';
 import { GAME_ROUTES, routeCell, routeLightDistance } from '../public/portfolio/assets/js/game-route-layouts.js';
 import { GAME_WORLDS, renderGameWorld, entries } from '../public/portfolio/assets/js/game-world.js';
 import { renderRatInventory, mountWorldUI, closeFieldGuide, worldInputBlocked, bindRatTouch } from '../public/portfolio/assets/js/game-ui.js';
 import { playerMenuMarkup } from '../public/portfolio/assets/js/player-menu.js';
+import { initAudio } from '../public/portfolio/assets/js/audio.js';
+import { renderGameShell } from '../public/portfolio/assets/js/game-shell.js';
 import { oceanCards, createOceanSequence, textPages } from '../public/portfolio/assets/js/ocean-expedition.js';
 import { OCEAN_ANIMALS } from '../public/portfolio/assets/js/ocean-animal-data.js';
 import { OCEAN_DEBRIS, OCEAN_LANDMARKS, oceanWaterColor, drawOceanEnvironment } from '../public/portfolio/assets/js/ocean-environment.js';
@@ -25,12 +29,53 @@ import { sceneRegistry } from '../public/portfolio/assets/js/scenes/index.js';
 import { bookPageIndex, bookDestination, researchPages, mountResearch } from '../public/portfolio/assets/js/scenes/research.js';
 import { pageFold, foldPolygon } from '../public/portfolio/assets/js/scenes/book-fold.js';
 import { isCreativePath, routeFromPath } from '../public/portfolio/assets/js/utils.js';
+import { originalSourceUrl, projectSources } from '../public/portfolio/assets/js/project-sources.js';
+import { filmCopy } from '../public/portfolio/assets/js/scenes/films.js';
+import { musicSource } from '../public/portfolio/assets/js/scenes/music.js';
 
 const root = new URL('../public/portfolio/', import.meta.url);
 const repoRoot = new URL('../', import.meta.url);
 const routes = ['', 'games/', 'films/', 'music/', 'research/', 'ai/', 'projects/', 'skills-experience/', 'resume/', 'about/'];
 const creativeRoutes = ['', 'games/', 'films/', 'music/', 'research/', 'ai/'];
 const detailRoutes = projects.map(project => project.detailRoute.replace(/^\//, ''));
+
+test('Original game links and supplied recordings remain accessible in every game guide', async () => {
+  const originals = {
+    'one-last-bird': 'https://bigfatcat79.itch.io/onelastbird',
+    'five-nights-at-chickens': 'https://bigfatcat79.itch.io/chickens',
+    'chickens-nightmare-gamemaker': 'https://bigfatcat79.itch.io/chickens-nightmare',
+  };
+  for (const project of projects.filter(item => item.category === 'games')) {
+    const html = renderGameWorld(project);
+    const guide = html.slice(html.indexOf('<details class="world-field-guide"'), html.indexOf('</details>', html.indexOf('<details class="world-field-guide"')));
+    assert.match(guide, /Original game & media/);
+    for (const link of projectSources(project)) assert(guide.includes(`href="${link.url}"`), `${project.id}: original accessible without completing exploration`);
+    if (originals[project.id]) assert.equal(project.externalLinks[0].url, originals[project.id]);
+    if (project.demoVideo) { await access(new URL(project.demoVideo.slice(1), root)); assert.match(guide, /public playable build link has not been supplied/); }
+    if (!projectSources(project).length) assert.match(guide, /release link has not been supplied/);
+  }
+});
+
+test('Film and music sources open the original viewer while music embeds stay lazy', () => {
+  const music = projects.find(project => project.category === 'music');
+  assert.equal(originalSourceUrl(music.externalLinks[0].url), 'https://drive.google.com/file/d/1fB9kPFtr7Y1Ot_9K0noQOGsuAvvXRDBJ/view');
+  assert.equal(originalSourceUrl('https://example.com/preview'), 'https://example.com/preview');
+  for (const [index, link] of music.externalLinks.entries()) {
+    assert(musicSource(index).includes(originalSourceUrl(link.url)));
+    assert(musicSource(index).includes(link.label));
+    assert.match(musicSource(index), /rel="noopener noreferrer"/);
+  }
+  assert.notEqual(musicSource(0), musicSource(1));
+  const html = sceneRegistry.music.render();
+  assert.match(html, /class="performance-source"/);
+  assert.doesNotMatch(html, /<iframe/);
+  for (const [index, project] of projects.filter(item => item.category === 'films').entries()) {
+    const film = filmCopy(project, index);
+    assert(film.includes(project.detailRoute));
+    for (const link of project.externalLinks) assert(film.includes(originalSourceUrl(link.url)));
+    assert.doesNotMatch(film, /href="[^"]*\/preview"/);
+  }
+});
 
 test('Research pagination is bounded, supports single pages and facing spreads, and retains canonical content', () => {
   assert.equal(bookPageIndex(-20), 0);
@@ -967,15 +1012,17 @@ test('Approved master supplies all five exact source cutouts and one shared came
   for(const layer of ['master-background','master-workstation','master-foreground','master-lighting'])assert.match(html,new RegExp(layer));
   assert.doesNotMatch(html,/cool-school-|object-prompt|<kbd>|original-game-sprite/);
   assert.match(html,/master-derived-native-reference/);
-  const payloads=[];
+  const sourceHashes=[];
   for(const[name,o]of Object.entries(MASTER_OBJECTS)){
     const svg=await readFile(new URL(`assets/room/master/${name}.svg`,root),'utf8');
     assert(svg.includes(`viewBox="${o.box.join(' ')}"`));
     assert(svg.includes(o.path),'mask must retain approved source coordinates');
-    payloads.push(svg.match(/base64,([^" ]+)/)[1]);
+    sourceHashes.push(svg.match(/data-source-sha256="([^"]+)"/)[1]);
+    assert(svg.includes(`<image x="${o.box[0]}" y="${o.box[1]}" width="${o.box[2]}" height="${o.box[3]}"`),'cropping must preserve exact source-space registration');
     assert.match(html,new RegExp(`href="/${name}/"`));
   }
-  assert(payloads.every(p=>p===payloads[0]),'no independently regenerated object imagery');
+  const sourceHash=createHash('sha256').update(await readFile(new URL(MASTER_ROOM.objectSource.slice(1),root))).digest('hex');
+  assert(sourceHashes.every(hash=>hash===sourceHash),'all cutouts must derive from the same registered room source');
   assert.equal(masterSupportReport().filter(o=>!o.valid||!o.footprintContained).length,0);
   assert.equal(masterContains([900,500],MASTER_ROOM.desk),true);
   assert.equal(masterContains([900,600],MASTER_ROOM.desk),false);
@@ -987,9 +1034,8 @@ test('Master room is click-first, label-free, accessible and lifecycle-safe', as
   assert.match(html,/data-reveal-room/);
   assert.match(html,/Use Tab and Enter/);
   assert.doesNotMatch(html,/<kbd>|object-prompt|tabindex="-1"[^>]*data-room-object/);
-  assert.match(room,/1500/);
   assert.match(room,/controller\.abort/);assert.match(room,/observer\.disconnect/);
-  assert.match(room,/clearTimeout\(revealTimer\)/);assert.match(room,/document\.hidden/);assert.match(room,/isReducedMotion/);
+  assert.match(room,/discovery\.destroy/);assert.match(room,/document\.hidden/);assert.match(room,/isReducedMotion/);
   assert.match(room,/observer\.observe\(shell.*aria-busy/,'bird scheduling must resume when camera travel ends');
   assert.match(css,/data-idle-paused="true"[^}]*animation-play-state: paused/,'hidden-page idle cues must pause');
   assert.doesNotMatch(room,/--parallax|watchRoomGeometry|translateTo/);
@@ -1005,6 +1051,106 @@ test('Master room is click-first, label-free, accessible and lifecycle-safe', as
       assert(Math.abs((w*scale)/(h*scale)-w/h)<1e-10,'uniform source projection');
     }
   }
+});
+
+function discoveryClock({ seen = false, reduced = false, onSeen = () => {} } = {}) {
+  let now = 0, serial = 0;
+  const timers = new Map(), events = [];
+  const controller = createRoomDiscovery({ seen, reduced: () => reduced, onSeen,
+    show: mode => events.push([now, mode]), hide: () => events.push([now, 'hide']),
+    setTimer(callback, delay) { const id = ++serial; timers.set(id, { at: now + delay, callback }); return id; },
+    clearTimer: id => timers.delete(id)
+  });
+  return { controller, events, timers, tick(duration) {
+    const end = now + duration;
+    while (true) {
+      const next = [...timers.entries()].filter(([, timer]) => timer.at <= end).sort((a, b) => a[1].at - b[1].at)[0];
+      if (!next) break;
+      now = next[1].at; timers.delete(next[0]); next[1].callback();
+    }
+    now = end;
+  } };
+}
+
+test('Room discovery waits for a stable visible room, scans once, and survives remounts without repeating', () => {
+  let remembered = false;
+  const clock = discoveryClock({ onSeen: () => { remembered = true; } });
+  clock.tick(10000); assert.equal(clock.events.length, 0, 'unready Room cannot teach over unloaded artwork');
+  clock.controller.setAvailable(true); clock.tick(1000);
+  clock.controller.setAvailable(false); clock.tick(3000);
+  assert.equal(clock.events.length, 0, 'menu, hidden tab or camera travel must cancel the pending lesson');
+  clock.controller.setAvailable(true); clock.tick(1549); assert.equal(clock.events.length, 0);
+  clock.tick(1); assert.equal(clock.controller.state.mode, 'intro'); assert(remembered);
+  clock.tick(1539); assert.equal(clock.controller.state.mode, 'intro', 'last staggered object gets its full hold');
+  clock.tick(1); assert.equal(clock.controller.state.mode, null);
+  clock.controller.setAvailable(false); clock.controller.setAvailable(true); clock.tick(10000);
+  assert.equal(clock.events.filter(([, mode]) => mode === 'intro').length, 1);
+  const remounted = discoveryClock({ seen: remembered }); remounted.controller.setAvailable(true); remounted.tick(10000);
+  assert.equal(remounted.events.length, 0, 'Room returns and reloads honor the session marker');
+});
+
+test('Meaningful interaction cancels onboarding; manual discovery remains available for 2.3 seconds', () => {
+  const clock = discoveryClock(); clock.controller.setAvailable(true); clock.tick(500);
+  clock.controller.acknowledge(); clock.tick(3000); assert.equal(clock.events.length, 0);
+  clock.controller.manual(); clock.tick(2299); assert.equal(clock.controller.state.mode, 'manual');
+  clock.tick(1); assert.equal(clock.controller.state.mode, null);
+  clock.controller.manual(); clock.tick(1000); clock.controller.manual(); clock.tick(1500);
+  assert.equal(clock.controller.state.mode, 'manual', 'repeated explicit reveal refreshes its reading time');
+  clock.controller.acknowledge(); assert.equal(clock.controller.state.mode, null, 'activation clears all discovery highlights before travel');
+  clock.tick(10000); assert.equal(clock.timers.size, 0);
+});
+
+test('Reduced-motion discovery holds all five together and cleanup cancels every pending callback', () => {
+  const clock = discoveryClock({ reduced: true }); clock.controller.setAvailable(true); clock.tick(1550);
+  assert.equal(clock.controller.state.mode, 'intro'); clock.tick(1200); assert.equal(clock.controller.state.mode, null);
+  clock.controller.manual(); clock.controller.destroy(); const count = clock.events.length; clock.tick(10000);
+  assert.equal(clock.events.length, count); assert.equal(clock.timers.size, 0);
+  clock.controller.setAvailable(true); clock.controller.manual(); assert.equal(clock.events.length, count);
+});
+
+test('Portrait Room suppresses navigation after touch drags, keeps single taps, ignores mouse panning and cleans up', () => {
+  const names=['window','document','matchMedia','MutationObserver','requestAnimationFrame','cancelAnimationFrame','sessionStorage','location','innerWidth','innerHeight'];
+  const previous=new Map(names.map(name=>[name,Object.getOwnPropertyDescriptor(globalThis,name)]));
+  let lifecycle,readyFrame,observerCallback,disconnected=false;
+  class Node {
+    constructor(object=false){this.object=object;this.dataset={};this.listeners=new Map();this.values=new Map();this.style={setProperty:(k,v)=>this.values.set(k,v),removeProperty:()=>{}};this.classList={contains:()=>false,toggle:()=>{}};}
+    addEventListener(type,fn,options){const list=this.listeners.get(type)||[];list.push({fn,signal:options?.signal});this.listeners.set(type,list);}
+    emit(type,extra={}){const event={target:this,preventDefault(){this.prevented=true;},stopImmediatePropagation(){this.stopped=true;},...extra};for(const item of this.listeners.get(type)||[])if(!item.signal?.aborted)item.fn(event);return event;}
+    closest(selector){return selector==='[data-room-object]'&&this.object?this:null;}
+    getBoundingClientRect(){return{left:0,top:0,width:1672,height:941};}
+    setPointerCapture(id){this.captured=id;}
+  }
+  const rootNode=new Node(),stage=new Node(),shell=new Node(),help=new Node(),manual=new Node(),status=new Node(),frame=new Node();
+  const objects=Array.from({length:5},()=>new Node(true)),bird=objects[0];
+  rootNode.matches=selector=>selector==='.master-room';
+  rootNode.closest=selector=>selector==='.game-shell'?shell:null;
+  rootNode.querySelector=selector=>({'[data-room-stage]':stage,'#room-navigation-help':help,'[data-reveal-room]':manual,'[role="status"]':status,'.master-composition':frame}[selector]);
+  rootNode.querySelectorAll=()=>[];stage.querySelector=()=>bird;stage.querySelectorAll=()=>objects;help.textContent='';
+  const saved=new Map();
+  try{
+    globalThis.window=new Node();globalThis.document=new Node();document.hidden=false;document.body=new Node();document.documentElement=new Node();
+    globalThis.location={search:''};globalThis.innerWidth=390;globalThis.innerHeight=844;
+    globalThis.matchMedia=query=>Object.assign(new Node(),{matches:query.includes('portrait')});
+    globalThis.sessionStorage={getItem:key=>saved.get(key),setItem:(key,value)=>saved.set(key,value)};
+    globalThis.MutationObserver=class{constructor(callback){observerCallback=callback;}observe(){}disconnect(){disconnected=true;}};
+    globalThis.requestAnimationFrame=callback=>{readyFrame=callback;return 1;};globalThis.cancelAnimationFrame=()=>{};
+    lifecycle=sceneRegistry.home.mount(rootNode);readyFrame();
+    const before=rootNode.values.get('--room-pan');
+    stage.emit('pointerdown',{pointerType:'mouse',clientX:300,pointerId:1});stage.emit('pointermove',{pointerType:'mouse',clientX:100,pointerId:1});
+    assert.equal(rootNode.values.get('--room-pan'),before,'mouse movement never shifts the room');
+    stage.emit('pointerdown',{pointerType:'touch',clientX:300,pointerId:7});
+    const drag=stage.emit('pointermove',{pointerType:'touch',clientX:150,pointerId:7});
+    assert(drag.prevented);assert.equal(stage.captured,7);assert(rootNode.values.get('--room-pan')>before);
+    stage.emit('pointerup',{pointerType:'touch',pointerId:7});
+    const afterDrag=stage.emit('click',{target:objects[2]});assert(afterDrag.prevented&&afterDrag.stopped,'drag release must not open a category');
+    stage.emit('pointerdown',{pointerType:'touch',clientX:150,pointerId:8});stage.emit('pointerup',{pointerType:'touch',pointerId:8});
+    const tap=stage.emit('click',{target:objects[2]});assert(!tap.prevented&&!tap.stopped,'one tap remains available to the scene router');
+    assert.equal(saved.get('bz-room-discovery-v2'),'seen');
+    manual.emit('click');assert.equal(rootNode.dataset.revealMode,'manual');
+    document.documentElement.dataset.motion='reduced';observerCallback();assert.equal(rootNode.dataset.roomMotion,'reduced');assert.equal(bird.dataset.state,'idle');
+    lifecycle.cleanup();assert(disconnected);assert.equal(rootNode.dataset.revealInteractables,undefined);
+    manual.emit('click');assert.equal(rootNode.dataset.revealInteractables,undefined,'aborted controls cannot revive the lesson');
+  }finally{lifecycle?.cleanup();for(const[name,descriptor]of previous){if(descriptor)Object.defineProperty(globalThis,name,descriptor);else delete globalThis[name];}}
 });
 
 test('All object highlights reuse their cutout contour with no rectangular focus or legacy halo',async()=>{
@@ -1042,10 +1188,52 @@ test('Portrait master framing preserves perspective and brings every keyboard ta
   }
 });
 
-test('audio remains opt-in, persistent, and scene-aware', async () => {
+test('audio remains persistent, autoplay-safe and scene-aware', async () => {
   const audio = await readFile(new URL('assets/js/audio.js', root), 'utf8');
   assert.match(audio, /localStorage/);
   assert.match(audio, /setAmbienceActive/);
   assert.match(audio, /userGestureGranted/);
   assert.match(audio, /visibilitychange/);
+});
+
+test('Studio sound is default-on in Settings, with no permanent sound HUD or changes to other scene menus',()=>{
+  assert.doesNotMatch(renderGameShell(),/sound-button|Sound Off|Sound On/);
+  assert.match(playerMenuMarkup({sceneStyle:'studio'}),/data-sound-toggle aria-pressed="true"/);
+  assert.doesNotMatch(playerMenuMarkup(),/data-sound-toggle/);
+  assert.doesNotMatch(playerMenuMarkup({gameProject:{title:'Game'}}),/data-sound-toggle/);
+});
+
+test('Default-on studio audio retries blocked autoplay, remembers mute and pauses outside the room or hidden tabs',async()=>{
+  const names=['document','localStorage','Audio','requestAnimationFrame','cancelAnimationFrame'];
+  const previous=new Map(names.map(name=>[name,Object.getOwnPropertyDescriptor(globalThis,name)]));
+  const saved=new Map(),tracks=[],frames=new Map();let serial=0;
+  class Button extends EventTarget{
+    constructor(studio=true){super();this.studio=studio;this.attrs=new Map();}
+    setAttribute(key,value){this.attrs.set(key,value);}
+    matches(){return this.studio;}
+    contains(target){return target===this;}
+  }
+  class Track extends EventTarget{
+    constructor(){super();this.dataset={};this.volume=0;this.paused=true;this.plays=0;this.failures=2;tracks.push(this);}
+    async play(){this.plays++;if(this.failures-->0)throw new Error('Autoplay denied');this.paused=false;}
+    pause(){this.paused=true;}
+  }
+  const settle=async()=>{await Promise.resolve();await Promise.resolve();};
+  const finishFades=()=>{for(const[id,callback]of[...frames]){frames.delete(id);callback(performance.now()+1000);}};
+  try{
+    globalThis.document=new EventTarget();document.hidden=false;document.body={append:()=>{}};
+    globalThis.localStorage={getItem:key=>saved.get(key)??null,setItem:(key,value)=>saved.set(key,value)};
+    globalThis.Audio=Track;globalThis.requestAnimationFrame=callback=>{frames.set(++serial,callback);return serial;};globalThis.cancelAnimationFrame=id=>frames.delete(id);
+    const button=new Button(),audio=initAudio(button,{ambience:true,defaultEnabled:true,storageKey:'studio-test'});
+    await settle();assert.equal(button.attrs.get('aria-pressed'),'true');assert.equal(tracks[0].plays,1);assert(tracks[0].paused);
+    document.dispatchEvent(new Event('keydown'));await settle();assert.equal(tracks[0].plays,2);assert(tracks[0].paused);
+    document.dispatchEvent(new Event('pointerdown'));await settle();finishFades();assert.equal(tracks[0].plays,3);assert(!tracks[0].paused);assert.equal(tracks[0].volume,.11);
+    audio.setAmbienceActive(false);finishFades();assert(tracks[0].paused);assert.equal(tracks[0].volume,0);
+    audio.setAmbienceActive(true);await settle();finishFades();assert(!tracks[0].paused);
+    document.hidden=true;document.dispatchEvent(new Event('visibilitychange'));assert(tracks[0].paused);
+    document.hidden=false;document.dispatchEvent(new Event('visibilitychange'));await settle();finishFades();assert(!tracks[0].paused);
+    button.dispatchEvent(new Event('click'));finishFades();assert.equal(button.attrs.get('aria-pressed'),'false');assert.equal(saved.get('studio-test'),'off');assert(tracks[0].paused);
+    const mutedButton=new Button();initAudio(mutedButton,{ambience:true,defaultEnabled:true,storageKey:'studio-test'});await settle();assert.equal(mutedButton.attrs.get('aria-pressed'),'false');assert.equal(tracks[1].plays,0,'saved mute must prevent automatic playback');
+    const legacyButton=new Button(false);initAudio(legacyButton);assert.equal(legacyButton.attrs.get('aria-pressed'),'false','other page sound defaults are preserved');
+  }finally{for(const[name,descriptor]of previous){if(descriptor)Object.defineProperty(globalThis,name,descriptor);else delete globalThis[name];}}
 });

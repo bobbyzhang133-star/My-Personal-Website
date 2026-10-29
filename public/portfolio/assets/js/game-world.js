@@ -1,8 +1,9 @@
-import { projects } from './content.js?v=0985987b2294';
-import { esc, isReducedMotion } from './utils.js?v=0985987b2294';
-import { createWorldEngine, WORLD_LAYOUTS, bindWorldLook } from './world-engine.js?v=0985987b2294';
-import { CUSTOM_GAMES, renderExperience, mountExperience } from './game-experiences.js?v=0985987b2294';
-import { renderFieldGuide, mountWorldUI, closeFieldGuide, worldInputBlocked } from './game-ui.js?v=0985987b2294';
+import { gameSources } from './project-sources.js?v=43292090dc3e';
+import { projects } from './content.js?v=43292090dc3e';
+import { esc, isReducedMotion } from './utils.js?v=43292090dc3e';
+import { createWorldEngine, WORLD_LAYOUTS, bindWorldLook } from './world-engine.js?v=43292090dc3e';
+import { CUSTOM_GAMES, renderExperience, mountExperience } from './game-experiences.js?v=43292090dc3e';
+import { renderFieldGuide, mountWorldUI, closeFieldGuide, worldInputBlocked } from './game-ui.js?v=43292090dc3e';
 
 const assetRoot='/assets/game-source/';
 const nativeFrame=(page,crop,target=[0,0,...crop.slice(2)],width=1366,height=768)=>({src:assetRoot+`security-cameras/atlas-${page}.png`,crop,target,width,height});
@@ -37,7 +38,7 @@ export function renderGameWorld(project){
     <div class="world-caption"><h1 id="world-title">${esc(project.title)}</h1></div>
     <canvas class="world-canvas" tabindex="0" aria-label="Explore ${esc(config.name)}. ${help}. Use the field guide for controls and information destinations."></canvas>
     <p class="world-objective" data-world-objective aria-live="polite">Find the first note</p>
-    ${renderFieldGuide({help,label:'Guide',count:4,coach:`<aside class="route-coach"><h3>Next discovery</h3><span data-route-prompt>${fixed?'Start at the office. Read its log, then switch cameras.':layout.orderedRoute?'Approach the note stand and press E. Drag to look around.':'Fly toward the nest and press E to read.'}</span>${layout.orderedRoute?'<small data-route-space>Service entrance</small><button class="game-control" data-next-stop type="button">Guide me to the next note →</button>':''}${project.id==='five-nights-at-chickens'?'<small>Original GameMaker camera art reference; Unity camera exports not supplied.</small>':''}</aside>`,destinations:config.stops.map((label,index)=>`<button type="button" data-discovery="${index}">0${index+1} · ${esc(label)}<span>Go →</span></button>`).join('')})}
+    ${renderFieldGuide({sources:gameSources(project),help,label:'Guide',count:4,coach:`<aside class="route-coach"><h3>Next discovery</h3><span data-route-prompt>${fixed?'Start at the office. Read its log, then switch cameras.':layout.orderedRoute?'Approach the note stand and press E. Drag to look around.':'Fly toward the nest and press E to read.'}</span>${layout.orderedRoute?'<small data-route-space>Service entrance</small><button class="game-control" data-next-stop type="button">Guide me to the next note →</button>':''}${project.id==='five-nights-at-chickens'?'<small>Original GameMaker camera art reference; Unity camera exports not supplied.</small>':''}</aside>`,destinations:config.stops.map((label,index)=>`<button type="button" data-discovery="${index}">0${index+1} · ${esc(label)}<span>Go →</span></button>`).join('')})}
     <button class="world-inspect game-control" type="button" data-interact disabled>Move closer to discover</button>
     <div class="world-touch-controls" role="group" aria-label="Movement controls"><button type="button" data-move="left" aria-label="${fixed?'Previous view':layout.orderedRoute?'Turn left':'Move left'}">←</button><button type="button" data-move="up" aria-label="Move forward" ${fixed?'disabled':''}>↑</button><button type="button" data-move="down" aria-label="Move backward" ${fixed?'disabled':''}>↓</button><button type="button" data-move="right" aria-label="${fixed?'Next view':layout.orderedRoute?'Turn right':'Move right'}">→</button></div>
     <dialog class="world-journal" aria-labelledby="journal-title"><button class="journal-close game-control" type="button" aria-label="Close discovery">×</button><p class="eyebrow">Discovered</p><h2 id="journal-title"></h2><div class="journal-body"></div></dialog>

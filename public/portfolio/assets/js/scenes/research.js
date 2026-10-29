@@ -1,8 +1,8 @@
-import { projects, researchNotes } from '../content.js?v=0985987b2294';
-import { esc, isReducedMotion } from '../utils.js?v=0985987b2294';
-import { sceneController } from './shared.js?v=0985987b2294';
-import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=0985987b2294';
-import { pageFold, foldPolygon } from './book-fold.js?v=0985987b2294';
+import { projects, researchNotes } from '../content.js?v=43292090dc3e';
+import { esc, isReducedMotion } from '../utils.js?v=43292090dc3e';
+import { sceneController } from './shared.js?v=43292090dc3e';
+import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=43292090dc3e';
+import { pageFold, foldPolygon } from './book-fold.js?v=43292090dc3e';
 
 const chapters = projects.filter(project => project.category === 'research');
 

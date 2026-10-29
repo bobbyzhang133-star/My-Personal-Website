@@ -6,7 +6,6 @@ export function renderGameShell() {
           <button class="menu-button game-control" type="button" aria-expanded="false" aria-controls="player-menu"><span aria-hidden="true">ESC</span> Menu</button>
           <button class="room-return game-control" type="button" data-room-return hidden><span aria-hidden="true">↙</span> Room</button>
         </div>
-        <button class="sound-button game-control" type="button" aria-pressed="false"></button>
       </header>
       <p class="visually-hidden" data-scene-announcer aria-live="polite"></p>
       <div class="room-backdrop" data-room-backdrop aria-hidden="true" inert></div>

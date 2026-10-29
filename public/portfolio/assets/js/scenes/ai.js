@@ -1,8 +1,8 @@
-import { projects, aiGroups } from '../content.js?v=0985987b2294';
-import { aiEvidence, aiActions } from '../ai-projects.js?v=0985987b2294';
-import { $$, esc } from '../utils.js?v=0985987b2294';
-import { bindLinearKeys, sceneController } from './shared.js?v=0985987b2294';
-import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=0985987b2294';
+import { projects, aiGroups } from '../content.js?v=43292090dc3e';
+import { aiEvidence, aiActions } from '../ai-projects.js?v=43292090dc3e';
+import { $$, esc } from '../utils.js?v=43292090dc3e';
+import { bindLinearKeys, sceneController } from './shared.js?v=43292090dc3e';
+import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=43292090dc3e';
 
 const applications = aiGroups.flatMap(group=>group.projectIds.map(id=>projects.find(project=>project.id===id)));
 

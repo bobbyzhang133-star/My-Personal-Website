@@ -1,0 +1,34 @@
+{
+  "baselineCommit": "6fb2821945ee94deaa1fc65b27af78d33afb8477",
+  "baselineMaster": "studio-master.webp",
+  "baselineSHA256": "a5f2a0c54216cacbaf23e462bc8023bd81724861bdd54bd65f2aa8272c4ce4cd",
+  "objectSource": "studio-objects-v2.webp",
+  "objectSourceSHA256": "0135eacf83d888ead745f22985eff3e3f8601e9aa6688598ac56c5036d17a5af",
+  "environment": "studio-environment-v2.webp",
+  "canvas": [
+    1672,
+    941
+  ],
+  "changed": [
+    "music: wine-red electric guitar / cream pickguard",
+    "research: indigo hardcover",
+    "films: chrome shoulders / blue-green lens"
+  ],
+  "preserved": [
+    "ai opaque source pixels",
+    "games opaque source pixels",
+    "source camera / hit boxes / support planes / route mappings"
+  ],
+  "guitarRegistration": [
+    0,
+    8
+  ],
+  "method": "Built-in OpenAI ImageGen room-referenced edits; bounded feathered cleanup, integer registration, contour clipping and lossless export with sharp. No standalone prop generations.",
+  "prompts": "artifacts/home-discoverability/imagegen-prompts.json",
+  "approval": "local proposal, awaiting Bobby visual approval",
+  "approximateHomeAssetBytes": {
+    "before": 1843644,
+    "after": 1252412,
+    "excludes": "HTTP compression, other shared site assets and caches; object source is authoring input, not a browser request"
+  }
+}

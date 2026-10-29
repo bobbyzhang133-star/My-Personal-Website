@@ -4,9 +4,35 @@
 
 Bobby Zhang's portfolio is a game-inspired, multi-page static website for games, films, music, research, AI tools, and professional information. Netlify remains the production host and publishes `public/portfolio` directly. The vinext/React layer is retained as legacy/local infrastructure and is not the production portfolio application.
 
-Do not deploy unless Bobby explicitly requests it.
+Always edit and verify locally, then provide Bobby the working local preview URL. Publish to the public website only when Bobby explicitly asks to publish that update. Completing work, visual approval, “continue,” GitHub upload and Chat Check do not authorize deployment by themselves. See `.cursor/rules/publish-completed-website-work.mdc`.
 
 ## Active architecture
+
+### Follow-up Chat Check: discoverability still insufficient (October 28)
+
+Bobby invoked **Chat Check: “Still not much indication for interactable objects.”** This explicitly authorizes uploading the relevant current portfolio state and sending that focus to the designated review conversation, superseding earlier no-upload instructions for this review only. It does not authorize public deployment or another design pass. Runtime remains `43292090dc3e`. The focused brief and current desktop/portrait screenshots are in `docs/chat-check-discoverability-2026-10-28/`; private recovery/source artifacts remain excluded. Upload and message delivery must be verified before reporting completion.
+
+### Original game, film and music source access restored (October 28, local only)
+
+Local release `43292090dc3e` restores three documented itch.io URLs to game project data (One Last Bird, Five Nights at Chicken's, Chicken's Nightmare GameMaker). Each game's existing field guide now exposes original game/media links immediately, including the supplied Cat/Rat and Plasteroids gameplay MP4s; Cat/Rat retains its two resting HUD controls. Breakout and UE5 have no verified public release URL. Film selection now exposes Watch film directly, alongside the project story. Music retains lazy preview loading and has a persistent original-Drive link that follows the selected take. Professional archive/detail outbound links use Drive `/view`, while embeds retain `/preview`. The source helper centralizes that distinction.
+
+The saved original portfolio and current GitHub profile corroborate source provenance. Browser readback opens both film files and both music files (Take 02 inside the preview); itch.io verification is blocked by this machine's certificate error. The Google Drive connector was unavailable, so no sharing permissions were changed. No public source was found for the in-progress Historical War Vehicles film. Do not invent links or substitute similarly titled games by other creators. 65 regressions, scoped ESLint, build and release checks pass. Screenshot/QA records: `artifacts/source-restoration/`. No deployment or GitHub upload.
+
+### Full-viewport room and default-on studio sound (October 28, local only)
+
+Bobby asked to keep the Room fullscreen, remove the corner Sound Off control and default sound on. Local release `389e6aec054a` replaces the contained/letterboxed composition with uniform cover sizing, framed toward the guitar horizontally and floor vertically. Portrait panning remains. Home's Menu moves to the top right on short screens to avoid covering the guitar neck; all room layers still share the same source scale/perspective. No artwork was regenerated.
+
+The shared creative HUD no longer renders a Sound button. Studio Settings contains the accessible sound toggle, bound to the same scene-aware audio manager. Studio uses `defaultEnabled: true` and a separate `bz-studio-sound-v2` preference, so a visitor's studio mute is remembered without changing game-detail/professional defaults. Autoplay is attempted; denial keeps sound logically enabled and retries on subsequent real pointer/keyboard gestures. The hidden native ambient audio element supports inspection; it still uses the credited roomtone file at volume .11 with fades, Home-only ambience and hidden-tab pausing. The clean-UI rule records full-viewport framing and Settings-only/default-on studio audio. The earlier discoverability pass remains pending local visual approval; no deployment or GitHub upload is authorized for this follow-up.
+
+### Home object discoverability proposal (October 28, local only)
+
+Bobby supplied a detailed Home-only brief after the Chat Check. Baseline GitHub commit is now `6fb2821945ee94deaa1fc65b27af78d33afb8477` (the prior menu work/rules and Chat Check evidence were uploaded and the focused review message delivered). This new pass is explicitly **not to be deployed or uploaded**; stop for visual approval. Current local runtime is `512582d2bed1`.
+
+Three room-referenced ImageGen edits supply a wine-red/cream electric guitar, a clearly edged indigo hardcover and refined chrome/lens camera. `studio-environment-v2.webp` cleans the old three silhouettes with feathered source-contour clearance masks; `studio-objects-v2.webp` combines the registered replacements with unchanged opaque laptop/bird pixels. The original master remains for comparison. Guitar registration is an eight-source-pixel downward translation, with no rescaling/rotation; original hit boxes, shared camera, support regions and category targets remain. Contours and contact markers were updated for the three edited props. All five SVG sprites now embed cropped lossless pixels from one hashed source instead of five complete room images. The page-corner SVG is a small same-source crop. Credits and `discoverability-provenance.json` explain this proposal; it is not newly approved master art.
+
+`room-discovery.js` owns the lesson lifecycle: start 1550 ms after loaded/visible/stable Room, 85 ms per-object CSS stagger, brief hold/fade, and a session marker that survives category returns/reloads. Focus, object activation and deliberate touch panning acknowledge discovery; menu/hidden/busy states stop pending/current lessons. Manual `?` reveal lasts 2300 ms and exposes only a small hover/focus tooltip. Book has a three-pixel page-corner lift; camera has brief alternating ~6.2/6.8-second glints; guitar has a restrained string reflection; laptop/bird behavior is retained. Reduced motion removes idle/spatial cues, uses modest object-only static contrast and an unstaggered opacity reveal. No labels, `[E]`, tutorial cards or mobile text strip were added.
+
+Portrait keyboard QA found native focus scrolling the hidden room-camera container in addition to the intentional pan. The Home camera now uses `overflow: clip`, eliminating that second offset; all five targets are framed with scrollLeft zero. Existing one-tap routing, touch-only panning/drag suppression and full-world approach/retreat remain. Category content/layouts and professional skins were not redesigned; only shared release tokens and shared Home-derived backgrounds/assets change. Verification evidence and limitations are in `artifacts/home-discoverability/report.md`; do not infer physical-device usability or first-time-user success from the desktop/viewport reviews. Local preview uses `http://127.0.0.1:4174/`.
 
 ### Studio menu completed locally; publication denied (October 28)
 

@@ -163,6 +163,9 @@ body.world-mode { margin: 0; overflow: hidden; background: #10130d; color: #fff4
 .world-field-guide[open] > summary { border-color: var(--hud-accent); }
 .world-guide-body { box-sizing: border-box; position: absolute; left: 0; bottom: 58px; width: min(360px,calc(100vw - 32px)); max-height: calc(100dvh - 165px); overflow-y: auto; overscroll-behavior: contain; padding: 20px; background: var(--hud-surface); border: 1px solid var(--hud-border); border-top: 3px solid var(--hud-accent); box-shadow: 0 12px 40px #0008; }
 .world-guide-body h2 { font: 600 21px/1.3 system-ui,sans-serif; margin: 0 0 18px; }
+.world-original-sources { display: grid; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--game-ui-edge,var(--hud-border)); }
+.world-original-sources .game-control { display: block; text-decoration: none; }
+.world-original-sources p { margin: 0; font: 13px/1.5 system-ui,sans-serif; }
 .world-guide-body h3 { font: 600 13px/1.4 system-ui,sans-serif; color: var(--hud-accent); margin: 0 0 8px; }
 .world-controls-help { margin-top: 20px; }
 .world-guide-body .world-help { display: block; font: 14px/1.65 system-ui,sans-serif; margin: 0; }

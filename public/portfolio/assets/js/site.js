@@ -1,11 +1,11 @@
-import { initAudio } from './audio.js?v=0985987b2294';
-import { renderGameShell } from './game-shell.js?v=0985987b2294';
-import { playerMenuMarkup, initPlayerMenu } from './player-menu.js?v=0985987b2294';
-import { professionalChrome, professionalFooter, initProfessionalPage, renderProfessionalPage } from './professional-pages.js?v=0985987b2294';
-import { SceneManager } from './scene-manager.js?v=0985987b2294';
-import { sceneRegistry } from './scenes/index.js?v=0985987b2294';
-import { isCreativePath, routeFromPath } from './utils.js?v=0985987b2294';
-import { gameWorldProject, renderGameWorld, mountGameWorld } from './game-world.js?v=0985987b2294';
+import { initAudio } from './audio.js?v=43292090dc3e';
+import { renderGameShell } from './game-shell.js?v=43292090dc3e';
+import { playerMenuMarkup, initPlayerMenu } from './player-menu.js?v=43292090dc3e';
+import { professionalChrome, professionalFooter, initProfessionalPage, renderProfessionalPage } from './professional-pages.js?v=43292090dc3e';
+import { SceneManager } from './scene-manager.js?v=43292090dc3e';
+import { sceneRegistry } from './scenes/index.js?v=43292090dc3e';
+import { isCreativePath, routeFromPath } from './utils.js?v=43292090dc3e';
+import { gameWorldProject, renderGameWorld, mountGameWorld } from './game-world.js?v=43292090dc3e';
 
 const legacyHashRoutes = { games: '/games/', films: '/films/', banddream: '/music/', research: '/research/', about: '/about/', contact: '/about/', now: '/skills-experience/' };
 const page = document.body.dataset.page || 'home';
@@ -34,8 +34,10 @@ if (page === 'home' && legacyHashRoutes[location.hash.slice(1)]) {
   app.innerHTML = renderGameShell();
   document.body.insertAdjacentHTML('beforeend', playerMenuMarkup({sceneStyle:'studio'}));
   const shell = document.querySelector('[data-game-shell]');
-  const audio = initAudio(shell.querySelector('.sound-button'), {
+  const audio = initAudio(document.querySelector('[data-sound-toggle]'), {
     ambience: true,
+    defaultEnabled: true,
+    storageKey: 'bz-studio-sound-v2',
     ambienceSrc: '/assets/audio/roomtone-bedroom-yew.mp3'
   });
   const manager = new SceneManager({

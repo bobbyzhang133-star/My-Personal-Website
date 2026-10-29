@@ -1,9 +1,10 @@
-import { esc, isReducedMotion } from './utils.js?v=0985987b2294';
-import { createWorldEngine, bindWorldLook } from './world-engine.js?v=0985987b2294';
-import { BREAKOUT_CHAPTERS, orderedChapters, OCEAN_LEVELS, RAT_OBJECTS, newRatState, validRatState, ratAction } from './experience-state.js?v=0985987b2294';
-import { renderFieldGuide, renderRatInventory, mountWorldUI, closeFieldGuide, worldInputBlocked, worldUIBlocked, bindRatTouch } from './game-ui.js?v=0985987b2294';
-import { renderOceanExpedition, mountOceanExpedition, oceanCards } from './ocean-expedition.js?v=0985987b2294';
-import { renderKitchenReveal, mountKitchenReveal } from './kitchen-reveal.js?v=0985987b2294';
+import { gameSources } from './project-sources.js?v=43292090dc3e';
+import { esc, isReducedMotion } from './utils.js?v=43292090dc3e';
+import { createWorldEngine, bindWorldLook } from './world-engine.js?v=43292090dc3e';
+import { BREAKOUT_CHAPTERS, orderedChapters, OCEAN_LEVELS, RAT_OBJECTS, newRatState, validRatState, ratAction } from './experience-state.js?v=43292090dc3e';
+import { renderFieldGuide, renderRatInventory, mountWorldUI, closeFieldGuide, worldInputBlocked, worldUIBlocked, bindRatTouch } from './game-ui.js?v=43292090dc3e';
+import { renderOceanExpedition, mountOceanExpedition, oceanCards } from './ocean-expedition.js?v=43292090dc3e';
+import { renderKitchenReveal, mountKitchenReveal } from './kitchen-reveal.js?v=43292090dc3e';
 
 export const CUSTOM_GAMES = new Set(['chickens-breakout','plasteroids','cat-eat-rat']);
 const controls=`<div class="world-touch-controls" role="group" aria-label="Movement controls"><button type="button" data-move="left" aria-label="Move left or turn left">←</button><button type="button" data-move="up" aria-label="Move up, forward or jump">↑</button><button type="button" data-move="down" aria-label="Move down or backward">↓</button><button type="button" data-move="right" aria-label="Move right or turn right">→</button></div>`;
@@ -25,7 +26,7 @@ export function renderExperience(project,records) {
     <header class="world-hud">${!bird&&!ocean?'<a class="game-control" href="/games/">← Return to characters</a>':'<a class="game-control" href="/games/">← Characters</a><a class="game-control" href="/">↙ Room</a><button class="game-control menu-button" type="button" aria-expanded="false" aria-controls="player-menu">Menu</button><button class="game-control sound-button" type="button" aria-pressed="false"></button>'}</header>
     <div class="${!bird&&!ocean?'visually-hidden':'world-caption'}"><h1 id="world-title">${esc(project.title)}</h1></div>
     <canvas class="world-canvas" tabindex="0" aria-label="${esc(help)}. Use the destination list for accessible navigation."></canvas>${scene}
-    ${renderFieldGuide({help,label:bird?'Chapters':'Guide',count:ocean?oceanCards(project).length:labels.length,coach:ocean?'<aside class="route-coach"><h3>Optional dive assistance</h3><button class="game-control" data-ocean-guide type="button">Swim to the next messenger ↓</button></aside>':!bird?'<aside class="route-coach"><h3>Next discovery</h3><span data-route-prompt>Find the cheese under the preparation counter.</span><small data-route-space>Under the preparation counter</small><button class="game-control" data-next-object type="button">Guide me to the next object →</button></aside>':'',extra:ocean?'<details class="ocean-encounter-log"><summary>Revisit encountered notes</summary><nav data-ocean-log aria-label="Encountered notes"></nav></details>':!bird?'<details class="world-restart"><summary>Restart this exploration</summary><p>This clears collected objects in this local session.</p><button class="rat-reset game-control" type="button">Restart collection</button></details>':'',destinations:labels.map((label,index)=>`<button type="button" data-discovery="${index}">0${index+1} · ${esc(label)}<span>Go →</span></button>`).join('')})}${controls}${journal}
+    ${renderFieldGuide({sources:gameSources(project),help,label:bird?'Chapters':'Guide',count:ocean?oceanCards(project).length:labels.length,coach:ocean?'<aside class="route-coach"><h3>Optional dive assistance</h3><button class="game-control" data-ocean-guide type="button">Swim to the next messenger ↓</button></aside>':!bird?'<aside class="route-coach"><h3>Next discovery</h3><span data-route-prompt>Find the cheese under the preparation counter.</span><small data-route-space>Under the preparation counter</small><button class="game-control" data-next-object type="button">Guide me to the next object →</button></aside>':'',extra:ocean?'<details class="ocean-encounter-log"><summary>Revisit encountered notes</summary><nav data-ocean-log aria-label="Encountered notes"></nav></details>':!bird?'<details class="world-restart"><summary>Restart this exploration</summary><p>This clears collected objects in this local session.</p><button class="rat-reset game-control" type="button">Restart collection</button></details>':'',destinations:labels.map((label,index)=>`<button type="button" data-discovery="${index}">0${index+1} · ${esc(label)}<span>Go →</span></button>`).join('')})}${controls}${journal}
   </main>`;
 }
 

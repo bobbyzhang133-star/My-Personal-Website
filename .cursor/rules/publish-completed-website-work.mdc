@@ -1,17 +1,15 @@
 ---
-description: Publish completed portfolio work and return the live result to Bobby
+description: Edit and deliver the local preview by default; publish only when Bobby explicitly asks
 alwaysApply: true
 ---
 
-# Deliver Completed Website Work
+# Local Preview and Production Publishing
 
-After completing any website creation or modification in this repository:
+For every website creation or modification in this repository:
 
-1. Verify the affected behavior and run the relevant project checks.
-2. Publish the validated `public/portfolio` site through the existing Netlify workflow.
-3. Confirm that the deployment completed successfully.
-4. Send Bobby the clickable live website URL in the final response.
+1. Make changes locally and verify the affected behavior with relevant project checks.
+2. Start or reuse the local preview rooted at `public/portfolio`, confirm it serves the current version, and give Bobby its clickable local URL after completing the work.
+3. Keep changes local unless Bobby explicitly asks to publish that update to the public website. Finishing work, visual approval, “continue,” GitHub upload and Chat Check do not by themselves authorize public publishing. A previous publication request does not authorize later updates automatically.
+4. When Bobby explicitly requests publication, publish the validated `public/portfolio` site through the existing Netlify workflow, verify deployment success and the live result, then send the clickable public URL.
 
-Do not claim that a change is live until deployment success is confirmed. If deployment fails, provide the blocker and keep the verified local work intact.
-
-An explicit request for local-only work, a draft, or no deployment overrides this rule for that task.
+Do not claim that a change is live until deployment success is confirmed. If preview startup or publication fails, report the blocker and preserve the local work. Keep GitHub uploads separate from public deployment authorization.

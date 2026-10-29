@@ -1,5 +1,11 @@
 # Asset Credits
 
+## Restored original game and media links (October 28)
+
+- Original game destinations: [One Last Bird](https://bigfatcat79.itch.io/onelastbird), [Five Nights at Chicken's](https://bigfatcat79.itch.io/chickens), [Chicken's Nightmare — GameMaker](https://bigfatcat79.itch.io/chickens-nightmare). Provenance: earlier source review recorded below; Bobby's GitHub profile README also lists One Last Bird and Chicken's Nightmare. Today's itch.io live check was blocked by a local certificate error.
+- The two film Drive IDs and two BandDream take IDs are preserved from the original portfolio capture (`claude-profile-source/manifest.json` and `personal-profile-website/index.html`). Direct source links now open Drive's file viewer; music embeds retain the original preview endpoints. Browser readback opened both films and both takes. No media was re-uploaded and no sharing permissions changed.
+- Cat/Rat and Plasteroids source actions expose the already-supplied `assets/game-evidence/{cat-eat-rat,plasteroids}-demo.mp4` recordings. They are gameplay evidence, not downloadable game builds. No new artwork or license is introduced by this source-access update.
+
 ## AI research descriptions (October 23)
 
 - Yong Bobby Zhang, [Game-Builder-Free: Evaluating AI Game-Writing Outputs Through Realistic Project Constraints](https://github.com/bobbyzhang133-star/Game-Builder-Paper/blob/main/PAPER.md), file SHA `716596813de77348a234dbca57000f2aaf04e61e`. Descriptions summarize the abstract, method, recorded tests, findings and limitations; the full manuscript and its pictures are not copied into the site.
@@ -30,7 +36,7 @@ The images under `assets/covers/` and `assets/menu-objects/` were already part o
 ## Audio
 
 - [Roomtone Bedroom Yew](https://freesound.org/people/leonelmail/sounds/329569/) by leonelmail, Freesound #329569, is dedicated to the public domain under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). The self-hosted file is the Freesound HQ MP3 preview and has not been materially modified.
-- The shared sound manager adds that low-volume loop only in the Home Room, after the visitor enables sound or interacts with a previously saved sound-on preference. It also produces brief, low-volume synthesized interface tones. Sound remains off by default, never autoplays audibly, remembers the visitor's preference, and pauses while the page is hidden.
+- The shared sound manager adds that low-volume loop only in the Home Room and produces brief, low-volume synthesized interface tones. Studio sound defaults on, attempts playback where the browser permits it, and retries after the first interaction if autoplay is blocked. Mute is available in Menu → Settings and remembered under the studio-specific preference. Ambience pauses outside Home or while the page is hidden. Other game/professional sound defaults retain their prior behavior.
 
 ## Home Room pixel-art system
 
@@ -201,6 +207,10 @@ All seven game detail routes now enter interactive portfolio worlds. These are o
 - The OpenArt-generated room concept was rejected and is not used in the Home Room, included in the public asset tree, or shipped. It is preserved only as an archived rejected direction in the Figma file so it cannot be mistaken for an approved production asset.
 
 ## Approved Home Room master and derivatives (October 24)
+
+- Home discoverability proposal (October 28, **local; awaiting Bobby's visual approval**): built-in OpenAI ImageGen edited the approved master in place to create a wine-red electric guitar with a cream pickguard, an indigo hardcover book and refined silver/blue-green vintage-camera details. A separate room-referenced cleanup pass reconstructed the wall, floor and desk behind the three replaced objects. These are generated portfolio derivatives, not newly licensed third-party game assets or recovered native sprites. The original master remains intact as `studio-master.webp`; its prior provenance and CC0 laptop reference still apply.
+- Production derivatives are `studio-environment-v2.webp` (bounded, feathered cleanup), `studio-objects-v2.webp` (registered common source), the five contour-clipped `games.svg`, `films.svg`, `research.svg`, `music.svg`, `ai.svg`, and `book-page-corner.svg`. The electric guitar was translated down eight source pixels, without resizing or rotating, to retain the original hit box and floor baseline. Laptop and bird opaque source pixels were checked against the original and preserved. `floor-clean-patch.svg` still uses the earlier bird-floor reconstruction. Lossless cropped payloads avoid embedding the entire room five times.
+- No new font, icon pack, external stock image or game asset license was added. Mechanical preparation/export lives in `scripts/prepare-discovery-room.mjs` and `scripts/export-master-room.mjs`; the latter now requires the same build-time `sharp` dependency as preparation (available in the bundled authoring runtime). Registration/provenance is recorded in `assets/room/master/discoverability-provenance.json`. Full ImageGen prompts, generated source PNGs, comparisons and visual QA are saved locally under `artifacts/home-discoverability/`. UI and idle cues are original project code; the book corner is clipped raster artwork, not a CSS-drawn replacement book.
 
 - Studio menu follow-through (October 28): original interface code uses the approved room's teal/walnut/ivory palette, crisp bevels and the existing self-hosted Pixelify Sans font (SIL Open Font License, retained in `assets/fonts/PixelifySans-OFL.txt`). No new generated artwork, furniture, icon pack or third-party raster source was introduced. Explicit studio scope preserves the separate game-specific and professional menu styles.
 

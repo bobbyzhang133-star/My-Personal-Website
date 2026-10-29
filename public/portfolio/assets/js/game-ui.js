@@ -7,11 +7,11 @@ export function renderRatInventory(state) {
   ].map(([key,count,label,icon])=>`<span class="inventory-slot" data-inventory="${key}"><img src="/assets/game-props/${icon}" alt="" aria-hidden="true"><span><b>${count}/2</b><small>${label}</small></span></span>`).join('');
 }
 
-export function renderFieldGuide({ help, label, count, coach = '', extra = '', destinations }) {
+export function renderFieldGuide({ help, label, count, coach = '', extra = '', sources = '', destinations }) {
   return `<details class="world-field-guide" id="world-discoveries">
     <summary class="world-progress game-control" aria-expanded="false" aria-controls="world-guide-body">${label} · 0 / ${count}</summary>
     <div class="world-guide-body" id="world-guide-body" tabindex="-1">
-      <h2>Field guide</h2>${coach}${extra}
+      <h2>Field guide</h2>${sources}${coach}${extra}
       <section class="world-controls-help"><h3>Controls</h3><p class="world-help">${help}</p></section>
       <nav class="world-discovery-list" aria-label="Discovery destinations">${destinations}</nav>
       <p class="world-source-note">Browser portfolio interpretation, not the original executable.</p>

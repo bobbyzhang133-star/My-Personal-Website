@@ -1,4 +1,4 @@
-import { $, $$, esc, isReducedMotion } from './utils.js?v=0985987b2294';
+import { $, $$, esc, isReducedMotion } from './utils.js?v=43292090dc3e';
 
 const MOTION_KEY = 'bz-portfolio-motion';
 
@@ -36,8 +36,9 @@ export function playerMenuMarkup({gameProject=null,sceneStyle='default'}={}) {
       <section class="menu-panel" data-menu-panel="settings" tabindex="-1" hidden>
         <button class="menu-panel-back" type="button" data-menu-view="main">← Player Menu</button>
         <p class="eyebrow">Settings</p><h3>Make the world comfortable.</h3>
+        ${style==='studio'?'<button class="setting-toggle" type="button" data-sound-toggle aria-pressed="true"><b>Sound on</b><span>Room ambience and interface sounds</span></button>':''}
         <button class="setting-toggle" type="button" data-motion-toggle aria-pressed="false"><b>Reduce motion</b><span>Skip camera travel and idle movement</span></button>
-        <p>Sound is controlled from the corner HUD and remains off until you choose to enable it.</p>
+        <p>${style==='studio'?'Sound is enabled by default. If your browser blocks autoplay, it starts with your first interaction. Your mute choice is remembered.':'Sound is controlled from the corner HUD and remains off until you choose to enable it.'}</p>
       </section>
       <p class="menu-help">Esc close · Tab navigate · Enter select</p>
     </aside>`;

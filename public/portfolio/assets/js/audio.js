@@ -2,25 +2,26 @@ const STORAGE_KEY = 'bz-portfolio-sound';
 const AMBIENCE_SRC = '/assets/audio/roomtone-bedroom-yew.mp3';
 const AMBIENCE_VOLUME = 0.11;
 
-function readPreference() {
+function readPreference(defaultEnabled, storageKey) {
   try {
-    return localStorage.getItem(STORAGE_KEY) === 'on';
+    const stored = localStorage.getItem(storageKey);
+    return stored === 'on' || (stored !== 'off' && defaultEnabled);
   } catch {
-    return false;
+    return defaultEnabled;
   }
 }
 
-function savePreference(enabled) {
+function savePreference(enabled, storageKey) {
   try {
-    localStorage.setItem(STORAGE_KEY, enabled ? 'on' : 'off');
+    localStorage.setItem(storageKey, enabled ? 'on' : 'off');
   } catch {
     // Sound still works for this visit when storage is unavailable.
   }
 }
 
-export function initAudio(button, { ambience = false, ambienceSrc = AMBIENCE_SRC } = {}) {
+export function initAudio(button, { ambience = false, ambienceSrc = AMBIENCE_SRC, defaultEnabled = false, storageKey = STORAGE_KEY } = {}) {
   let context;
-  let enabled = readPreference();
+  let enabled = readPreference(defaultEnabled, storageKey);
   let userGestureGranted = false;
   let ambienceStarted = false;
   let ambienceUnavailable = false;
@@ -33,6 +34,9 @@ export function initAudio(button, { ambience = false, ambienceSrc = AMBIENCE_SRC
     ambientTrack.loop = true;
     ambientTrack.preload = 'none';
     ambientTrack.volume = 0;
+    ambientTrack.hidden = true;
+    ambientTrack.dataset.portfolioAmbience = '';
+    document.body.append(ambientTrack);
     ambientTrack.addEventListener('error', () => {
       ambienceUnavailable = true;
       fadeGeneration += 1;
@@ -42,9 +46,11 @@ export function initAudio(button, { ambience = false, ambienceSrc = AMBIENCE_SRC
 
   function update() {
     button.setAttribute('aria-pressed', String(enabled));
-    button.innerHTML = `<span aria-hidden="true">${enabled ? '◉' : '○'}</span> Sound ${enabled ? 'On' : 'Off'}`;
+    button.innerHTML = button.matches('[data-sound-toggle]')
+      ? `<b>Sound ${enabled ? 'on' : 'off'}</b><span>Room ambience and interface sounds</span>`
+      : `<span aria-hidden="true">${enabled ? '◉' : '○'}</span> Sound ${enabled ? 'On' : 'Off'}`;
     button.title = ambience
-      ? 'Low-volume room ambience and interface sounds. Sound starts only after you interact.'
+      ? 'Low-volume room ambience and interface sounds. Your browser may wait for the first interaction.'
       : 'Low-volume interface sounds.';
   }
 
@@ -72,8 +78,8 @@ export function initAudio(button, { ambience = false, ambienceSrc = AMBIENCE_SRC
     fadeFrame = requestAnimationFrame(step);
   }
 
-  async function startAmbience() {
-    if (!ambientTrack || ambienceUnavailable || !ambienceActive || !enabled || !userGestureGranted || document.hidden) return;
+  async function startAmbience(attemptAutoplay = false) {
+    if (!ambientTrack || ambienceUnavailable || !ambienceActive || !enabled || (!userGestureGranted && !attemptAutoplay) || document.hidden) return;
 
     try {
       ambientTrack.volume = 0;
@@ -83,9 +89,11 @@ export function initAudio(button, { ambience = false, ambienceSrc = AMBIENCE_SRC
         return;
       }
       ambienceStarted = true;
+      userGestureGranted = true;
       fadeAmbience(AMBIENCE_VOLUME);
     } catch {
-      // Browsers may still deny media playback; keep the rest of the UI silent-safe.
+      // Autoplay denial is not a mute preference. Retry on the next real gesture.
+      userGestureGranted = false;
     }
   }
 
@@ -134,7 +142,7 @@ export function initAudio(button, { ambience = false, ambienceSrc = AMBIENCE_SRC
     userGestureGranted = true;
     if (enabled) tone(280, 0.06, 0.02);
     enabled = !enabled;
-    savePreference(enabled);
+    savePreference(enabled, storageKey);
     update();
 
     if (enabled) {
@@ -145,8 +153,8 @@ export function initAudio(button, { ambience = false, ambienceSrc = AMBIENCE_SRC
     }
   });
 
-  document.addEventListener('pointerdown', grantGesture, { once: true, capture: true });
-  document.addEventListener('keydown', grantGesture, { once: true, capture: true });
+  document.addEventListener('pointerdown', grantGesture, { capture: true });
+  document.addEventListener('keydown', grantGesture, { capture: true });
   document.addEventListener('click', event => {
     if (event.target.closest('a, button') && !button.contains(event.target)) tone(360);
   });
@@ -160,6 +168,7 @@ export function initAudio(button, { ambience = false, ambienceSrc = AMBIENCE_SRC
   });
 
   update();
+  if (enabled) startAmbience(true);
   return {
     tone,
     setAmbienceActive(active) {

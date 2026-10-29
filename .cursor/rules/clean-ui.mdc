@@ -5,6 +5,8 @@ alwaysApply: true
 
 # Clean UI, World First
 
+- Keep the Home Room full-viewport without letterbox/pillarbox bars. Use one uniform room scale and deliberate cropping/panning; never stretch props or separate them from their supports to fill space. Check grounded bases and HUD clearance at desktop, portrait and short landscape.
+- Home/studio sound defaults on, subject to browser autoplay rules, with a remembered mute in Menu → Settings. Do not restore a permanent corner Sound On/Off HUD. Do not silently override a visitor's saved mute choice.
 - Match UI to the active scene's art style as defined in `scene-ui-art-style.mdc`; visual consistency and restraint apply to menus and settings as well as the resting HUD.
 - For UI work in this portfolio, keep the normal view focused on the content or game world. Every persistent control must support an immediate user task; do not add decorative HUD, duplicate navigation, redundant titles, coaching strips or competing status panels.
 - Cat Eat Rat's approved resting HUD has exactly two anchors: **Return to characters at top left** and **real inventory at bottom right**. Do not restore permanent Menu, Sound, Room, Guide, objective, Inspect or touch-arrow overlays without Bobby's explicit request.
