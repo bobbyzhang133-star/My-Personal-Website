@@ -1,8 +1,8 @@
-import { projects, aiGroups } from '../content.js?v=43292090dc3e';
-import { aiEvidence, aiActions } from '../ai-projects.js?v=43292090dc3e';
-import { $$, esc } from '../utils.js?v=43292090dc3e';
-import { bindLinearKeys, sceneController } from './shared.js?v=43292090dc3e';
-import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=43292090dc3e';
+import { projects, aiGroups } from '../content.js?v=260ff82f01eb';
+import { aiEvidence, aiActions } from '../ai-projects.js?v=260ff82f01eb';
+import { $$, esc } from '../utils.js?v=260ff82f01eb';
+import { bindLinearKeys, sceneController } from './shared.js?v=260ff82f01eb';
+import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=260ff82f01eb';
 
 const applications = aiGroups.flatMap(group=>group.projectIds.map(id=>projects.find(project=>project.id===id)));
 
@@ -20,6 +20,7 @@ export function renderAI({ preview = false } = {}) {
         <picture>
           <img class="object-source-sprite computer-perspective-art" src="${ROOM_OBJECT_ASSETS.aiPerspective}" alt="" aria-hidden="true">
         </picture>
+        <img class="computer-idle-mark" src="/assets/room/master/ai-mark.svg" width="406" height="257" alt="" aria-hidden="true">
         <div class="computer-screen-window" data-category-interface>
         <section class="ai-system computer-screen scene-surface" data-ai-system data-keyboard-surface aria-label="AI computer operating environment">
           <header><span class="system-light"></span><b>BZ / AI OS</b><time>LOCAL SESSION</time></header>

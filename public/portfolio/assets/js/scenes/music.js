@@ -1,8 +1,8 @@
-import { projects } from '../content.js?v=43292090dc3e';
-import { $$, esc } from '../utils.js?v=43292090dc3e';
-import { bindLinearKeys, sceneController } from './shared.js?v=43292090dc3e';
-import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=43292090dc3e';
-import { originalSourceUrl } from '../project-sources.js?v=43292090dc3e';
+import { projects } from '../content.js?v=260ff82f01eb';
+import { $$, esc } from '../utils.js?v=260ff82f01eb';
+import { bindLinearKeys, sceneController } from './shared.js?v=260ff82f01eb';
+import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=260ff82f01eb';
+import { originalSourceUrl } from '../project-sources.js?v=260ff82f01eb';
 
 const project = projects.find(item => item.category === 'music');
 

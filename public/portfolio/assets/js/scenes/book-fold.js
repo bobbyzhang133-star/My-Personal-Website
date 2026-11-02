@@ -1,4 +1,4 @@
-import { FlipCalculation } from '../vendor/st-page-flip-geometry.js?v=43292090dc3e';
+import { FlipCalculation } from '../vendor/st-page-flip-geometry.js?v=260ff82f01eb';
 
 const rectangle = (w, h) => [{ x: 0, y: 0 }, { x: w, y: 0 }, { x: w, y: h }, { x: 0, y: h }];
 
@@ -21,24 +21,34 @@ export const foldPolygon = points => points.length > 2
   ? `polygon(${points.map(p => `${p.x.toFixed(3)}px ${p.y.toFixed(3)}px`).join(',')})`
   : 'polygon(0 0,0 0,0 0)';
 
-// StPageFlip's licensed constraints keep both spine corners attached. Our DOM
-// adapter reflects only the folded portion across the cursor/corner bisector.
+// Both spine corners stay attached. For a continuous edge grab, their radii
+// are measured from that actual edge point, rather than a selected corner.
+// The legacy corner path retains StPageFlip's licensed calculation. Our DOM
+// adapter reflects only the folded portion across the cursor/grab bisector.
 // Its matrix is a pure rotation + translation: text/paper never stretch.
 export function pageFold(point, width, height, corner = 'bottom', direction = 1) {
-  const cornerY = corner === 'top' ? 0 : height;
+  const edgeGrab=typeof corner==='number';
+  const cornerY = edgeGrab ? Math.max(0,Math.min(height,corner)) : corner === 'top' ? 0 : height;
   let position = { x: Math.max(-width, Math.min(width, point.x)), y: point.y };
   // Guard exact vertical/extreme drags before calling the upstream solver.
   const constrain = p => {
+    if(edgeGrab){
+      const x=Math.max(-width,Math.min(width,p.x));
+      const upperRadius=Math.sqrt(Math.max(0,width*width+cornerY*cornerY-x*x));
+      const lowerRadius=Math.sqrt(Math.max(0,width*width+(height-cornerY)**2-x*x));
+      const low=Math.max(-upperRadius,height-lowerRadius),high=Math.min(upperRadius,height+lowerRadius);
+      return {x,y:Math.max(low,Math.min(high,p.y))};
+    }
     let result = p;
-    for (let i = 0; i < 12; i++) for (const [cy, radius] of [[cornerY, width], [height - cornerY, Math.hypot(width, height)]]) {
+    for (let i = 0; i < 12; i++) for (const [cy, radius] of [[0,Math.hypot(width,cornerY)],[height,Math.hypot(width,height-cornerY)]]) {
       const length = Math.hypot(result.x, result.y - cy);
       if (length > radius) result = { x: result.x * radius / length, y: cy + (result.y - cy) * radius / length };
     }
     return result;
   };
   position = constrain(position);
-  const calc = new FlipCalculation(0, corner, String(width), String(height));
-  if (calc.calc(position) && Number.isFinite(calc.getPosition().x + calc.getPosition().y)) position = calc.getPosition();
+  if(!edgeGrab){const calc = new FlipCalculation(0, corner, String(width), String(height));
+    if (calc.calc(position) && Number.isFinite(calc.getPosition().x + calc.getPosition().y)) position = calc.getPosition();}
   position = constrain(position);
   const delta = { x: width - position.x, y: cornerY - position.y };
   const length = Math.hypot(delta.x, delta.y);

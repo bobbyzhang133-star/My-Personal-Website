@@ -1,4 +1,4 @@
-import { isReducedMotion } from './utils.js?v=43292090dc3e';
+import { isReducedMotion } from './utils.js?v=260ff82f01eb';
 
 export const CAMERA_HOME = Object.freeze({ x: 0, y: 0, scale: 1 });
 
@@ -63,7 +63,7 @@ export function cameraTransform({ x, y, scale }) {
 }
 
 export const CAMERA_TRAVEL_PROFILES = Object.freeze({
-  games: { scale: 4.8, compactScale: 3.2, focusX: 0.5, focusY: 0.54 },
+  games: { scale: 3.9, compactScale: 3.2, shortScale: 2.8, focusX: 0.5, focusY: 0.5, compactFocusY: 0.48 },
   films: { scale: 1.78, compactScale: 1.62, focusX: 0.58, focusY: 0.48 },
   research: { scale: 1.68, compactScale: 1.56, focusX: 0.5, focusY: 0.62 },
   music: { scale: 1.72, compactScale: 1.58, focusX: 0.5, focusY: 0.52 },
@@ -81,6 +81,9 @@ export class VirtualCamera {
   measure(target, route) {
     const viewportRect=this.viewport.getBoundingClientRect(),worldRect=this.world.getBoundingClientRect();
     const profile={...CAMERA_TRAVEL_PROFILES[route]};
+    // The standing bird is wider than it is tall. Fit its whole silhouette in
+    // portrait instead of reusing a desktop zoom that cuts off the beak/tail.
+    if(route==='games' && viewportRect.width<=700) profile.compactScale=Math.min(profile.compactScale,viewportRect.width*.86/target.getBoundingClientRect().width);
     if(route==='ai' && viewportRect.width<=700 && worldRect.width>viewportRect.width*1.01) profile.compactScale=2.45;
     return calculateTravelTransform(
       target.getBoundingClientRect(),

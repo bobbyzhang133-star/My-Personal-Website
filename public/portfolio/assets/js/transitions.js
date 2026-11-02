@@ -1,5 +1,6 @@
-import { CAMERA_HOME, VirtualCamera } from './camera.js?v=43292090dc3e';
-import { isReducedMotion, nextFrame } from './utils.js?v=43292090dc3e';
+import { CAMERA_HOME, VirtualCamera } from './camera.js?v=260ff82f01eb';
+import { layoutJournal, moveJournal } from './scenes/journal-motion.js?v=260ff82f01eb';
+import { isReducedMotion, nextFrame } from './utils.js?v=260ff82f01eb';
 
 export const OBJECT_TRANSITIONS = Object.freeze({
   games: { cameraDuration: 940, interfaceDuration: 320, exitInterfaceDuration: 220, restoreDuration: 820 },
@@ -71,10 +72,32 @@ export class TransitionDirector {
   }
 
   roomObjectArt(route, root = this.host) {
-    return root.querySelector(`.object-${route} .object-art > img, .object-${route} .bird-sprite`);
+    return root.querySelector(`.object-${route} .object-art > .master-object-image, .object-${route} .bird-sprite`);
   }
 
   alignSceneObject(route) {
+    if (route === 'research') {
+      const source=this.backdrop?.querySelector('.object-research');
+      const research=this.host.querySelector('[data-scene="research"]');
+      if(source&&research?.dataset.bookModelLoading!=='true')source.dataset.bookLifted='true';
+      layoutJournal(research);
+      return;
+    }
+    if (route === 'games') {
+      const bird = this.backdrop?.querySelector('.master-room .object-games .bird-sprite');
+      const selection = this.host.querySelector('[data-room-bird-selection]');
+      const track = selection?.parentElement;
+      if (!bird || !selection || !track) return;
+      const art = bird.getBoundingClientRect(), parent = track.getBoundingClientRect();
+      if (art.width <= 0 || art.height <= 0) return;
+      // Keep the same visible bird on the same rug. Only the transparent,
+      // accessible character link moves into exact registration with it.
+      Object.assign(selection.style, { position: 'absolute', left: `${art.left-parent.left}px`, top: `${art.top-parent.top}px`, width: `${art.width}px`, height: `${art.height}px`, margin: '0' });
+      selection.dataset.sharedBirdAligned = 'true';
+      const roster = this.host.querySelector('.games-roster-stage');
+      if (roster) roster.style.setProperty('--shared-bird-center', `${art.top+art.height/2-roster.getBoundingClientRect().top}px`);
+      return;
+    }
     if (route !== 'ai') return;
     const masterObject=this.backdrop?.querySelector('.master-room .object-ai .master-object-image');
     const masterComputer=this.host.querySelector('.computer-object');
@@ -167,7 +190,10 @@ export class TransitionDirector {
 
   captureBackdrop(room, route) {
     if (!room) return;
-    this.showBackdrop(room.cloneNode(true), route, this.camera?.state || CAMERA_HOME);
+    const captured=room.cloneNode(true);
+    this.registry.home.copyArtwork?.(room,captured);
+    this.showBackdrop(captured, route, this.camera?.state || CAMERA_HOME);
+    this.registry.home.ready?.(captured);
   }
 
   prepareBackdrop(route) {
@@ -181,6 +207,7 @@ export class TransitionDirector {
     if (!room) return;
     this.backdrop.replaceChildren(room);
     this.backdrop.classList.add('is-active');
+    this.registry.home.ready?.(room);
     this.registry.home.align?.(room);
     const viewport = room.querySelector('[data-camera-viewport]');
     const world = room.querySelector('[data-room-world]');
@@ -223,15 +250,17 @@ export class TransitionDirector {
   }
 
   async revealInterface(root, duration) {
+    if(root?.dataset.scene==='research') { await moveJournal(root,this.backdrop,{opening:true,play,track:element=>this.track(element)}); return; }
     const element = root?.querySelector('[data-category-interface]');
     if (!element || isReducedMotion()) return;
     this.track(element);
+    const entrance = ['games','ai'].includes(root?.dataset.scene) ? 'translate3d(0,0,0)' : 'translate3d(0,12px,0)';
     element.style.opacity = '0';
-    element.style.transform = 'translate3d(0,12px,0)';
+    element.style.transform = entrance;
     element.style.willChange = 'opacity, transform';
     await nextFrame();
     await play(element, [
-      { opacity: 0, transform: 'translate3d(0,12px,0)' },
+      { opacity: 0, transform: entrance },
       { opacity: 1, transform: 'translate3d(0,0,0)' }
     ], { duration, easing: 'cubic-bezier(.16,1,.3,1)' });
     clearInlineMotion(element);
@@ -239,12 +268,14 @@ export class TransitionDirector {
   }
 
   async hideInterface(root, duration) {
+    if(root?.dataset.scene==='research') { await moveJournal(root,this.backdrop,{opening:false,play,track:element=>this.track(element)}); return; }
     const element = root?.querySelector('[data-category-interface]');
     if (!element || isReducedMotion()) return;
     this.track(element);
+    const departure = root?.dataset.scene === 'ai' ? 'translate3d(0,0,0)' : 'translate3d(0,8px,0)';
     await play(element, [
       { opacity: 1, transform: 'translate3d(0,0,0)' },
-      { opacity: 0, transform: 'translate3d(0,8px,0)' }
+      { opacity: 0, transform: departure }
     ], { duration, easing: 'cubic-bezier(.4,0,1,1)' });
   }
 
@@ -280,6 +311,9 @@ export class TransitionDirector {
     const world = room?.querySelector('[data-room-world]');
     const focusTarget = this.roomCameraTarget(route);
     const object = room?.querySelector(`[data-room-object].object-${route}`);
+
+    if(route==='research')await this.registry.home.ready?.(room);
+    if(!this.isCurrent(generation))return;
 
     if (isReducedMotion() || !viewport || !world || !focusTarget || !object) {
       this.prepareBackdrop(route);

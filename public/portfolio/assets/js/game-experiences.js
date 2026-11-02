@@ -1,10 +1,10 @@
-import { gameSources } from './project-sources.js?v=43292090dc3e';
-import { esc, isReducedMotion } from './utils.js?v=43292090dc3e';
-import { createWorldEngine, bindWorldLook } from './world-engine.js?v=43292090dc3e';
-import { BREAKOUT_CHAPTERS, orderedChapters, OCEAN_LEVELS, RAT_OBJECTS, newRatState, validRatState, ratAction } from './experience-state.js?v=43292090dc3e';
-import { renderFieldGuide, renderRatInventory, mountWorldUI, closeFieldGuide, worldInputBlocked, worldUIBlocked, bindRatTouch } from './game-ui.js?v=43292090dc3e';
-import { renderOceanExpedition, mountOceanExpedition, oceanCards } from './ocean-expedition.js?v=43292090dc3e';
-import { renderKitchenReveal, mountKitchenReveal } from './kitchen-reveal.js?v=43292090dc3e';
+import { gameSources } from './project-sources.js?v=260ff82f01eb';
+import { esc, isReducedMotion } from './utils.js?v=260ff82f01eb';
+import { createWorldEngine, bindWorldLook } from './world-engine.js?v=260ff82f01eb';
+import { BREAKOUT_CHAPTERS, orderedChapters, OCEAN_LEVELS, RAT_OBJECTS, newRatState, validRatState, ratAction } from './experience-state.js?v=260ff82f01eb';
+import { renderFieldGuide, renderRatInventory, mountWorldUI, closeFieldGuide, worldInputBlocked, worldUIBlocked, bindRatTouch } from './game-ui.js?v=260ff82f01eb';
+import { renderOceanExpedition, mountOceanExpedition, oceanCards } from './ocean-expedition.js?v=260ff82f01eb';
+import { renderKitchenReveal, mountKitchenReveal } from './kitchen-reveal.js?v=260ff82f01eb';
 
 export const CUSTOM_GAMES = new Set(['chickens-breakout','plasteroids','cat-eat-rat']);
 const controls=`<div class="world-touch-controls" role="group" aria-label="Movement controls"><button type="button" data-move="left" aria-label="Move left or turn left">←</button><button type="button" data-move="up" aria-label="Move up, forward or jump">↑</button><button type="button" data-move="down" aria-label="Move down or backward">↓</button><button type="button" data-move="right" aria-label="Move right or turn right">→</button></div>`;

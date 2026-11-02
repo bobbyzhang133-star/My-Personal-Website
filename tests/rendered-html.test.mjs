@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { SceneManager } from '../public/portfolio/assets/js/scene-manager.js';
 import { MASTER_ROOM, MASTER_OBJECTS, masterSupportReport, masterContains, masterBoxStyle, masterPanForObject, masterPanFromDrag } from '../public/portfolio/assets/js/scenes/room-master.js';
+import { paintRoomJournal, copyRoomJournal } from '../public/portfolio/assets/js/scenes/journal-room.js';
+import { createJournalIdle } from '../public/portfolio/assets/js/scenes/journal-idle.js';
 import { createRoomDiscovery } from '../public/portfolio/assets/js/scenes/room-discovery.js';
 import { WORLD_LAYOUTS, ROOM_STATIONS, roomPath, roomFree, moveBody, createWorldEngine } from '../public/portfolio/assets/js/world-engine.js';
 import { GAME_ROUTES, routeCell, routeLightDistance } from '../public/portfolio/assets/js/game-route-layouts.js';
@@ -22,12 +24,18 @@ import { kitchenInformation, mountKitchenReveal } from '../public/portfolio/asse
 import { KITCHEN_SURFACES, kitchenSurfaceQuad, kitchenReadingPoint, projectKitchenSurface } from '../public/portfolio/assets/js/kitchen-surfaces.js';
 import { GAME_ANIMATIONS, sampleClip, createSpritePlayer } from '../public/portfolio/assets/js/game-animation.js';
 import { BREAKOUT_CHAPTERS, orderedChapters, OCEAN_LEVELS, OCEAN_WORLD, BOSS_TENTACLES, oceanLevel, oceanCamera, verticalCamera, RAT_OBJECTS, newRatState, validRatState, ratAction, ratPropGeometry, projectRatPoint } from '../public/portfolio/assets/js/experience-state.js';
-import { calculateTravelTransform, CAMERA_HOME, CAMERA_TRAVEL_PROFILES } from '../public/portfolio/assets/js/camera.js';
+import { TransitionDirector } from '../public/portfolio/assets/js/transitions.js';
+import { calculateTravelTransform, CAMERA_HOME, CAMERA_TRAVEL_PROFILES, VirtualCamera } from '../public/portfolio/assets/js/camera.js';
 import { projects, aiGroups, aiResearchNotes, researchNotes } from '../public/portfolio/assets/js/content.js';
 import { aiEvidence } from '../public/portfolio/assets/js/ai-projects.js';
 import { sceneRegistry } from '../public/portfolio/assets/js/scenes/index.js';
 import { bookPageIndex, bookDestination, researchPages, mountResearch } from '../public/portfolio/assets/js/scenes/research.js';
+import { JOURNAL_MODEL_ASSET, sampleJournalAction, projectJournalPoint, journalRestDepth, animateBlenderJournal } from '../public/portfolio/assets/js/scenes/journal-model.js';
+import { journalReadingQuads, drawJournalModel } from '../public/portfolio/assets/js/scenes/journal-renderer.js';
+import { mountJournalReadingPages } from '../public/portfolio/assets/js/scenes/journal-pages.js';
+import { JOURNAL_COVER_QUAD, journalProjection } from '../public/portfolio/assets/js/scenes/journal-motion.js';
 import { pageFold, foldPolygon } from '../public/portfolio/assets/js/scenes/book-fold.js';
+import { addPageSample, pageReleaseIntent } from '../public/portfolio/assets/js/scenes/book-gesture.js';
 import { isCreativePath, routeFromPath } from '../public/portfolio/assets/js/utils.js';
 import { originalSourceUrl, projectSources } from '../public/portfolio/assets/js/project-sources.js';
 import { filmCopy } from '../public/portfolio/assets/js/scenes/films.js';
@@ -124,6 +132,36 @@ test('Research corner fold follows both mouse axes without stretching or detachi
   assert.notEqual(foldPolygon(upper.back),foldPolygon(lower.back));
 });
 
+test('Research edge grabs preserve the actual height continuously and keep both spine ends attached', () => {
+  const area=points=>Math.abs(points.reduce((sum,p,i)=>{const q=points[(i+1)%points.length];return sum+p.x*q.y-q.x*p.y;},0)/2);
+  for(const [width,height] of [[500,600],[310,550],[310,190]])for(const direction of [-1,1])for(const grab of [0,height*.2,height*.499,height*.5,height*.501,height*.8,height]){
+    for(const point of [{x:width*.7,y:grab+20},{x:width*.2,y:grab-80},{x:-width,y:grab},{x:width*.8,y:1e5},{x:0,y:-1e5}]){
+      const shape=pageFold(point,width,height,grab,direction),[a,b,c,d,tx,ty]=shape.matrix;
+      const sourceX=direction>0?0:width;
+      assert(Math.abs(a*sourceX+c*grab+tx-direction*shape.position.x)<1e-6);
+      assert(Math.abs(b*sourceX+d*grab+ty-shape.position.y)<1e-6,'the grabbed height, not a nearest corner, stays under the constrained pointer');
+      assert(Math.abs(a*d-b*c-1)<1e-8,'paper remains an isometry');
+      assert(Math.abs(area(shape.front)+area(shape.back)-width*height)<1e-6);
+      for(const y of [0,height])assert(Math.hypot(shape.position.x,shape.position.y-y)<=Math.hypot(width,grab-y)+1e-6,'both spine attachments obey their own length constraint');
+    }
+    const before=pageFold({x:width*.7,y:grab+20},width,height,grab,direction);
+    const after=pageFold({x:width*.7,y:grab+20.01},width,height,grab+.01,direction);
+    assert(Math.abs(before.angle-after.angle)<.1,'crossing the middle does not switch corners or jump the crease');
+  }
+});
+
+test('Page release distinguishes short flicks, slow pulls, pauses, jitter and reverse momentum', () => {
+  const decide=(positions,now=positions.at(-1)[1],extra={})=>{const samples=[];for(const [x,time] of positions)addPageSample(samples,x,time);return pageReleaseIntent(samples,{direction:1,progress:.02,width:500,now,...extra});};
+  assert(decide([[500,0],[480,18],[480,24]]).commit,'one short fast movement can complete below the old 16% gate');
+  assert(!decide([[500,0],[480,250],[480,270]]).commit,'a slow short pull settles back');
+  assert(!decide([[500,0],[480,18],[480,200]]).commit,'holding after a flick dissipates its momentum');
+  assert(!decide([[500,0],[496,8],[496,12]]).commit,'tiny pointer jitter is not a page turn');
+  assert(decide([[0,0],[24,20],[24,25]],25,{direction:-1}).commit,'backward flick uses the same physical direction convention');
+  assert(!decide([[500,0],[100,200],[125,222],[125,227]],227,{progress:.7}).commit,'a deliberate reverse flick can return a partly turned leaf');
+  assert(decide([[500,0],[100,500]],520,{progress:.7}).commit,'slow travel past halfway still turns');
+  assert(!decide([[500,0],[480,18]],18,{cancelled:true}).commit,'cancellation never spends a page');
+});
+
 test('Research reader controls are visually quiet but keep accessible hit areas', async () => {
   const css = await readFile(new URL('assets/css/game-shell.css', root), 'utf8');
   const controls = css.match(/\.book-reader-controls button \{([^}]+)\}/)[1];
@@ -140,7 +178,7 @@ test('Research physical sheet handles forward/back, interrupted drags, resize, r
   class Element {
     constructor(dataset = {}) { this.dataset = dataset; this.listeners = new Map(); this.style = { setProperty() {} }; this.hidden = true; this.innerHTML = ''; this.inert = false; this.capture = null; }
     addEventListener(type, fn, options) { const list = this.listeners.get(type) || []; list.push({ fn, signal: options?.signal }); this.listeners.set(type, list); }
-    emit(type, extra = {}) { const event = { target: this, preventDefault() {}, ...extra }; for (const item of this.listeners.get(type) || []) if (!item.signal?.aborted) item.fn(event); }
+    emit(type, extra = {}) { const event = { target: this,defaultPrevented:false,preventDefault() {this.defaultPrevented=true;}, ...extra }; for (const item of this.listeners.get(type) || []) if (!item.signal?.aborted) item.fn(event);return event; }
     closest(selector) {
       if (selector.includes('[data-book-direction]') && this.dataset.bookDirection) return this;
       if (selector.includes('[data-book-jump]') && this.dataset.bookJump !== undefined) return this;
@@ -166,21 +204,29 @@ test('Research physical sheet handles forward/back, interrupted drags, resize, r
   leaf.querySelector = selector => selector === '.leaf-front' ? front : back;
   leaf.querySelectorAll = () => [];
   front.querySelector = back.querySelector = () => shade;
-  let single = false, motion = '';
+  let single = false, motion = '',selectionClears=0;
+  const selection={anchorNode:viewport,focusNode:viewport,removeAllRanges(){selectionClears++;}};
   const win = new Element(); win.matchMedia = () => ({ get matches() { return single; } });
   const frames = new Map(); let id = 0;
   Object.defineProperty(globalThis, 'window', { configurable: true, value: win });
-  Object.defineProperty(globalThis, 'document', { configurable: true, value: { activeElement: null, documentElement: { dataset: { get motion() { return motion; } } } } });
+  Object.defineProperty(globalThis, 'document', { configurable: true, value: { activeElement: null,getSelection:()=>selection, documentElement: { dataset: { get motion() { return motion; } } } } });
   Object.defineProperty(globalThis, 'requestAnimationFrame', { configurable: true, value: fn => { frames.set(++id, fn); return id; } });
   Object.defineProperty(globalThis, 'cancelAnimationFrame', { configurable: true, value: key => frames.delete(key) });
   const flush = () => { const callbacks = [...frames.values()]; frames.clear(); callbacks.forEach(fn => fn(performance.now() + 2000)); };
   const click = target => surface.emit('click', { target });
-  const down = (x, pointerType = 'mouse') => viewport.emit('pointerdown', { pointerId: 1, isPrimary: true, button: 0, clientX: x, clientY: 200, pointerType });
-  const move = (x, y = 200) => viewport.emit('pointermove', { pointerId: 1, clientX: x, clientY: y });
-  const up = () => viewport.emit('pointerup', { pointerId: 1 });
+  let gestureTime=1000,lastX=0,lastY=200;
+  const down = (x, pointerType = 'mouse',y=200) => {lastX=x;lastY=y;return viewport.emit('pointerdown', { pointerId: 1, isPrimary: true, button: 0, clientX: x, clientY:y, pointerType,timeStamp:gestureTime+=200 });};
+  const move = (x, y = 200,ms=180) => {lastX=x;lastY=y;viewport.emit('pointermove', { pointerId: 1, clientX: x, clientY: y,timeStamp:gestureTime+=ms });};
+  const up = (ms=16) => viewport.emit('pointerup', { pointerId: 1,clientX:lastX,clientY:lastY,timeStamp:gestureTime+=ms });
   try {
     const scene = mountResearch({ querySelector: () => surface });
     assert.equal(counter.textContent, 'Pages 1–2 / 3'); assert(prev.disabled); assert(!next.disabled);
+    assert(!viewport.emit('selectstart').defaultPrevented,'normal reading text stays selectable');
+    assert(!down(500).defaultPrevented,'interior reading is not hijacked as an edge pull');assert.equal(viewport.dataset.bookGrabbed,undefined);
+    assert(down(990).defaultPrevented,'mouse selection must be blocked at the edge press, before the movement threshold');
+    assert.equal(selectionClears,1,'an old highlight inside the book is cleared on a new grab');
+    assert.equal(viewport.dataset.bookGrabbed,'true');assert(viewport.emit('selectstart').defaultPrevented);assert(viewport.emit('dragstart').defaultPrevented);
+    up();assert.equal(viewport.dataset.bookGrabbed,undefined);assert(!viewport.emit('selectstart').defaultPrevented,'selection resumes after releasing the edge');
     click(next);
     assert.equal(surface.dataset.turning, 'forward'); assert(!leaf.hidden); assert(pages.inert);
     assert.equal((leaf.innerHTML.match(/class="book-leaf-face/g) || []).length, 2);
@@ -192,13 +238,18 @@ test('Research physical sheet handles forward/back, interrupted drags, resize, r
     click(prev); assert.equal(surface.dataset.turning, 'backward'); flush();
     down(990); move(940); const beforeY=leaf.dataset.foldAngle; move(940,280); assert.notEqual(leaf.dataset.foldAngle,beforeY,'vertical mouse motion changes the fold while horizontal position stays fixed'); up(); flush();
     assert.equal(surface.dataset.bookPage, '1', 'short drag snaps back');
+    down(990,'mouse',300);move(970,300,15);assert.equal(leaf.dataset.grabY,'300.00');up(5);flush();
+    assert.equal(surface.dataset.bookPage,'3','a short first-move flick flips the mounted reader');
+    click(prev);flush();
     down(990); move(650); up(); flush(); assert.equal(surface.dataset.bookPage, '3');
-    down(10); move(350); viewport.emit('pointercancel', { pointerId: 1 }); flush();
+    down(10); move(350); const beforeCancel=leaf.dataset.foldAngle;
+    viewport.emit('pointercancel', { pointerId: 1,clientX:0,clientY:0,timeStamp:gestureTime+=16 });
+    assert.equal(leaf.dataset.foldAngle,beforeCancel,'cancellation must not jump the grabbed paper to synthetic (0,0) coordinates');flush();
     assert.equal(surface.dataset.bookPage, '3', 'cancel restores the original spread');
     down(10); move(350); win.emit('resize'); assert(leaf.hidden); assert(!pages.inert); assert.equal(frames.size, 0);
     single = true; win.emit('resize'); assert.equal(surface.dataset.bookMode, 'single'); assert.equal(counter.textContent, 'Page 3 / 3');
     assert.equal((pages.innerHTML.match(/<article/g) || []).length, 1);
-    down(500, 'touch'); move(510, 250); assert.equal(viewport.capture, null, 'vertical reading does not turn a leaf');
+    assert(!down(500, 'touch').defaultPrevented,'touch retains vertical reading scroll');move(510, 250); assert.equal(viewport.capture, null, 'vertical reading does not turn a leaf');assert.equal(viewport.dataset.bookGrabbed,undefined);
     click(prev); flush();down(800, 'touch'); move(450); up(); flush(); assert.equal(counter.textContent, 'Page 3 / 3');
     surface.emit('keydown', { key: 'Home' }); flush(); assert.equal(surface.dataset.bookPage, '1');
     click(new Element({ bookJump: '2' })); flush(); assert.equal(surface.dataset.bookPage, '3');
@@ -206,6 +257,7 @@ test('Research physical sheet handles forward/back, interrupted drags, resize, r
     surface.emit('keydown', { key: 'Home' }); assert.equal(surface.dataset.bookPage, '1');
     motion = ''; click(next); assert.equal(frames.size, 1);
     scene.cleanup(); assert.equal(frames.size, 0, 'leaving the category cancels the animation');
+    assert.equal(viewport.dataset.bookGrabbed,undefined,'cleanup cannot leave selection disabled');
     click(next); assert.equal(frames.size, 0, 'detached listeners cannot restart turns');
   } finally {
     for (const name of names) { const descriptor = previous.get(name); if (descriptor) Object.defineProperty(globalThis, name, descriptor); else delete globalThis[name]; }
@@ -307,7 +359,7 @@ test('Studio menu has an explicit safe theme scope without changing game or prof
 
 test('Studio UI uses room materials, accessible responsive controls, and a persistent scene-art rule',async()=>{
   const css=await readFile(new URL('assets/css/game-shell.css',root),'utf8');
-  const theme=css.split('/* The studio pause UI belongs')[1];assert(theme);
+  const theme=css.split('/* The studio pause UI belongs')[1]?.split('/* One source-registered standing bird')[0];assert(theme);
   for(const color of ['#20393e','#f6edcf','#9c623f','#d49b60'])assert(theme.includes(color));
   assert.match(theme,/\.menu-backdrop\[data-menu-style="studio"\][^}]*backdrop-filter: none/);
   assert.match(theme,/font-family: 'Pixelify Sans'/);assert.match(theme,/outline: 3px dashed/);
@@ -940,7 +992,7 @@ test('category interfaces stay inside their physical Room objects', async () => 
   const expected = {
     games: { object: 'bird-character-select', surface: 'data-carousel="games"', asset: 'game-characters' },
     films: { object: 'camera', surface: 'data-film-browser', asset: 'camera-original.svg' },
-    research: { object: 'book', surface: 'data-book', asset: 'cool-school-book.png' },
+    research: { object: 'book', surface: 'data-book', asset: 'master/research.svg' },
     music: { object: 'guitar-studio', surface: 'data-studio', asset: 'guitar-original.svg' },
     ai: { object: 'computer', surface: 'data-ai-system', asset: 'master/ai.svg' }
   };
@@ -1080,9 +1132,9 @@ test('Room discovery waits for a stable visible room, scans once, and survives r
   clock.controller.setAvailable(false); clock.tick(3000);
   assert.equal(clock.events.length, 0, 'menu, hidden tab or camera travel must cancel the pending lesson');
   clock.controller.setAvailable(true); clock.tick(1549); assert.equal(clock.events.length, 0);
-  clock.tick(1); assert.equal(clock.controller.state.mode, 'intro'); assert(remembered);
+  clock.tick(1); assert.equal(clock.controller.state.mode, 'intro'); assert(!remembered, 'starting a lesson is not completion');
   clock.tick(1539); assert.equal(clock.controller.state.mode, 'intro', 'last staggered object gets its full hold');
-  clock.tick(1); assert.equal(clock.controller.state.mode, null);
+  clock.tick(1); assert.equal(clock.controller.state.mode, null); assert(remembered, 'the full automatic lesson has completed');
   clock.controller.setAvailable(false); clock.controller.setAvailable(true); clock.tick(10000);
   assert.equal(clock.events.filter(([, mode]) => mode === 'intro').length, 1);
   const remounted = discoveryClock({ seen: remembered }); remounted.controller.setAvailable(true); remounted.tick(10000);
@@ -1100,6 +1152,54 @@ test('Meaningful interaction cancels onboarding; manual discovery remains availa
   clock.tick(10000); assert.equal(clock.timers.size, 0);
 });
 
+test('Interrupted lessons remain pending; one deliberate keyboard focus acknowledges discovery', () => {
+  let remembered=0;
+  const clock=discoveryClock({onSeen:()=>remembered++});clock.controller.setAvailable(true);
+  clock.tick(1550);assert.equal(clock.controller.state.mode,'intro');
+  clock.controller.setAvailable(true);clock.tick(500);assert.equal(clock.events.filter(([,mode])=>mode==='intro').length,1,'availability updates cannot restart an active lesson');
+  clock.controller.setAvailable(false);assert.equal(remembered,0,'interrupted intro remains pending');
+  clock.controller.setAvailable(true);clock.tick(1550);assert.equal(clock.controller.state.mode,'intro');
+  clock.controller.visitObject('films');assert.equal(remembered,1,'a deliberately focused object confirms the interaction model');
+  assert.equal(clock.controller.state.mode,null);clock.tick(10000);assert.equal(clock.timers.size,0);
+  clock.controller.destroy();clock.controller.visitObject('ai');assert.equal(remembered,1);
+});
+
+test('Physical category markings preserve source boxes, semantic links and readable bird facing', async () => {
+  const html=sceneRegistry.home.render(),css=await readFile(new URL('assets/css/game-shell.css',root),'utf8');
+  for(const [name,label] of Object.entries({games:'GAMES',films:'FILMS',research:'RESEARCH',music:'MUSIC',ai:'AI'})) {
+    const art=await readFile(new URL(`assets/room/master/${name}-mark.svg`,root),'utf8');
+    assert(art.includes(`viewBox="${MASTER_OBJECTS[name].box.join(' ')}"`),'markings share the prop camera instead of using viewport labels');
+    assert(art.includes(`data-category="${label}"`));assert(art.includes(MASTER_OBJECTS[name].path),'physical markings stay clipped to the prop surface');
+    assert.doesNotMatch(art,/<text[ >]/,'letterforms are pixel paths, not a browser font over the art');
+    if(name==='research')assert(html.includes('data-category-mark="baked-in-3d"'));else assert(html.includes(`${name}-mark.svg`));assert(html.includes(`aria-label="${name==='ai'?'AI':name[0].toUpperCase()+name.slice(1)}"`));
+  }
+  const left=await readFile(new URL('assets/room/master/games-left-mark.svg',root),'utf8');
+  assert(left.includes('data-readable-facing="left"'),'left-facing accessory includes readable lettering');
+  assert(!left.split('data-readable-facing="left"')[1].includes('scale(-1'),'only the cloth mirrors; lettering remains readable');
+  assert.doesNotMatch(css,/object-ai \.object-category-mark[^}]*visibility: hidden/,'AI splash must stay on the glass during camera travel');
+  assert(sceneRegistry.ai.render().includes('class="computer-idle-mark"'),'the destination glass retains the same splash beneath the live interface');
+  assert.match(html,/class="room-edge-peek room-edge-left"[^>]*aria-hidden="true"/);
+  assert.doesNotMatch(html,/book-cover-glint\.svg/,'the resting 3D journal must not carry a separate 2D glint overlay');
+  assert.doesNotMatch(html,/book-page-corner/,'the old lifted open-page fragment must not float over a closed cover');
+  assert.match(css,/master-object-outline[^}]*opacity: 0;/,'resting differentiation comes from object design, not permanent hover outlines');
+});
+
+test('The physical journal idle cue stays bounded, resets before travel, and leaves no idle render loop', () => {
+  let id=0;const timers=new Map(),frames=new Map(),poses=[];
+  const idle=createJournalIdle({paint:p=>poses.push(p),setTimer:(fn,delay)=>{timers.set(++id,{fn,delay});return id;},clearTimer:id=>timers.delete(id),requestFrame:fn=>{frames.set(++id,fn);return id;},cancelFrame:id=>frames.delete(id)});
+  const runFrame=time=>{const [id,fn]=frames.entries().next().value;frames.delete(id);fn(time);};
+  idle.setAvailable(true);assert.equal([...timers.values()][0].delay,3400);
+  [...timers.values()][0].fn();timers.clear();runFrame(0);runFrame(300);runFrame(500);
+  assert.equal(poses.at(-1),1,'cover pauses at the restrained lifted pose');
+  idle.setAvailable(false);assert.equal(poses.at(-1),0,'focus/menu/reduced-motion/travel restores the calibrated resting pose');
+  assert.equal(frames.size,0);assert.equal(timers.size,0);
+  idle.setAvailable(true);assert.equal([...timers.values()][0].delay,8900);
+  [...timers.values()][0].fn();timers.clear();runFrame(0);runFrame(1050);
+  assert.equal(frames.size,0,'no frame requests between cues');assert.equal(poses.at(-1),0);
+  assert(poses.every(p=>p>=0&&p<=1));idle.destroy();assert.equal(timers.size,0);assert.equal(frames.size,0);
+  idle.setAvailable(true);assert.equal(timers.size,0,'cleanup prevents late restart');
+});
+
 test('Reduced-motion discovery holds all five together and cleanup cancels every pending callback', () => {
   const clock = discoveryClock({ reduced: true }); clock.controller.setAvailable(true); clock.tick(1550);
   assert.equal(clock.controller.state.mode, 'intro'); clock.tick(1200); assert.equal(clock.controller.state.mode, null);
@@ -1109,9 +1209,11 @@ test('Reduced-motion discovery holds all five together and cleanup cancels every
 });
 
 test('Portrait Room suppresses navigation after touch drags, keeps single taps, ignores mouse panning and cleans up', () => {
-  const names=['window','document','matchMedia','MutationObserver','requestAnimationFrame','cancelAnimationFrame','sessionStorage','location','innerWidth','innerHeight'];
+  const names=['window','document','matchMedia','MutationObserver','requestAnimationFrame','cancelAnimationFrame','sessionStorage','location','innerWidth','innerHeight','setTimeout','clearTimeout'];
   const previous=new Map(names.map(name=>[name,Object.getOwnPropertyDescriptor(globalThis,name)]));
-  let lifecycle,readyFrame,observerCallback,disconnected=false;
+  let lifecycle,readyFrame,observerCallback,disconnected=false,nextTimer=1;
+  const timers=new Map();
+  const runTimer=delay=>{const [id,timer]=[...timers].find(([,entry])=>entry.delay===delay);timers.delete(id);timer.fn();};
   class Node {
     constructor(object=false){this.object=object;this.dataset={};this.listeners=new Map();this.values=new Map();this.style={setProperty:(k,v)=>this.values.set(k,v),removeProperty:()=>{}};this.classList={contains:()=>false,toggle:()=>{}};}
     addEventListener(type,fn,options){const list=this.listeners.get(type)||[];list.push({fn,signal:options?.signal});this.listeners.set(type,list);}
@@ -1134,21 +1236,35 @@ test('Portrait Room suppresses navigation after touch drags, keeps single taps, 
     globalThis.sessionStorage={getItem:key=>saved.get(key),setItem:(key,value)=>saved.set(key,value)};
     globalThis.MutationObserver=class{constructor(callback){observerCallback=callback;}observe(){}disconnect(){disconnected=true;}};
     globalThis.requestAnimationFrame=callback=>{readyFrame=callback;return 1;};globalThis.cancelAnimationFrame=()=>{};
+    globalThis.setTimeout=(fn,delay)=>{const id=nextTimer++;timers.set(id,{fn,delay});return id;};
+    globalThis.clearTimeout=id=>timers.delete(id);
     lifecycle=sceneRegistry.home.mount(rootNode);readyFrame();
+    runTimer(4000);assert.equal(bird.dataset.state,'walk-right');
+    runTimer(1800);runTimer(4000);runTimer(1800);runTimer(4000);
+    assert.equal(bird.dataset.state,'walk-left');assert.equal(bird.dataset.facing,'left');
+    bird.getBoundingClientRect=()=>({left:530,top:711,width:202,height:176});
+    bird.emit('pointerenter');
+    assert.equal(bird.dataset.state,'idle');assert.equal(bird.dataset.facing,'left','hover must not flip a moving bird at the camera handoff');
+    assert.equal(bird.style.left,`${530/1672*100}%`,'activation freezes the interpolated visual position, not the patrol destination');
+    assert(sceneRegistry.home.render().includes('data-facing="left"'),'return/backdrop renders keep the held facing');
+    assert(sceneRegistry.home.render({preview:true}).includes(masterBoxStyle([530,711,202,176])),'unmounted backdrop previews retain the held patrol position too');
+    bird.emit('pointerleave');
     const before=rootNode.values.get('--room-pan');
     stage.emit('pointerdown',{pointerType:'mouse',clientX:300,pointerId:1});stage.emit('pointermove',{pointerType:'mouse',clientX:100,pointerId:1});
     assert.equal(rootNode.values.get('--room-pan'),before,'mouse movement never shifts the room');
     stage.emit('pointerdown',{pointerType:'touch',clientX:300,pointerId:7});
     const drag=stage.emit('pointermove',{pointerType:'touch',clientX:150,pointerId:7});
     assert(drag.prevented);assert.equal(stage.captured,7);assert(rootNode.values.get('--room-pan')>before);
+    assert.equal(saved.get('bz-room-discovery-v3'),undefined,'a small pan does not claim discovery is complete');
+    assert.equal(rootNode.dataset.roomPanned,'true','edge cues retire after the user demonstrates panning');
     stage.emit('pointerup',{pointerType:'touch',pointerId:7});
     const afterDrag=stage.emit('click',{target:objects[2]});assert(afterDrag.prevented&&afterDrag.stopped,'drag release must not open a category');
     stage.emit('pointerdown',{pointerType:'touch',clientX:150,pointerId:8});stage.emit('pointerup',{pointerType:'touch',pointerId:8});
     const tap=stage.emit('click',{target:objects[2]});assert(!tap.prevented&&!tap.stopped,'one tap remains available to the scene router');
-    assert.equal(saved.get('bz-room-discovery-v2'),'seen');
+    assert.equal(saved.get('bz-room-discovery-v3'),'seen');
     manual.emit('click');assert.equal(rootNode.dataset.revealMode,'manual');
     document.documentElement.dataset.motion='reduced';observerCallback();assert.equal(rootNode.dataset.roomMotion,'reduced');assert.equal(bird.dataset.state,'idle');
-    lifecycle.cleanup();assert(disconnected);assert.equal(rootNode.dataset.revealInteractables,undefined);
+    lifecycle.cleanup();assert(disconnected);assert.equal(timers.size,0,'room cleanup cancels both patrol and discovery timers');assert.equal(rootNode.dataset.revealInteractables,undefined);
     manual.emit('click');assert.equal(rootNode.dataset.revealInteractables,undefined,'aborted controls cannot revive the lesson');
   }finally{lifecycle?.cleanup();for(const[name,descriptor]of previous){if(descriptor)Object.defineProperty(globalThis,name,descriptor);else delete globalThis[name];}}
 });
@@ -1236,4 +1352,249 @@ test('Default-on studio audio retries blocked autoplay, remembers mute and pause
     const mutedButton=new Button();initAudio(mutedButton,{ambience:true,defaultEnabled:true,storageKey:'studio-test'});await settle();assert.equal(mutedButton.attrs.get('aria-pressed'),'false');assert.equal(tracks[1].plays,0,'saved mute must prevent automatic playback');
     const legacyButton=new Button(false);initAudio(legacyButton);assert.equal(legacyButton.attrs.get('aria-pressed'),'false','other page sound defaults are preserved');
   }finally{for(const[name,descriptor]of previous){if(descriptor)Object.defineProperty(globalThis,name,descriptor);else delete globalThis[name];}}
+});
+
+
+test('Games keeps the approached Room bird and registers its accessible selection link without a pose swap', () => {
+  const html = sceneRegistry.games.render();
+  assert(html.includes('data-room-bird-selection'));
+  assert(html.includes('data-selected-game="one-last-bird"'));
+  assert(!html.includes('data-character-animation="one-last-bird"'), 'native flight previews must not replace the approached standing bird');
+  const art = { left: 84, top: 112, width: 326, height: 284 };
+  const selection = { style: {}, dataset: {}, parentElement: { getBoundingClientRect: () => ({ left: 20, top: 64 }) } };
+  const director = new TransitionDirector({
+    host: { querySelector: selector => selector==='[data-room-bird-selection]' ? selection : null }, layer: null,
+    backdrop: { querySelector: () => ({ getBoundingClientRect: () => art }) }, registry: sceneRegistry
+  });
+  director.alignSceneObject('games');
+  assert.deepEqual(selection.style, { position: 'absolute', left: '64px', top: '48px', width: '326px', height: '284px', margin: '0' });
+  assert.equal(selection.dataset.sharedBirdAligned, 'true');
+  art.left = -26; art.width = 390; art.height = 340;
+  director.alignSceneObject('games');
+  assert.equal(selection.style.left, '-46px', 'portrait registration follows the actual camera frame, including crop');
+  assert.equal(selection.style.width, '390px', 'resizing preserves the source bird proportions');
+});
+
+
+test('Portrait approach fits the whole standing bird instead of cropping its beak and tail', () => {
+  const camera=new VirtualCamera(
+    {getBoundingClientRect:()=>({left:0,top:0,width:390,height:844,right:390,bottom:844})},
+    {getBoundingClientRect:()=>({left:-700,top:0,width:1500,height:844})}
+  );
+  const bird={getBoundingClientRect:()=>({left:100,top:637,width:181,height:157})};
+  const state=camera.measure(bird,'games');
+  assert(Math.abs(state.scale*181-390*.86)<.001,'camera adapts to the actual standing silhouette width');
+  assert(state.scale>=1);assert(state.scale<CAMERA_TRAVEL_PROFILES.games.compactScale);
+});
+
+test('AI live glass dissolves in place over its retained splash and uncovers it before retreat', async () => {
+  const previous = Object.getOwnPropertyDescriptor(globalThis,'requestAnimationFrame');
+  const motions=[];
+  const element={
+    style:{removeProperty(key){delete this[key];}},getAnimations:()=>[],
+    animate(frames,options){motions.push({frames,options});return{finished:Promise.resolve()};}
+  };
+  const rootNode={dataset:{scene:'ai'},querySelector:()=>element};
+  const director=new TransitionDirector({host:null,layer:null,backdrop:null,registry:sceneRegistry});
+  try {
+    globalThis.requestAnimationFrame=callback=>{callback(0);return 1;};
+    await director.revealInterface(rootNode,340);
+    await director.hideInterface(rootNode,230);
+    assert.deepEqual(motions.map(motion=>motion.frames.map(frame=>frame.opacity)),[[0,1],[1,0]]);
+    assert(motions.every(motion=>motion.frames.every(frame=>frame.transform==='translate3d(0,0,0)')),'live pixels must not slide away from the physical screen');
+    assert.equal(motions[0].options.duration,340);
+    assert.equal(motions[1].options.duration,230);
+    const html=sceneRegistry.ai.render();
+    assert(html.indexOf('computer-idle-mark')<html.indexOf('computer-screen-window'),'the same source-registered marking stays underneath the live glass for both dissolves');
+  } finally {
+    if(previous)Object.defineProperty(globalThis,'requestAnimationFrame',previous);else delete globalThis.requestAnimationFrame;
+  }
+});
+
+
+test('Journal pickup reprojects every original cover corner exactly and returns to the same desk plane', () => {
+  const rectangle=[[0,0],[500,0],[500,580],[0,580]];
+  const project=(matrix,[x,y])=>{const w=matrix[3]*x+matrix[7]*y+matrix[15];return[(matrix[0]*x+matrix[4]*y+matrix[12])/w,(matrix[1]*x+matrix[5]*y+matrix[13])/w];};
+  const flat=journalProjection(JOURNAL_COVER_QUAD,rectangle),table=journalProjection(rectangle,JOURNAL_COVER_QUAD);
+  for(let i=0;i<4;i++) {
+    const normalized=project(flat,JOURNAL_COVER_QUAD[i]);
+    assert(normalized.every((value,axis)=>Math.abs(value-rectangle[i][axis])<1e-6));
+    const restored=project(table,normalized);
+    assert(restored.every((value,axis)=>Math.abs(value-JOURNAL_COVER_QUAD[i][axis])<1e-6),'the cover must land on its complete original footprint, not only one edge');
+  }
+  assert.equal(journalProjection([[0,0],[0,0],[0,0],[0,0]],rectangle),null,'degenerate geometry cannot produce NaN artwork');
+});
+
+test('Research hardcover carries the actual Room artwork, with an inert duplicate flyleaf and matching indigo binding', async () => {
+  const html=sceneRegistry.research.render();
+  assert(html.includes('/assets/room/master/research.svg'));
+  assert(html.includes('/assets/room/master/research-mark.svg'));
+  assert(html.includes('/assets/room/master/journal-binding.svg'));
+  assert(!html.includes('cool-school-book.png'),'the old unrelated book cannot reappear on direct loads');
+  assert.match(html,/data-journal-cover aria-hidden="true" inert/);
+  const css=await readFile(new URL('assets/css/game-shell.css',root),'utf8');
+  assert(!css.includes('background: #b34858'),'the old red binding must be removed');
+  assert.match(css,/journal-cover-inside[^}]*rotateY\(180deg\)/);
+});
+
+
+test('Blender journal exports real thickness, attached cover parts and a self-contained animated glTF', async () => {
+  const model=JSON.parse(await readFile(new URL(`${JOURNAL_MODEL_ASSET.slice(1)}journal.mesh.json`,root),'utf8'));
+  for(const name of ['JournalBackBoard','JournalFrontBoard','JournalPageBlock','JournalClothSpine','JournalNativeCover','JournalInsideCover'])assert(model.meshes.some(mesh=>mesh.name===name),name);
+  for(const mesh of model.meshes){
+    assert.equal(mesh.positions.length%9,0);assert.equal(mesh.normals.length,mesh.positions.length);assert.equal(mesh.uv.length,mesh.positions.length/3*2);
+    assert(mesh.positions.every(Number.isFinite));assert(mesh.normals.every(Number.isFinite));assert(mesh.uv.every(Number.isFinite));
+    if(mesh.name==='JournalNativeCover'||mesh.name==='JournalInsideCover')assert.equal(mesh.part,'front','both cover surfaces must share the hinge');
+  }
+  const board=model.meshes.find(mesh=>mesh.name==='JournalBackBoard');
+  const z=board.positions.filter((_,index)=>index%3===2);
+  assert(Math.max(...z)-Math.min(...z)>.002,'the binding must have physical volume');
+  assert(Math.abs(Math.min(...z)+model.dimensions.thickness)<.0001,'the entire back-board underside shares the resting plane');
+  const base=[];for(let i=0;i<board.positions.length;i+=3)if(board.normals[i+2]<-.99)base.push(board.positions.slice(i,i+3));
+  assert(base.length>=4&&base.every(point=>Math.abs(point[2]+model.dimensions.thickness)<.0001),'all base-face contacts must lie on the support plane');
+  assert(Math.max(...base.map(point=>point[0]))-Math.min(...base.map(point=>point[0]))>model.dimensions.width);
+  assert(Math.max(...base.map(point=>point[1]))-Math.min(...base.map(point=>point[1]))>model.dimensions.height);
+  const glb=await readFile(new URL(`${JOURNAL_MODEL_ASSET.slice(1)}journal.glb`,root));assert.equal(glb.toString('ascii',0,4),'glTF');
+  const manifest=JSON.parse(glb.toString('utf8',20,20+glb.readUInt32LE(12)));
+  assert(manifest.animations.length>=2,'pickup and cover actions must survive export');assert(manifest.images.every(image=>image.bufferView!==undefined),'cover texture is packed into the downloadable model');
+});
+
+test('Blender action samples lift before opening and retain depth when matched to the Room cover', async () => {
+  const model=JSON.parse(await readFile(new URL(`${JOURNAL_MODEL_ASSET.slice(1)}journal.mesh.json`,root),'utf8'));
+  assert.equal(sampleJournalAction(model.animation,0).hinge,0);assert.equal(sampleJournalAction(model.animation,0).pickup,0);assert.equal(sampleJournalAction(model.animation,1).pickup,1);
+  const lifted=sampleJournalAction(model.animation,.2);assert(lifted.pickup>0);assert(Math.abs(lifted.hinge)<.001,'the complete book starts lifting before its rigid board opens');
+  const middle=sampleJournalAction(model.animation,.55);assert(middle.hinge<-.5&&middle.hinge>-Math.PI);
+  assert(Math.abs(sampleJournalAction(model.animation,1).hinge+Math.PI)<.00001);
+  const {thickness}=model.dimensions,[x0,y0,x1,y1]=model.coverBounds,plane=[[x0,y0],[x1,y0],[x1,y1],[x0,y1]],matrix=journalProjection(plane,model.coverQuad);
+  for(let i=0;i<4;i++)assert(projectJournalPoint(matrix,[...plane[i],0]).every((value,axis)=>Math.abs(value-model.coverQuad[i][axis])<1e-6));
+  const top=projectJournalPoint(matrix,[x1,y1,0],[0,-700]),bottom=projectJournalPoint(matrix,[x1,y1,-thickness],[0,-700]);
+  assert(bottom[1]>top[1]+5,'modeled thickness remains visible at the desk angle');
+});
+
+test('The moving journal uses native pixels for the whole cover, page grain, spine and binding edges', async () => {
+  const model=JSON.parse(await readFile(new URL(`${JOURNAL_MODEL_ASSET.slice(1)}journal.mesh.json`,root),'utf8'));
+  const provenance=JSON.parse(await readFile(new URL(`${JOURNAL_MODEL_ASSET.slice(1)}provenance.json`,root),'utf8'));
+  const texture=await readFile(new URL(`${JOURNAL_MODEL_ASSET.slice(1)}cover-source.png`,root));
+  assert.equal(createHash('sha256').update(texture).digest('hex'),provenance.files['cover-source.png'].sha256);
+  for(const name of ['JournalNativeCover','JournalNativePageEdge','JournalNativeSpine','JournalNativeFrontBoardEdge','JournalNativeBackBoardEdge']) {
+    const mesh=model.meshes.find(mesh=>mesh.name===name);assert(mesh?.texture,'every visible native surface must retain its source texture');
+    assert.equal(mesh.sourceQuad.length,4);
+    const uvBounds=mesh.uv.filter((_,i)=>i%2===0);assert(uvBounds.every(u=>u>=0&&u<=1));
+    const [a,b,c,d]=model.coverBounds,matrix=journalProjection([[a,b],[c,b],[c,d],[a,d]],model.coverQuad);
+    for(let i=0;i<mesh.positions.length;i+=3){
+      const pixel=projectJournalPoint(matrix,mesh.positions.slice(i,i+3),journalRestDepth(model)),uv=i/3*2;
+      assert(Math.hypot(pixel[0]-mesh.uv[uv]*354,pixel[1]-(1-mesh.uv[uv+1])*112)<.002,'native pixel registration must hold at every 3D vertex, not just the four patch corners');
+    }
+  }
+  assert(!model.meshes.some(mesh=>mesh.name.includes('GiltLongEdge')||mesh.name.includes('GiltShortEdge')),'native tooling must not get a duplicate artificial gold border');
+  const cover=model.meshes.find(mesh=>mesh.name==='JournalNativeCover');
+  const xs=cover.positions.filter((_,i)=>i%3===0),ys=cover.positions.filter((_,i)=>i%3===1);
+  assert([Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)].every((value,i)=>Math.abs(value-model.coverBounds[i])<1e-7),'texture reaches the entire board, including overhang');
+});
+
+test('Native journal depth calibration retains its full closed profile within the painted source tolerance', async () => {
+  const model=JSON.parse(await readFile(new URL(`${JOURNAL_MODEL_ASSET.slice(1)}journal.mesh.json`,root),'utf8'));
+  const [x0,y0,x1,y1]=model.coverBounds,corners=[[x0,y0],[x1,y0],[x1,y1],[x0,y1]],matrix=journalProjection(corners,model.coverQuad),axis=journalRestDepth(model);
+  for(let i=0;i<4;i++) {
+    const base=projectJournalPoint(matrix,[...corners[i],-model.dimensions.thickness],axis);
+    assert(Math.hypot(base[0]-model.restBaseQuad[i][0],base[1]-model.restBaseQuad[i][1])<3.6,'fit every corner, including the far supporting edge');
+  }
+});
+
+test('The native yellow fore-edge includes the complete red headband and stays attached to the page block', async () => {
+  const model=JSON.parse(await readFile(new URL(`${JOURNAL_MODEL_ASSET.slice(1)}journal.mesh.json`,root),'utf8'));
+  const edge=model.meshes.find(mesh=>mesh.name==='JournalNativePageEdge');
+  assert.equal(edge.part,'body');
+  assert(edge.sourceQuad[0][0]<=80&&edge.sourceQuad[1][0]<=81,'the red headband at the left end cannot be cropped off');
+  assert(edge.sourceQuad[0][1]<=91&&edge.sourceQuad[1][1]>=102,'retain the complete marked strip height');
+  assert(model.meshes.some(mesh=>mesh.name==='JournalNativeSpineCap'),'keep the rounded binding support behind the marked edge');
+  assert(model.meshes.every(mesh=>mesh.positions.filter((_,i)=>i%3===2).every(z=>z>=-model.dimensions.thickness-.00001)),'the restored spine must not sink below the shared base');
+  for(const mesh of model.meshes.filter(mesh=>mesh.texture&&mesh.name!=='JournalNativeCover')) {
+    assert.equal(mesh.heldPositions.length,mesh.positions.length);
+    for(let i=0;i<mesh.heldPositions.length;i+=3)assert(mesh.heldPositions[i+1]>=-.006001&&mesh.heldPositions[i+1]<=model.coverBounds[3]+.000001,'painted side margins cannot protrude as loose plates below the opened book');
+  }
+  const glb=await readFile(new URL(`${JOURNAL_MODEL_ASSET.slice(1)}journal.glb`,root));
+  const manifest=JSON.parse(glb.toString('utf8',20,20+glb.readUInt32LE(12)));
+  assert(manifest.meshes.some(mesh=>mesh.primitives.some(primitive=>primitive.targets?.length)),'perspective normalization must exist in the editable/exported model too');
+});
+
+
+test('An unavailable 3D model leaves the registered book visible for the existing fallback', async () => {
+  const body={style:{removeProperty(key){delete this[key];}}},source={dataset:{bookLifted:'true'}};
+  const rootNode={dataset:{},isConnected:true,querySelector:()=>body};
+  const handled=await animateBlenderJournal(rootNode,{querySelector:()=>source},{opening:true});
+  assert.equal(handled,false);assert.equal(body.style.opacity,undefined,'failed loading cannot hide the reader forever');
+  assert.equal(source.dataset.bookLifted,undefined,'keep the native closed book painted until the fallback takes over');
+  assert.equal(rootNode.dataset.bookModelLoading,undefined);
+});
+
+test('The resting Room journal draws the approved mesh with its baked title and no normal 2D book layer', async () => {
+  const html=sceneRegistry.home.render();
+  const book=html.match(/<a class="room-object object-research"[\s\S]*?<\/a>/)[0];
+  assert.match(book,/<canvas[^>]*data-room-journal/);
+  assert.doesNotMatch(book,/<img|research\.svg|research-mark\.svg|book-cover-glint/,'normal Room art must not switch from a book sprite');
+  const model=JSON.parse(await readFile(new URL(`${JOURNAL_MODEL_ASSET.slice(1)}journal.mesh.json`,root),'utf8'));
+  let draws=0,scale;
+  const ctx={save(){},restore(){},beginPath(){},lineTo(){},moveTo(){},closePath(){},clip(){},transform(){},clearRect(){},fill(){},stroke(){},scale(...args){scale=args;},drawImage(){draws++;}};
+  const object={dataset:{},querySelector:()=>null},canvas={dataset:{},closest:()=>object,getContext:()=>ctx};
+  assert(paintRoomJournal(canvas,{model,texture:{width:354,height:112}}));
+  assert(draws>50,'the rest pose must render textured 3D triangles, not a single cached sprite');
+  assert.deepEqual(scale,[3,3]);assert.equal(canvas.width,1062);assert.equal(canvas.height,336);
+  assert.equal(object.dataset.bookSource,'model');assert.equal(canvas.dataset.journalModel,'blender-journal-approved-v1');
+});
+
+test('A captured Room backdrop retains the rendered book bitmap instead of a blank cloned canvas', () => {
+  const source={width:1062,height:336,dataset:{journalModel:'blender-journal-approved-v1'}};
+  let copied;
+  const target={getContext:()=>({drawImage:(...args)=>{copied=args;}})};
+  copyRoomJournal({querySelector:()=>source},{querySelector:()=>target});
+  assert.equal(target.width,source.width);assert.equal(target.height,source.height);
+  assert.deepEqual(copied,[source,0,0]);
+});
+
+test('Printed page planes follow the approved mesh hinge and land exactly on the live reader',async()=>{
+  const model=JSON.parse(await readFile(new URL(`${JOURNAL_MODEL_ASSET.slice(1)}journal.mesh.json`,root),'utf8'));
+  const {width:W,height:H}=model.dimensions,[x0,y0,x1,y1]=model.coverBounds;
+  const x=420,y=80,width=400,height=width*H/W;
+  const held=[[x0,y0],[x1,y0],[x1,y1],[x0,y1]].map(([u,v])=>[x+u/W*width,y+v/H*height]);
+  const project=time=>journalReadingQuads(model,model.coverQuad,held,journalRestDepth(model),sampleJournalAction(model.animation,time));
+  const closed=project(0);assert(!closed.left.visible,'inside lettering cannot show through the outside cover');
+  const middle=project(.65);assert(middle.left.visible&&middle.right.visible,'both printed surfaces exist while the book is still opening');
+  assert.notDeepEqual(middle.left.quad,project(.8).left.quad,'left lettering follows the actual moving cover, not a settled screen overlay');
+  const open=project(1),expected={left:[[x-width,y],[x,y],[x,y+height],[x-width,y+height]],right:[[x,y],[x+width,y],[x+width,y+height],[x,y+height]]};
+  for(const side of ['left','right'])for(let i=0;i<4;i++)assert(Math.hypot(open[side].quad[i][0]-expected[side][i][0],open[side].quad[i][1]-expected[side][i][1])<.001,'the text must hand off without any position or scale jump');
+  assert.equal(open.left.name,'JournalInsideCover');assert.equal(open.right.name,'JournalRightReadingLeaf');
+  const counts={};for(const part of [null,'body','front']){
+    let images=0;
+    const ctx={save(){},restore(){},beginPath(){},lineTo(){},moveTo(){},closePath(){},clip(){},transform(){},clearRect(){},fill(){},stroke(){},drawImage(){images++;}};
+    drawJournalModel(ctx,model,{width:354,height:112},model.coverQuad,held,journalRestDepth(model),sampleJournalAction(model.animation,.35),{width:1280,height:720},{part});counts[String(part)]=images;
+  }
+  assert(counts.body>0&&counts.front>0);assert.equal(counts.body+counts.front,counts.null,'split occlusion layers draw each textured triangle exactly once');
+});
+
+test('Moving printed pages preserve the current chapter and scroll, stay inert, and clean up in both layouts',()=>{
+  const makePage=text=>{
+    const content={scrollTop:0,scrollLeft:0};
+    return {textContent:text,querySelector:()=>content,querySelectorAll:()=>[],cloneNode(deep){assert(deep);return makePage(text);}};
+  };
+  for(const single of [false,true]){
+    const originals=[makePage('Currently chasing'),makePage('Opposite printed page')];
+    originals[0].querySelector().scrollTop=73;originals[0].querySelector().scrollLeft=4;
+    const faces=[];
+    const rootNode={
+      querySelector:()=>({children:originals}),append(face){faces.push(face);},
+      ownerDocument:{createElement(){return {style:{},dataset:{},attributes:{},setAttribute(name,value){this.attributes[name]=value;},append(page){this.page=page;},remove(){this.removed=true;}};}}
+    };
+    const moving=mountJournalReadingPages(rootNode,{width:300,height:343,single});
+    assert.equal(faces.length,single?1:2);
+    const current=faces.find(face=>face.dataset.journalReadingFace===(single?'right':'left'));
+    assert.equal(current.page.textContent,'Currently chasing','closing must keep the page actually being read, not substitute the contents');
+    assert.equal(current.page.querySelector().scrollTop,73);assert.equal(current.page.querySelector().scrollLeft,4);
+    for(const face of faces){assert.equal(face.attributes['aria-hidden'],'true');assert.equal(face.attributes.inert,'');assert.equal(face.style.visibility,'hidden');}
+    moving.update({left:{visible:true,name:'JournalInsideCover',quad:[[0,0],[300,0],[300,343],[0,343]]},right:{visible:true,name:'JournalRightReadingLeaf',quad:[[300,0],[600,0],[600,343],[300,343]]}});
+    for(const face of faces){assert.equal(face.style.visibility,'visible');assert(face.style.transform.startsWith('matrix3d('));}
+    moving.update({left:{visible:false},right:{visible:true,name:'JournalRightReadingLeaf',quad:[[300,0],[600,0],[600,343],[300,343]]}});
+    if(!single)assert.equal(faces[0].style.visibility,'hidden','the inside face disappears by physical backface visibility');
+    moving.remove();assert(faces.every(face=>face.removed));assert.equal(originals[0].querySelector().scrollTop,73,'the real reader remains intact');
+  }
 });

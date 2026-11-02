@@ -1,5 +1,56 @@
 # Asset Credits
 
+## Approved 3D book at rest and during pickup (October 30, local only)
+
+- The Room now renders the actual approved `assets/room/journal-3d/approved-v1/` mesh and texture at rest, through `scenes/journal-room.js` and the same mesh renderer/action pose as pickup. No new model, texture, generated image, external asset or dependency was added; approved asset hashes are unchanged.
+- The original Room book SVG, RESEARCH marking and cover glint remain authoring/reference assets but are not separate normal Room book layers. The title and gilt detail are part of the approved texture. A native PNG is mounted only as an asset/context-failure fallback. Existing source-art/model credits continue to apply.
+
+## Approved journal model (October 30)
+
+- `assets/room/journal-3d/approved-v1/` is the active, byte-identical approved snapshot of v3 below. `provenance.json` records approval and source hashes. Editable snapshot: `artifacts/journal-approved/journal-approved-v1.blend`. No new art, materials or external assets were introduced during promotion.
+
+## Yellow page edge / red headband refinement (October 30, local only)
+
+- `assets/room/journal-3d/v3/` uses the approved Room book's original yellow page grain, red headband marks, indigo cloth and gilt corners. `scripts/prepare-journal-texture.mjs` applies the original `research.svg` silhouette to the existing texture pixels; no recoloring, generated replacement or external texture is used for these visible native surfaces.
+- Original Blender geometry was refined with native camera-calibrated UVs, rounded spine/cap and rim meshes. A perspective-normalization shape key keeps the illustrated side profiles within the opened boards. Editable source: `artifacts/journal-page-match/journal-v3.blend`; reproducible authoring script: `scripts/build-journal-blender.py`. GLB includes the texture, actions and morph targets. File hashes are in v3 `provenance.json`; v1/v2 remain preserved. No new third-party artwork or runtime dependencies.
+
+## Native-material Blender journal refinement (October 30, local only)
+
+- `assets/room/journal-3d/v2/` preserves the original source texture pixels and maps separate native patches onto the cover, spine, page grain and board edges. Extra synthetic gilt edging was removed. No new image generation, external texture pack or third-party model was used. Original source-art credits below still apply.
+- Original Blender geometry and lift/hinge animation remain, refined through the connected Blender MCP. Packed source: `artifacts/journal-3d-match/journal-v2.blend`. Exporter: `scripts/build-journal-blender.py`. Public file hashes/source provenance: `assets/room/journal-3d/v2/provenance.json`. Version 1 is retained.
+
+## Blender journal model and navigation animation (October 29, local only)
+
+- `assets/room/journal-3d/v1/journal.glb` and `journal.mesh.json` contain original Blender-authored geometry: covers, spine, page block, page edges, gilt trim and a hinged cover. Paper span is 280×320 mm with 6 mm cover overhang and nominal 18 mm thickness. The source uses a shared world support plane at Z=0.
+- The model was built/inspected with Blender 4.5.9 and local Blender MCP; `scripts/build-journal-blender.py` reproduces the geometry/export and `scripts/blender-journal-mcp.py` provides the local authoring connection. The editable, texture-packed source is retained locally at `artifacts/journal-3d/journal-v1.blend`. Blender/MCP are authoring tools, not website runtime services.
+- `cover-source.png` composites only the existing approved Room book crop and existing original RESEARCH pixel-path lettering. Native cloth/gilt details are UV-mapped onto the front board; no unrelated cover art, new image generation or external 3D pack is used. Earlier credits for the source Room artwork continue to apply. `provenance.json` records runtime file hashes.
+- The website renders the actual exported triangles and sampled Blender lift/hinge action continuously. The portable GLB includes the pickup and cover actions and an embedded texture. The existing HTML paper reader/curl remains accessible after arrival. No third-party 3D runtime library or new font was added.
+
+## Research journal reading pose and matching binding (October 29, local only)
+
+- `assets/room/master/journal-binding.svg` is original authored pixel-vector cloth, gilt corners and binding detail. Palette/material reference: the existing approved indigo Room journal. It replaces the old red reader backing; no new external asset or font was added.
+- The moving hardcover uses the existing `research.svg` and `research-mark.svg`, reprojected from four measured top-cover points in the 354×112 source cutout. No replacement cover image or new generated art is used. The full native book cutout carries the page-block edges during pickup/putdown. Paper/ink UI colors match the existing cream/gold/indigo family.
+- The existing research page-curl geometry and content remain. The temporary flyleaf content is a noninteractive duplicate of the current page, used only during the hard-cover opening/closing motion. It is not a new research source.
+
+## Shared Room / One Last Bird animation (October 29, local only)
+
+- The standing bird remains the existing master-derived native-reference cutout, `assets/room/master/games.svg`, with the existing original folded Games neckerchief. No replacement mascot or new external art was introduced.
+- Room walking uses three registered image clips from that same cutout: body, near foot and far foot. Alternating foot lifts and a restrained idle look are authored web animation, not claimed to be native game walk frames. At least one foot remains at the original rug contact row during each stride. The supplied native game flight clips remain available inside the game itself and for their original uses.
+- One Last Bird's character selection now keeps the actual approached Room bird in the room backdrop. Its source pose, facing, neckerchief, support shadow and surrounding floor are carried through the camera handoff; an aligned semantic link provides selection. Other characters retain their existing art/animations.
+
+## Item-form redraw for physical category identity (October 29, local proposal)
+
+- Built-in OpenAI image generation edited the existing `studio-objects-v2.webp` room reference to redraw the Research object as a closed indigo cloth-bound journal with a broad upper cover, cream page block and gilt details. The complete generated edit is retained locally in `artifacts/item-form-redraw/book-generated.png`; the exact prompt is in `artifacts/item-form-redraw/imagegen-prompt.md`.
+- `scripts/prepare-journal-form.mjs` registers only the bounded book region into lossless `studio-objects-v3.webp` and restores the original opaque laptop pixels at their shared boundary. It validates unchanged opaque bird, camera, guitar and laptop base sprites. The environment source remains unchanged. The registered journal is exported through `research.svg`; source hashes, region, full-footprint contact estimates and title-plane transform are recorded in `assets/room/master/item-form-provenance.json`.
+- Original pixel-path details now use embossed cover lettering, a folded cloth Games neckerchief with nonmirrored lettering, and a recessed/engraved camera nameplate. These supersede the earlier flat chest tag/page-title treatment below. Music sticker and AI splash remain. No new third-party assets or font were introduced. Native bird identity and movement are retained.
+- `book-cover-glint.svg` is a registered crop of the generated journal's gilt corner. It uses a brief light reflection; the former lifted open-page fragment is no longer rendered above the closed journal. Object coordinates and interaction boxes are preserved; the Research contour/contact markers follow its new form.
+
+## Physical category markings (October 29, local proposal)
+
+- `assets/room/master/{games,games-left,films,research,music,ai}-mark.svg` are original authored pixel-path lettering and small material details registered to the existing master-object source coordinates. No external font or new third-party asset is used. `scripts/export-room-markings.mjs` records the glyphs and surface transforms.
+- GAMES uses a chest tag/attachment with separately registered left-facing artwork so its letters never mirror. FILMS is printed on the camera's metal plate. RESEARCH is a page title aligned to the left page plane. MUSIC is a stepped paper sticker on the electric guitar. AI is a pixel screen splash, cleared at the live-screen transition.
+- Existing room/environment/object-source WebP artwork, silhouettes, support contacts, scale and transition anchors are unchanged by these details. Each mark is clipped to its existing prop surface. These source-registered SVG details are separate from viewport UI and do not redraw the furniture in CSS. No image generation was needed for this code-native SVG lettering pass.
+
 ## Restored original game and media links (October 28)
 
 - Original game destinations: [One Last Bird](https://bigfatcat79.itch.io/onelastbird), [Five Nights at Chicken's](https://bigfatcat79.itch.io/chickens), [Chicken's Nightmare — GameMaker](https://bigfatcat79.itch.io/chickens-nightmare). Provenance: earlier source review recorded below; Bobby's GitHub profile README also lists One Last Bird and Chicken's Nightmare. Today's itch.io live check was blocked by a local certificate error.
@@ -226,5 +277,13 @@ All seven game detail routes now enter interactive portfolio worlds. These are o
 
 ## Research book folding
 
+- November 2: the moving book's printed content uses the portfolio's existing live HTML pages, projected onto the approved Blender model's actual reading surfaces through original `journal-pages.js` / `journal-renderer.js` code. The body/cover split provides physical occlusion; no new generated artwork, model geometry, textures, third-party renderer or document text was added. The temporary moving copies are inert and hidden from assistive technology; the original reader remains the accessible interactive version.
+
+- November 1: continuous arbitrary-height edge constraints, pointer sampling and momentum/reversal release in `scenes/book-fold.js` / `book-gesture.js` are original portfolio implementation. The legacy corner calculation and existing MIT license remain unchanged. No proprietary flipbook code or new imagery/model assets were added.
+
 - `assets/js/vendor/st-page-flip-geometry.js` contains the `Helper` and `FlipCalculation` geometry subset from [Nodlik/StPageFlip](https://github.com/Nodlik/StPageFlip), npm `page-flip` **2.0.7**, copyright (c) 2020 Nodlik, **MIT**. The full license is retained beside it in `st-page-flip-LICENSE.txt`. The official npm archive was verified against its registry SHA-512 integrity value. `scripts/vendor-page-fold.mjs` reproduces the TypeScript-to-JavaScript conversion from an extracted 2.0.7 package; changes are type erasure, standalone enum constants, fractional-size parsing and omission of an unused catch binding. No upstream renderer, persistent animation loop, remote runtime service or tracking code is included.
 - `scenes/book-fold.js` and the Research DOM/gesture/shadow adapter are original portfolio implementation. The upstream corner constraints feed a two-dimensional reflected/clipped paper surface. Bobby's [Delta Institute/Heyzine flipbook](https://deltainstitute.hflip.co/all-programs-prospectus.html) is an interaction reference only: its proprietary code, document text, images, logos and PDF are not copied, embedded or redistributed. This is a compatible interaction interpretation, not a claim to use Heyzine's exact renderer.
+
+## Home Room discoverability follow-through — October 31, 2026
+
+The resting journal's brief cover/fore-edge lift uses the same approved original Blender mesh, texture and calibrated camera as its pickup. The base/body remain fixed. `journal-idle.js` and the runtime hinge interpolation are original implementation; no new third-party or AI-generated imagery was added for this pass. Existing electric-guitar, camera, environment, native bird and approved journal provenance above remain applicable. Earlier page-corner/glint fragments are not used by the normal 3D Room book.

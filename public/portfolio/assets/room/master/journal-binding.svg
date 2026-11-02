@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" preserveAspectRatio="none" data-medium="original-pixel-binding-matched-to-native-journal">
+<defs><pattern id="cloth" width="8" height="8" patternUnits="userSpaceOnUse"><path fill="#2d304b" d="M0 0H8V8H0Z"/><path fill="#363951" d="M1 1h2v1H1ZM5 5h2v1H5Z"/><path fill="#242a43" d="M4 0h1v3H4ZM0 5h1v2H0Z"/></pattern><g id="corner" fill="none" stroke="#ad8b53" stroke-width="2"><path d="M18 54V18H54M24 42V24H42M30 34V30H34"/><path d="M18 30H14V18H18M30 18V14H18V18"/></g></defs>
+<path fill="#111727" d="M8 0H587L600 6L613 0H1192V7H1200V752H1192V760H613L600 754L587 760H8V752H0V8H8Z"/>
+<path fill="url(#cloth)" d="M9 7H587L600 14L613 7H1191V752H613L600 746L587 752H9Z"/>
+<path fill="none" stroke="#6d674e" stroke-width="1" d="M16 14H584L600 22L616 14H1184V744H616L600 738L584 744H16Z"/>
+<path fill="#171f35" d="M590 17H610V744H590Z"/><path fill="#46465b" d="M595 19H599V738H595Z"/><path fill="#ad8b5355" d="M600 20H602V738H600Z"/>
+<use href="#corner"/><use href="#corner" transform="translate(1200 0) scale(-1 1)"/><use href="#corner" transform="translate(0 760) scale(1 -1)"/><use href="#corner" transform="translate(1200 760) scale(-1 -1)"/>
+<path fill="#c7b17c" d="M28 750H577V752H28ZM624 750H1172V752H624Z"/>
+</svg>

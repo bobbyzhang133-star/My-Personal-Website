@@ -172,7 +172,7 @@ body.game-mode #app { overflow: hidden; }
 /* Research: chapter controls and project content remain on the open pages. */
 .research-scene { color: #2c2a24; }
 .book-object-shell { inset: max(60px,7vh) clamp(12px,3vw,48px) clamp(16px,3vh,34px); }
-.book-cover { position: absolute; inset: 10px 0 0; border: 5px solid #242c5c; border-radius: 5px; background: #b34858; box-shadow: 9px 10px 0 rgba(36,44,92,.24),inset 0 0 0 3px rgba(248,149,163,.32); }
+.book-cover { position: absolute; inset: 0; pointer-events: none; }
 .book-source-sprite { position: absolute; left: 12px; bottom: 5px; width: 30px; height: 30px; }
 .book-cover span { position: absolute; right: 20px; bottom: 8px; color: rgba(255,231,183,.72); font: 600 8px 'JetBrains Mono',monospace; letter-spacing: .15em; }
 .research-scene .open-book { position: absolute; inset: 0 8px 14px; width: auto; height: auto; max-width: none; min-height: 0; margin: 0; }
@@ -225,6 +225,7 @@ body.game-mode #app { overflow: hidden; }
 .computer-object { left: 50%; top: clamp(-32px,-2.5vh,-12px); width: min(62vw,calc(65dvh * 1.103)); aspect-ratio: 1317 / 1194; transform: translateX(-50%); }
 .computer-perspective-frame { position: relative; width: 100%; height: 100%; }
 .computer-perspective-frame picture { position: absolute; inset: 0; display: block; }
+.computer-idle-mark { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; image-rendering: pixelated; }
 .computer-perspective-art { width: 100%; height: 100%; object-fit: fill; image-rendering: pixelated; }
 .computer-screen-window { position: absolute; left: 14.12%; top: 14.74%; width: 71.68%; height: 43.89%; min-width: 0; min-height: 0; overflow: hidden; background: #090e24; }
 .computer-screen { width: 100%; height: 100%; }
@@ -272,23 +273,33 @@ body.game-mode #app { overflow: hidden; }
 .master-room .room-object::before { content: ''; position: absolute; z-index: 4; left: 50%; top: 50%; width: 100%; height: 100%; min-width: 44px; min-height: 44px; transform: translate(-50%,-50%); }
 .master-room .object-art { position: absolute; inset: 0; display: block; filter: none; transform: none; transition: filter 120ms ease; pointer-events: none; }
 .master-room .object-art > .master-object-image { display: block; width: 100%; height: 100%; object-fit: fill; object-position: initial; filter: none; transition: filter 120ms ease; }
+.master-room .room-journal-model { image-rendering: pixelated; }
+.master-room .journal-model-fallback { display: none; position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.master-room .object-research[data-book-source="fallback"] .room-journal-model { visibility: hidden; }
+.master-room .object-research[data-book-source="fallback"] .journal-model-fallback { display: block; }
+.master-room .object-category-mark { position: absolute; z-index: 3; inset: 0; display: block; width: 100%; height: 100%; object-fit: fill; pointer-events: none; filter: none !important; }
+.master-room .category-mark-left { display: none; }
+.master-room .object-games[data-facing="left"] .category-mark-right { display: none; }
+.master-room .object-games[data-facing="left"] .category-mark-left { display: block; }
 .master-room .room-object:is(:hover,:focus-visible) :is(.object-art,.master-object-image) { filter: none; }
 .master-room .object-art::after { display: none; }
 .master-room .transition-anchor { inset: 0; width: auto; height: auto; border-radius: 0; }
 .master-room .anchor-ai { left: 13.3%; top: 8.56%; width: 72.17%; height: 57.2%; }
 .master-room .object-games { transition: left 1800ms linear; }
 .master-room .bird-contact-shadow { position: absolute; inset: 0; width: 100%; height: 100%; }
-.master-room .object-games[data-state="walk-left"] :is(.bird-sprite,.bird-outline) { transform: scaleX(-1); }
+.master-room .object-games:is([data-state="walk-left"],[data-facing="left"]) :is(.bird-sprite,.bird-outline) { transform: scaleX(-1); }
 .master-room .object-idle-cue { position: absolute; pointer-events: none; }
 .master-room .object-films .object-idle-cue { left: 31%; top: 49%; width: 5%; height: 7%; background: #fff0c7; clip-path: polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%); animation: master-camera-reflection 13s ease-in-out infinite; }
-.master-room .book-page-corner { position: absolute; left: 81.64%; top: 36.61%; width: 15.82%; height: 30.36%; object-fit: fill; object-position: initial; filter: none !important; transform-origin: 0 100%; pointer-events: none; animation: master-page-corner 8.7s ease-in-out infinite; }
+.master-room .book-cover-glint { position: absolute; left: 63.559322%; top: 0; width: 12.711864%; height: 23.214286%; object-fit: fill; object-position: initial; opacity: 0; filter: brightness(1.35) !important; pointer-events: none; animation: master-cover-reflection 8.7s ease-in-out infinite; }
 .master-room .object-music .object-idle-cue { left: 52%; top: 45%; width: 1%; height: 35%; background: #ffe4ac; transform: rotate(-5deg); animation: master-lens-glint 10.4s ease-in-out infinite; }
 .master-room .object-ai .object-idle-cue { left: 13.3%; top: 8.56%; width: 72.17%; height: 57.2%; background: linear-gradient(135deg,transparent 15%,rgba(157,206,194,.1) 50%,transparent 85%); animation: master-screen-light 10s ease-in-out infinite; }
-.master-room .master-object-outline { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; opacity: 0; pointer-events: none; transition: opacity 120ms ease; }
+.master-room .master-object-outline { position: absolute; z-index: 4; inset: 0; width: 100%; height: 100%; overflow: visible; fill: none; opacity: 0; pointer-events: none; transition: opacity 120ms ease; }
 .master-object-outline path { vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
-.master-object-outline .outline-keyline { stroke: #19252c; stroke-width: 5; }
-.master-object-outline .outline-rim { stroke: #fff1c8; stroke-width: 2; }
+.master-object-outline .outline-keyline { stroke: #19252c; stroke-width: 3; }
+.master-object-outline .outline-rim { stroke: #e2dfb7; stroke-width: 1; }
 .master-room[data-reveal-interactables="true"] .master-object-outline,.master-room .room-object:focus-visible .master-object-outline { opacity: 1; }
+.master-room[data-reveal-interactables="true"] .outline-keyline,.master-room .room-object:focus-visible .outline-keyline { stroke-width: 5; }
+.master-room[data-reveal-interactables="true"] .outline-rim,.master-room .room-object:focus-visible .outline-rim { stroke: #fff1c8; stroke-width: 2; }
 .master-room[data-reveal-mode="intro"] .master-object-outline { transition-delay: calc(var(--discovery-order) * 85ms); }
 .master-room .room-object:is(:hover,:focus-visible) .master-object-outline { transition-delay: 0ms; }
 .master-room .room-object:focus-visible::before { outline: none; }
@@ -298,6 +309,9 @@ body.game-mode #app { overflow: hidden; }
 .master-room .room-discovery-control:focus-visible { outline: 3px solid #fff1c8; outline-offset: 3px; }
 .master-room .room-discovery-tooltip { position: absolute; left: 0; bottom: calc(100% + 8px); padding: 7px 10px; width: max-content; max-width: calc(100vw - 32px); border: 1px solid #9c805b; background: #20393e; color: #f6edcf; font: 13px/1.3 'Pixelify Sans',monospace; opacity: 0; visibility: hidden; pointer-events: none; }
 .master-room .room-discovery-control:focus-visible .room-discovery-tooltip { opacity: 1; visibility: visible; }
+.master-room .room-edge-peek { display: none; position: absolute; z-index: 19; top: 58%; width: 10px; height: 20px; fill: #e2dfb7; opacity: .65; filter: drop-shadow(1px 1px #19252c); pointer-events: none; }
+.master-room .room-edge-left { left: max(5px,env(safe-area-inset-left)); }
+.master-room .room-edge-right { right: max(5px,env(safe-area-inset-right)); transform: scaleX(-1); }
 .master-geometry-guides { display: none; position: absolute; inset: 0; width: 100%; height: 100%; z-index: 25; fill: none; stroke: #ffdb82; stroke-width: 2; stroke-dasharray: 8 5; pointer-events: none; }
 .master-room.show-grounding-guides .master-geometry-guides { display: block; }
 .room-backdrop:has(.master-room)::before,.room-backdrop:has(.master-room)::after { display: none; }
@@ -306,14 +320,16 @@ body.game-mode #app { overflow: hidden; }
 .room-backdrop .master-room [data-room-object][data-shared-object="games"] { opacity: 0; }
 .room-backdrop .master-room .master-object-image,.room-backdrop .master-room .object-art { filter: none !important; outline: none !important; }
 .room-backdrop .master-room .object-idle-cue { animation: none; opacity: 0; }
-.room-backdrop .master-room .book-page-corner { animation: none; transform: none; }
+.room-backdrop .master-room .book-cover-glint { animation: none; transform: none; }
 .room-backdrop .master-object-outline,.game-shell[aria-busy="true"] .master-object-outline { opacity: 0 !important; transition: none; }
 .game-shell[aria-busy="true"] .master-room .object-art,.game-shell[aria-busy="true"] .master-room .master-object-image { filter: none !important; }
 .game-shell[aria-busy="true"] .master-room .room-object::before { outline: none; }
 .game-shell[aria-busy="true"] .master-room .room-discovery-control { visibility: hidden; }
+/* AI splash stays painted on the Room glass during both camera directions. */
+.game-shell[aria-busy="true"] .master-room .room-edge-peek,.room-backdrop .master-room .room-edge-peek { visibility: hidden; }
 .game-shell[aria-busy="true"] .master-room .object-idle-cue,body.menu-open .master-room .object-idle-cue,.master-room[data-idle-paused="true"] .object-idle-cue { animation-play-state: paused; }
-.game-shell[aria-busy="true"] .master-room .book-page-corner,body.menu-open .master-room .book-page-corner,.master-room[data-idle-paused="true"] .book-page-corner { animation-play-state: paused; }
-.master-room[data-room-motion="reduced"] :is(.object-idle-cue,.book-page-corner) { animation: none !important; opacity: 0; transform: none; }
+.game-shell[aria-busy="true"] .master-room .book-cover-glint,body.menu-open .master-room .book-cover-glint,.master-room[data-idle-paused="true"] .book-cover-glint { animation-play-state: paused; }
+.master-room[data-room-motion="reduced"] :is(.object-idle-cue,.book-cover-glint) { animation: none !important; opacity: 0; transform: none; }
 .master-room[data-room-motion="reduced"] .master-object-image { filter: contrast(1.08) saturate(1.06); }
 .master-room[data-room-motion="reduced"] .object-games { transition: none; }
 .master-room[data-room-motion="reduced"] .master-object-outline { transition-delay: 0ms; }
@@ -321,19 +337,23 @@ body.game-mode #app { overflow: hidden; }
 .computer-object[data-master-aligned="true"] .computer-screen-window { top: 8.56%; left: 13.3%; width: 72.17%; height: 57.2%; }
 @media (hover: hover) {
   .master-room .room-object:hover .master-object-outline { opacity: 1; }
+  .master-room .room-object:hover .outline-keyline { stroke-width: 5; }
+  .master-room .room-object:hover .outline-rim { stroke: #fff1c8; stroke-width: 2; }
   .master-room .room-discovery-control:hover .room-discovery-tooltip { opacity: 1; visibility: visible; }
 }
 @media (prefers-reduced-motion: reduce) {
   .master-room .object-games { transition: none; }
   .master-room .master-object-outline { transition: none; }
   .master-room .object-idle-cue { animation: none !important; opacity: .12; }
-  .master-room .book-page-corner { animation: none !important; transform: none; }
+  .master-room .book-cover-glint { animation: none !important; transform: none; }
 }
 @keyframes master-lens-glint { 0%,82%,100% { opacity: 0; } 87% { opacity: .65; } 94% { opacity: 0; } }
-@keyframes master-camera-reflection { 0%,38%,49%,90%,100% { opacity: 0; } 43%,95% { opacity: .85; } 47%,98% { opacity: .1; } }
-@keyframes master-page-corner { 0%,64%,83%,100% { transform: none; } 70%,76% { transform: translateY(-3px) rotate(-3deg); } }
+/* Two brief reflections per 13 s: alternating gaps of 6.24 and 6.76 s. */
+@keyframes master-camera-reflection { 0%,23%,31%,75%,83%,100% { opacity: 0; } 27%,79% { opacity: .85; } 29%,81% { opacity: .1; } }
+@keyframes master-cover-reflection { 0%,64%,83%,100% { opacity: 0; } 70% { opacity: .85; } 76% { opacity: .1; } }
 @keyframes master-screen-light { 0%,100% { opacity: .35; } 55% { opacity: .8; } }
 @media (max-width:700px) and (orientation:portrait) {
+  .master-room:not([data-room-panned="true"])[data-pan-before="true"] .room-edge-left,.master-room:not([data-room-panned="true"])[data-pan-after="true"] .room-edge-right { display: block; }
   .master-room .room-world { width: calc(100dvh * 1.77683316); height: 100%; left: calc((100vw - 100dvh * 1.77683316) * var(--room-pan,.5)); right: auto; touch-action: pan-y; }
   .master-room .master-composition { width: 100%; height: 100%; left: 0; top: 0; transform: none; }
 }
@@ -573,6 +593,8 @@ html[data-motion="reduced"] .studio-visual > img { animation: none !important; }
 .research-scene .book-object-shell { top: max(72px,9vh); bottom: 28px; max-width: 1280px; margin-inline: auto; }
 .research-scene .flipbook.open-book { display: block; inset: 0 9px 15px; filter: none; overflow: visible; outline-offset: 5px; }
 .flipbook-viewport { position: absolute; inset: 0 0 76px; perspective: 2200px; touch-action: pan-y; }
+.flipbook-viewport[data-book-grabbed],.flipbook-viewport[data-book-grabbed] *,.flipbook[data-turning] .flipbook-viewport,.flipbook[data-turning] .flipbook-viewport * { user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.book-turning-leaf,.book-turning-leaf * { user-select: none; -webkit-user-select: none; }
 .book-resting-pages { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 1fr; }
 .research-scene .flipbook .journal-page { position: relative; min-width: 0; min-height: 0; height: 100%; padding: 0; overflow: hidden; border-radius: 2px; background-color: #f4e9ca; background-image: linear-gradient(#846b3c0c 1px,transparent 1px); background-size: 100% 28px; }
 .book-page-content { position: absolute; inset: 0 0 35px; padding: clamp(24px,3.1vw,45px) clamp(27px,3.6vw,52px) 20px; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #ac9470 transparent; }
@@ -726,4 +748,81 @@ body.game-mode[data-page="home"] .game-control.sound-button[aria-pressed="true"]
   .player-menu[data-menu-style="studio"] .menu-help { margin-top: 8px; }
   .player-menu[data-menu-style="studio"] .menu-panel h3 { max-width: none; font-size: 26px; margin-block: 12px; }
   .player-menu[data-menu-style="studio"] .setting-toggle { margin-block: 14px; }
+}
+
+/* One source-registered standing bird, carried intact through the camera approach.
+   Leg clips meet the body at source row 132/176. A planted foot stays at the
+   rug contact row while the other lifts; the body never bobs off the floor. */
+.master-room .bird-sprite { position: absolute; inset: 0; overflow: visible; }
+.master-room .bird-sprite .bird-part { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: fill; image-rendering: pixelated; filter: none; }
+.bird-body { clip-path: inset(0 0 25% 0); transform-origin: 58% 75%; animation: room-bird-look 7.2s steps(2,end) infinite; }
+.bird-near-foot { clip-path: inset(75% 47% 0 0); }
+.bird-far-foot { clip-path: inset(75% 0 0 53%); }
+.master-room .object-games:is([data-state="walk-left"],[data-state="walk-right"]) .bird-body { animation: none; }
+.master-room .object-games:is([data-state="walk-left"],[data-state="walk-right"]) .bird-near-foot { animation: room-bird-step 480ms steps(2,end) infinite; }
+.master-room .object-games:is([data-state="walk-left"],[data-state="walk-right"]) .bird-far-foot { animation: room-bird-step 480ms steps(2,end) -240ms infinite; }
+@keyframes room-bird-look { 0%,61%,74%,100% { transform: none; } 64%,71% { transform: skewX(-1deg); } }
+@keyframes room-bird-step { 0%,49%,100% { transform: none; } 50%,99% { transform: translateY(-1.7%); } }
+.game-shell:has(.games-scene[data-selected-game="one-last-bird"]) .room-backdrop .master-room .object-games { opacity: 1; }
+.games-scene [data-room-bird-selection][data-shared-bird-aligned="true"] .character-frame { width: 100%; height: 100%; opacity: 0; }
+.games-scene [data-room-bird-selection] { align-self: auto; justify-self: auto; }
+.master-room[data-idle-paused="true"] .bird-part,
+body.menu-open .bird-part,
+.game-shell[aria-busy="true"] .bird-part { animation-play-state: paused !important; }
+html[data-motion="reduced"] .bird-part { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .bird-part { animation: none !important; } }
+
+.games-scene[data-selected-game="one-last-bird"] .carousel-arrow { top: var(--shared-bird-center,50%); }
+@media (max-height: 500px) and (min-width: 701px) {
+  .games-scene .game-select-action { left: auto; right: 12px; transform: none; max-width: 38vw; padding-inline: 18px; }
+}
+
+/* The indigo/gilt Room journal, intentionally lifted into the reader's hands.
+   Source cover pixels are re-projected onto a hinged board; pages keep the
+   existing pointer-driven soft fold. The desk camera holds during the lift. */
+.research-scene .book-object-shell { perspective: 1800px; transform-style: preserve-3d; }
+.journal-body { position: absolute; inset: 0; }
+.journal-binding-art { width: 100%; height: 100%; display: block; filter: drop-shadow(5px 9px 5px #0a102755); }
+.journal-front-cover,.journal-closed-edges { position: absolute; pointer-events: none; }
+.journal-front-cover { z-index: 12; transform-origin: 0 50%; transform-style: preserve-3d; }
+.journal-closed-edges { z-index: 11; }
+.journal-cover-front,.journal-cover-inside { position: absolute; inset: 0; backface-visibility: hidden; }
+.journal-cover-inside { transform: rotateY(180deg); background: #ead7a4; overflow: hidden; }
+.journal-cover-inside .journal-page { height: 100%; width: 100%; }
+.journal-cover-inside .book-page-content { overflow: hidden; }
+.journal-source-plane { position: absolute; left: 0; top: 0; width: 354px; height: 112px; transform-origin: 0 0; }
+.journal-source-plane img { position: absolute; inset: 0; display: block; width: 354px; height: 112px; image-rendering: pixelated; }
+.journal-source-plane[data-journal-face] { clip-path: polygon(7.6271% 21.4286%,67.7966% 2.6786%,91.2429% 56.25%,23.7288% 82.1429%); }
+.book-object-shell:not([data-journal-pose="opening"]):not([data-journal-pose="closing"]):not([data-journal-pose="closed"]) :is(.journal-front-cover,.journal-closed-edges) { display: none; }
+.book-object-shell[data-journal-pose="closed"] { visibility: hidden; }
+.room-backdrop .object-research[data-book-lifted="true"] { visibility: hidden; }
+.research-scene .flipbook .journal-page { background-color: #ead7a4; background-image: linear-gradient(#7d67400a 1px,transparent 1px); color: #30334b; }
+.research-scene .book-page .eyebrow,.research-scene .book-folio { color: #837044; }
+.research-scene .book-summary,.research-scene .book-research-notes li { color: #4e493f; }
+.research-scene .book-contents button { color: #30334b; }
+.research-scene .book-read-link,.research-scene .book-source-link { color: #414b6b; }
+.research-scene .book-reader-controls { color: #dcc792; }
+.research-scene .book-help { color: #d8cba6b8; }
+
+/* Only page contents scroll; hidden pickup geometry cannot scroll the scene. */
+.research-scene { overflow: clip; }
+.research-scene .book-cover { overflow: hidden; }
+.research-scene:has([data-book-mode="single"]) .journal-binding-art { width: 200%; max-width: none; transform: translateX(-50%); }
+/* Blender-authored mesh transition; the accessible paper reader remains HTML. */
+.journal-model-canvas { position: absolute; z-index: 20; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.journal-model-cover-canvas { z-index: 22; }
+.journal-reading-face { position: absolute; z-index: 21; top: 0; left: 0; overflow: hidden; transform-origin: 0 0; pointer-events: none; user-select: none; -webkit-user-select: none; will-change: transform; }
+.journal-reading-face.journal-reading-left { z-index: 23; }
+.journal-reading-face > .book-page { width: 100%; height: 100%; }
+.research-scene[data-book-renderer="blender"] :is(.journal-front-cover,.journal-closed-edges) { display: none !important; }
+.research-scene .book-cover { top: -8px; bottom: var(--journal-board-bottom,83px); }
+.research-scene .book-reader-controls { text-shadow: 1px 1px 2px #101823; }
+.research-scene .book-help { color: #f0dfb9; text-shadow: 1px 1px 2px #101823; }
+@media (max-width: 680px) and (orientation: portrait) {
+  .research-scene .book-contents { margin-top: 20px; }
+  .research-scene .book-handnote { margin-top: 14px; font-size: 16px; }
+}
+@media (min-width: 681px) and (min-height: 501px) {
+  .research-scene .flipbook .book-page h2 { font-size: clamp(30px,3.1vw,42px); }
+  .research-scene .book-summary { font-size: 15px; line-height: 1.55; }
 }

@@ -1,11 +1,14 @@
-import { projects } from '../content.js?v=43292090dc3e';
-import { $$, esc } from '../utils.js?v=43292090dc3e';
-import { addSwipe, bindLinearKeys, sceneController, setRoving } from './shared.js?v=43292090dc3e';
-import { GAME_ANIMATIONS, mountCharacterAnimations } from '../game-animation.js?v=43292090dc3e';
+import { projects } from '../content.js?v=260ff82f01eb';
+import { $$, esc } from '../utils.js?v=260ff82f01eb';
+import { addSwipe, bindLinearKeys, sceneController, setRoving } from './shared.js?v=260ff82f01eb';
+import { GAME_ANIMATIONS, mountCharacterAnimations } from '../game-animation.js?v=260ff82f01eb';
 
 const games = projects.filter(project => project.category === 'games');
 
 function characterArt(project) {
+  // The actual approached Room bird remains visible in the backdrop. This
+  // matching fallback is used until its accessible selection target is aligned.
+  if (project.id === 'one-last-bird') return '<img src="/assets/room/master/games.svg" alt="One Last Bird — the same standing bird as the room" data-asset-status="master-derived-native-reference" data-shared-bird-fallback>';
   const animation = GAME_ANIMATIONS[project.id];
   const status = animation ? 'original-game-animation' : project.characterAssetStatus || project.artworkStatus || 'generated-concept';
   const alt = animation || status === 'original-game-sprite' ? 'original game character' : status === 'original-game-model-posed-render' ? 'original Cat and Rat models posed together' : status.includes('generated') ? 'character concept' : 'gameplay preview';
@@ -18,13 +21,13 @@ function copy(project, index) {
 
 export function renderGames({ preview = false } = {}) {
   const id = preview ? '' : ' id="main"';
-  return `<main${id} class="game-scene object-scene games-scene" data-scene="games" tabindex="-1" aria-labelledby="games-title">
+  return `<main${id} class="game-scene object-scene games-scene" data-scene="games" data-selected-game="one-last-bird" tabindex="-1" aria-labelledby="games-title">
     <h1 class="visually-hidden" id="games-title">Character Select</h1>
     <div class="object-stage games-object-stage" data-object-interface="bird-character-select">
       <section class="games-character-ui character-select scene-surface" data-category-interface data-carousel="games" data-keyboard-surface aria-label="Choose a game">
         <div class="games-roster-stage">
             <button class="carousel-arrow prev" type="button" aria-label="Previous game">←</button>
-            <div class="character-track">${games.map((project, index) => `<a class="character" href="${project.detailRoute}" data-index="${index}" aria-label="Open ${esc(project.title)}" tabindex="${index === 0 ? 0 : -1}"><span class="character-frame">${characterArt(project)}</span><span class="visually-hidden">${esc(project.title)}</span></a>`).join('')}</div>
+            <div class="character-track">${games.map((project, index) => `<a class="character" href="${project.detailRoute}" data-index="${index}"${project.id==='one-last-bird'?' data-room-bird-selection':''} aria-label="Open ${esc(project.title)}" tabindex="${index === 0 ? 0 : -1}"><span class="character-frame">${characterArt(project)}</span><span class="visually-hidden">${esc(project.title)}</span></a>`).join('')}</div>
             <button class="carousel-arrow next" type="button" aria-label="Next game">→</button>
         </div>
         <div class="select-copy visually-hidden" aria-live="polite">${copy(games[0], 0)}</div>
@@ -44,6 +47,7 @@ export function mountGames(root) {
   let index = 0;
   const render = (nextIndex, focus = false) => {
     index = (nextIndex + items.length) % items.length;
+    root.dataset.selectedGame = games[index].id;
     items.forEach((item, itemIndex) => {
       item.dataset.position = itemIndex === index ? 'active' : itemIndex === (index - 1 + items.length) % items.length ? 'prev' : itemIndex === (index + 1) % items.length ? 'next' : 'hidden';
     });

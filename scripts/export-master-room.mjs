@@ -1,4 +1,4 @@
-// Mechanical clipping of approved pixels. No generation, repainting or new perspective.
+// Mechanical clipping of registered source pixels; art edits happen upstream.
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';
@@ -20,5 +20,5 @@ async function svg([x,y,w,h],source,clip=''){
 }
 for(const[name,o]of Object.entries(MASTER_OBJECTS))await writeFile(new URL(`${name}.svg`,root),await svg(o.box,master,o.path));
 await writeFile(new URL('floor-clean-patch.svg',root),await svg([480,700,240,207],clean));
-await writeFile(new URL('book-page-corner.svg',root),await svg([786,455,56,34],master,'M786 455L812 468L840 483L793 480Z'));
-console.log('Exported five exact master masks and the reconstructed floor patch.');
+await writeFile(new URL('book-cover-glint.svg',root),await svg([722,414,45,26],master,'M730 414H748L762 425L751 426L740 420L729 420Z'));
+console.log('Exported five registered master masks, journal cover glint and reconstructed floor patch.');

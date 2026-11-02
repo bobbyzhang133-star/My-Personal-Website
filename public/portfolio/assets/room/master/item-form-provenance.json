@@ -1,0 +1,55 @@
+{
+  "date": "2026-10-29",
+  "status": "local proposal awaiting visual approval",
+  "method": "Built-in OpenAI image generation: reference-room edit, followed by bounded lossless source registration and existing SVG clip export.",
+  "reference": "studio-objects-v2.webp",
+  "referenceSHA256": "0135eacf83d888ead745f22985eff3e3f8601e9aa6688598ac56c5036d17a5af",
+  "objectSource": "studio-objects-v3.webp",
+  "objectSourceSHA256": "d4f3d2aabbea995d86a2ee18c44d74b9050dbf14a940c78348e9bdea24c1aa43",
+  "canvas": [
+    1672,
+    941
+  ],
+  "editedRegion": [
+    497,
+    410,
+    354,
+    116
+  ],
+  "changedRasterObject": "research: closed indigo cloth-bound journal with a broad title-bearing cover",
+  "preservedOpaqueSprites": [
+    "games",
+    "films",
+    "music",
+    "ai"
+  ],
+  "environment": "studio-environment-v2.webp unchanged",
+  "researchFootprint": [
+    [
+      521,
+      452
+    ],
+    [
+      737,
+      427
+    ],
+    [
+      823,
+      494
+    ],
+    [
+      577,
+      516
+    ]
+  ],
+  "researchTitleSurfaceMatrix": [
+    1,
+    -0.115,
+    0.72,
+    0.84,
+    586,
+    452
+  ],
+  "otherDetails": "Original authored folded bird neckerchief and engraved recessed camera plate; original sprite pixels preserved.",
+  "prompt": "artifacts/item-form-redraw/imagegen-prompt.md"
+}

@@ -1,0 +1,473 @@
+{
+  "opening": {
+    "bodyOpacity": "0",
+    "faces": [
+      {
+        "opacity": "1",
+        "side": "left",
+        "title": "Field Notes",
+        "transform": "matrix3d(0.999968, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 177.182, 72, 0, 1)",
+        "visible": "true"
+      },
+      {
+        "opacity": "1",
+        "side": "right",
+        "title": "How Free-to-Play Games Increase In-Game Purchase",
+        "transform": "matrix3d(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 640, 72, 0, 1)",
+        "visible": "true"
+      }
+    ],
+    "progress": "0.894"
+  },
+  "closing": {
+    "faces": [
+      {
+        "opacity": "1",
+        "side": "left",
+        "title": "Field Notes",
+        "visible": "true"
+      },
+      {
+        "opacity": "1",
+        "side": "right",
+        "title": "How Free-to-Play Games Increase In-Game Purchase",
+        "visible": "true"
+      }
+    ],
+    "progress": "0.741"
+  },
+  "currentPageSamples": [
+    {
+      "faces": [],
+      "sample": 0
+    },
+    {
+      "faces": [],
+      "sample": 1
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "left",
+          "title": "Currentlychasing",
+          "visible": "true"
+        },
+        {
+          "opacity": "1",
+          "side": "right",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.981",
+      "sample": 2
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "left",
+          "title": "Currentlychasing",
+          "visible": "true"
+        },
+        {
+          "opacity": "1",
+          "side": "right",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.944",
+      "sample": 3
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "left",
+          "title": "Currentlychasing",
+          "visible": "true"
+        },
+        {
+          "opacity": "1",
+          "side": "right",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.907",
+      "sample": 4
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "left",
+          "title": "Currentlychasing",
+          "visible": "true"
+        },
+        {
+          "opacity": "1",
+          "side": "right",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.870",
+      "sample": 5
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "left",
+          "title": "Currentlychasing",
+          "visible": "true"
+        },
+        {
+          "opacity": "1",
+          "side": "right",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.823",
+      "sample": 6
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "left",
+          "title": "Currentlychasing",
+          "visible": "true"
+        },
+        {
+          "opacity": "1",
+          "side": "right",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.777",
+      "sample": 7
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "left",
+          "title": "Currentlychasing",
+          "visible": "true"
+        },
+        {
+          "opacity": "1",
+          "side": "right",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.730",
+      "sample": 8
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "left",
+          "title": "Currentlychasing",
+          "visible": "true"
+        },
+        {
+          "opacity": "1",
+          "side": "right",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.685",
+      "sample": 9
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "left",
+          "title": "Currentlychasing",
+          "visible": "true"
+        },
+        {
+          "opacity": "1",
+          "side": "right",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.666",
+      "sample": 10
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "left",
+          "title": "Currentlychasing",
+          "visible": "true"
+        },
+        {
+          "opacity": "1",
+          "side": "right",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.610",
+      "sample": 11
+    }
+  ],
+  "portrait": [
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "right",
+          "title": "Field Notes",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.275"
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "right",
+          "title": "Field Notes",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.324"
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "right",
+          "title": "Field Notes",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.364"
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "right",
+          "title": "Field Notes",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.405"
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "right",
+          "title": "Field Notes",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.438"
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "right",
+          "title": "Field Notes",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.479"
+    },
+    {
+      "faces": [
+        {
+          "opacity": "1",
+          "side": "right",
+          "title": "Field Notes",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.519"
+    }
+  ],
+  "landscape": [
+    {
+      "faces": [
+        {
+          "side": "left",
+          "title": "Field Notes",
+          "visible": "false"
+        },
+        {
+          "side": "right",
+          "title": "How Free-to-Play Games Increase In-Game Purchase",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.024"
+    },
+    {
+      "faces": [
+        {
+          "side": "left",
+          "title": "Field Notes",
+          "visible": "false"
+        },
+        {
+          "side": "right",
+          "title": "How Free-to-Play Games Increase In-Game Purchase",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.057"
+    },
+    {
+      "faces": [
+        {
+          "side": "left",
+          "title": "Field Notes",
+          "visible": "false"
+        },
+        {
+          "side": "right",
+          "title": "How Free-to-Play Games Increase In-Game Purchase",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.098"
+    },
+    {
+      "faces": [
+        {
+          "side": "left",
+          "title": "Field Notes",
+          "visible": "false"
+        },
+        {
+          "side": "right",
+          "title": "How Free-to-Play Games Increase In-Game Purchase",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.130"
+    },
+    {
+      "faces": [
+        {
+          "side": "left",
+          "title": "Field Notes",
+          "visible": "false"
+        },
+        {
+          "side": "right",
+          "title": "How Free-to-Play Games Increase In-Game Purchase",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.162"
+    },
+    {
+      "faces": [
+        {
+          "side": "left",
+          "title": "Field Notes",
+          "visible": "false"
+        },
+        {
+          "side": "right",
+          "title": "How Free-to-Play Games Increase In-Game Purchase",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.187"
+    },
+    {
+      "faces": [
+        {
+          "side": "left",
+          "title": "Field Notes",
+          "visible": "false"
+        },
+        {
+          "side": "right",
+          "title": "How Free-to-Play Games Increase In-Game Purchase",
+          "visible": "true"
+        }
+      ],
+      "progress": "0.244"
+    }
+  ],
+  "pause": {
+    "a": {
+      "faceCount": 1,
+      "paused": "true",
+      "progress": "0.463"
+    },
+    "b": "0.463"
+  },
+  "reducedCleanup": {
+    "canvases": 0,
+    "faces": 0,
+    "motion": "reduced",
+    "path": "/",
+    "scene": "home"
+  },
+  "reducedReader": {
+    "bodyOpacity": "1",
+    "canvases": 0,
+    "faces": 0,
+    "title": "Field Notes"
+  },
+  "categories": [
+    {
+      "brokenImages": 0,
+      "canvases": 0,
+      "faces": 0,
+      "grounding": "0",
+      "model": "blender-journal-approved-v1",
+      "path": "/games/"
+    },
+    {
+      "brokenImages": 0,
+      "canvases": 0,
+      "faces": 0,
+      "grounding": "0",
+      "model": "blender-journal-approved-v1",
+      "path": "/films/"
+    },
+    {
+      "brokenImages": 0,
+      "canvases": 0,
+      "faces": 0,
+      "grounding": "0",
+      "model": "blender-journal-approved-v1",
+      "path": "/music/"
+    },
+    {
+      "brokenImages": 0,
+      "canvases": 0,
+      "faces": 0,
+      "grounding": "0",
+      "model": "blender-journal-approved-v1",
+      "path": "/ai/"
+    }
+  ],
+  "final": {
+    "bookTextMode": "reader",
+    "brokenImages": 0,
+    "canvases": 0,
+    "faces": 0,
+    "grounding": "0",
+    "motion": "system",
+    "release": [
+      "http://127.0.0.1:4174/assets/js/site.js?v=46ea0745defa"
+    ],
+    "renderMs": "10.60"
+  },
+  "logs": []
+}

@@ -1,0 +1,38 @@
+{
+  "version": 3,
+  "authoring": "Original Blender journal refined through local Blender MCP",
+  "source_assets": [
+    "assets/room/master/studio-objects-v3.webp",
+    "assets/room/master/research-mark.svg"
+  ],
+  "texture_policy": "Native masked Room art, projected per vertex onto the full board, yellow page edge with original red markings, spine and binding edges; no synthetic white seam",
+  "paper_span_m": [
+    0.28,
+    0.32
+  ],
+  "cover_overhang_m": 0.006,
+  "thickness_m": 0.018,
+  "source_world_base_z": 0,
+  "model_local_base_z": -0.018,
+  "external_assets": [],
+  "files": {
+    "journal.glb": {
+      "sha256": "3fb4aea730cdbb687ae8a3f49d93cb654fefdeb07e4f150e1155c25e42ec1564",
+      "bytes": 123560
+    },
+    "journal.mesh.json": {
+      "sha256": "62bac340fc32ebda52bcadea9ff2433acc994cb5561ebb060af33cf8877ff96a",
+      "bytes": 169315
+    },
+    "cover-source.png": {
+      "sha256": "53164606375b30197bbf2479a752c2c281ffee1e8d6bd2c1f3ddb8eb77ce4cb7",
+      "bytes": 57777
+    }
+  },
+  "approval": {
+    "date": "2026-10-30",
+    "source_version": 3,
+    "active_asset_root": "/assets/room/journal-3d/approved-v1/",
+    "scope": "Approved for the local book transition; public publishing requires a separate request"
+  }
+}

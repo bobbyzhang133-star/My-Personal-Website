@@ -1,8 +1,9 @@
-import { projects, researchNotes } from '../content.js?v=43292090dc3e';
-import { esc, isReducedMotion } from '../utils.js?v=43292090dc3e';
-import { sceneController } from './shared.js?v=43292090dc3e';
-import { ROOM_OBJECT_ASSETS } from './object-assets.js?v=43292090dc3e';
-import { pageFold, foldPolygon } from './book-fold.js?v=43292090dc3e';
+import { projects, researchNotes } from '../content.js?v=260ff82f01eb';
+import { esc, isReducedMotion } from '../utils.js?v=260ff82f01eb';
+import { sceneController } from './shared.js?v=260ff82f01eb';
+import { journalMechanism } from './journal-motion.js?v=260ff82f01eb';
+import { pageFold, foldPolygon } from './book-fold.js?v=260ff82f01eb';
+import { addPageSample, pageReleaseIntent } from './book-gesture.js?v=260ff82f01eb';
 
 const chapters = projects.filter(project => project.category === 'research');
 
@@ -40,7 +41,7 @@ export function renderResearch({ preview: isPreview = false } = {}) {
   return `<main${id} class="game-scene object-scene research-scene" data-scene="research" tabindex="-1" aria-labelledby="research-title">
     <h1 class="visually-hidden" id="research-title">Field Notes</h1>
     <div class="object-stage book-object-shell" data-object-interface="book">
-      <div class="book-cover" aria-hidden="true"><img class="object-source-sprite book-source-sprite" src="${ROOM_OBJECT_ASSETS.research}" alt=""></div>
+      <div class="journal-body"><div class="book-cover" aria-hidden="true"><img class="journal-binding-art" src="/assets/room/master/journal-binding.svg" alt=""></div>
       <section class="open-book scene-surface flipbook" data-category-interface data-book data-keyboard-surface tabindex="0" aria-label="Research flipbook" aria-describedby="book-help">
         <div class="flipbook-viewport" data-book-viewport>
           <div class="book-resting-pages" data-book-pages>${pageMarkup(0, 'page-left')}${pageMarkup(1, 'page-right')}</div>
@@ -55,8 +56,9 @@ export function renderResearch({ preview: isPreview = false } = {}) {
           <span class="book-counter" data-book-counter role="status" aria-live="polite">Pages 1–2 / ${researchPages.length}</span>
           <button type="button" data-book-direction="1" aria-label="Next page"><span aria-hidden="true">›</span></button>
         </div>
-        <p id="book-help" class="book-help">Pull a corner in any direction · Or use ← →</p>
-      </section>
+        <p id="book-help" class="book-help">Pull the page edge from any height · Or use ← →</p>
+      </section></div>
+      ${journalMechanism(pageMarkup(0, 'page-left'))}
     </div>
   </main>`;
 }
@@ -103,11 +105,13 @@ export function mountResearch(root) {
   }
 
   function fold(point) {
-    const shape = pageFold(point, turn.width, turn.height, turn.corner, turn.direction);
+    const shape = pageFold(point, turn.width, turn.height, turn.grabY, turn.direction);
     turn.point = shape.position;
     turn.progress = shape.progress;
     if (isReducedMotion()) return;
     leaf.dataset.foldAngle = shape.angle.toFixed(2);
+    leaf.dataset.grabY=turn.grabY.toFixed(2);
+    leaf.dataset.foldX=shape.position.x.toFixed(2);leaf.dataset.foldY=shape.position.y.toFixed(2);
     turn.front.style.transform = `translateX(${shape.frontX}px)`;
     turn.front.style.clipPath = foldPolygon(shape.front);
     turn.back.style.transform = `matrix(${shape.matrix.map(n => n.toFixed(6)).join(',')})`;
@@ -129,9 +133,9 @@ export function mountResearch(root) {
     const direction = to > index ? 1 : -1;
     const rect = viewport.getBoundingClientRect();
     const width = rect.width / (single ? 1 : 2);
-    turn = { to, direction, progress: 0, corner, width, height: rect.height,
-      point: { x: width, y: corner === 'top' ? 0 : rect.height },
-      spine: single ? (direction > 0 ? rect.left : rect.left + rect.width) : rect.left + width,
+    const grabY=typeof corner==='number'?Math.max(0,Math.min(rect.height,corner)):corner==='top'?0:rect.height;
+    turn = { to, direction, progress: 0, grabY, width, height: rect.height,
+      point: { x: width, y: grabY },
       top: rect.top };
     if (isReducedMotion()) return true;
     surface.dataset.turning = direction > 0 ? 'forward' : 'backward';
@@ -154,18 +158,19 @@ export function mountResearch(root) {
     return true;
   }
 
-  function settle(commit = true, automatic = false) {
+  function settle(commit = true, automatic = false, intent = {}) {
     if (!turn) return;
     if (isReducedMotion()) { finish(commit); return; }
     const start = { ...turn.point };
-    const end = { x: (commit ? -1 : 1) * turn.width, y: turn.corner === 'top' ? 0 : turn.height };
-    const duration = Math.max(220, Math.hypot(end.x - start.x, end.y - start.y) / (2 * turn.width) * 1350);
+    const end = { x: (commit ? -1 : 1) * turn.width, y: turn.grabY };
+    const distance=Math.hypot(end.x-start.x,end.y-start.y);
+    const duration = intent.flick?Math.max(180,Math.min(650,distance/Math.max(.6,Math.abs(intent.velocity))*.8)):Math.max(220,distance/(2*turn.width)*(automatic?1350:900));
     const started = performance.now();
     const tick = now => {
       if (!turn || signal.aborted) return;
       const time = Math.min(1, (now - started) / duration);
-      const eased = time * time * (3 - 2 * time);
-      const lift = automatic ? Math.sin(eased * Math.PI) * turn.height * .16 * (turn.corner === 'top' ? 1 : -1) : 0;
+      const eased = intent.flick?1-(1-time)**3:time * time * (3 - 2 * time);
+      const lift = automatic ? Math.sin(eased * Math.PI) * turn.height * .16 * (turn.grabY < turn.height/2 ? 1 : -1) : 0;
       fold({ x: start.x + (end.x - start.x) * eased, y: start.y + (end.y - start.y) * eased + lift });
       if (time < 1) frame = requestAnimationFrame(tick);
       else finish(commit);
@@ -206,12 +211,23 @@ export function mountResearch(root) {
     const rect = viewport.getBoundingClientRect();
     const x = event.clientX - rect.left;
     if (event.pointerType === 'mouse' && x > 48 && x < rect.width - 48) return;
+    // Take ownership before the browser starts a text-selection drag. Touch
+    // keeps its native vertical reading scroll until a horizontal pull wins.
+    if(event.pointerType!=='touch')event.preventDefault();
+    const selection=document.getSelection?.();
+    if(selection&&(viewport.contains(selection.anchorNode)||viewport.contains(selection.focusNode)))selection.removeAllRanges();
+    viewport.dataset.bookGrabbed='true';
     gesture = { id: event.pointerId, x: event.clientX, y: event.clientY, pointerType: event.pointerType, width: rect.width / (single ? 1 : 2), active: false,
-      corner: event.clientY - rect.top < rect.height / 2 ? 'top' : 'bottom',
+      grabY: event.clientY - rect.top, samples:[],
       edge: Number(event.target.closest('[data-book-edge]')?.dataset.bookEdge || 0) };
     suppressUntil = 0;
+    addPageSample(gesture.samples,event.clientX,Number.isFinite(event.timeStamp)?event.timeStamp:performance.now());
     viewport.setPointerCapture(event.pointerId);
   }, { signal });
+
+  for(const type of ['selectstart','dragstart'])viewport.addEventListener(type,event=>{
+    if(gesture||turn)event.preventDefault();
+  },{signal});
 
   viewport.addEventListener('pointermove', event => {
     if (!gesture || event.pointerId !== gesture.id) return;
@@ -222,29 +238,34 @@ export function mountResearch(root) {
       if (Math.hypot(dx, dy) < 8) return;
       const direction = single ? (dx <= 0 ? 1 : -1) : gesture.x < viewport.getBoundingClientRect().left + gesture.width ? -1 : 1;
       if (!single && ((gesture.x < viewport.getBoundingClientRect().left + gesture.width) === (direction > 0))) { releaseGesture(); return; }
-      if (!begin(bookDestination(index, direction, single), gesture.corner)) { releaseGesture(); return; }
+      if (!begin(bookDestination(index, direction, single), gesture.grabY)) { releaseGesture(); return; }
       gesture.active = true;
     }
     event.preventDefault();
-    const now = performance.now();
-    gesture.velocity = gesture.lastTime ? -(event.clientX - gesture.lastX) * turn.direction / Math.max(1, now - gesture.lastTime) : -dx * turn.direction / 120;
-    gesture.lastX = event.clientX;
-    gesture.lastTime = now;
-    fold({ x: turn.direction * (event.clientX - turn.spine), y: event.clientY - turn.top });
+    addPageSample(gesture.samples,event.clientX,Number.isFinite(event.timeStamp)?event.timeStamp:performance.now());
+    fold({ x: turn.width+turn.direction*dx, y: event.clientY - turn.top });
   }, { signal });
 
   function releaseGesture() {
     if (!gesture) return;
     const id = gesture.id;
     gesture = null;
+    delete viewport.dataset.bookGrabbed;
     if (viewport.hasPointerCapture(id)) viewport.releasePointerCapture(id);
   }
   function endGesture(event, cancel = false) {
     if (!gesture || event.pointerId !== gesture.id) return;
-    const { active, edge, velocity, lastTime } = gesture;
+    const { active, edge, samples } = gesture;
+    const now=Number.isFinite(event.timeStamp)?event.timeStamp:performance.now();
+    if(active&&!cancel&&Number.isFinite(event.clientX)){
+      addPageSample(samples,event.clientX,now);
+      // The final release may contain motion not delivered by pointermove.
+      if(Number.isFinite(event.clientY))fold({x:turn.width+turn.direction*(event.clientX-gesture.x),y:event.clientY-turn.top});
+    }
+    const intent=active?pageReleaseIntent(samples,{direction:turn.direction,progress:turn.progress,width:turn.width,now,cancelled:cancel}):null;
     releaseGesture();
     if (active || edge) suppressUntil = performance.now() + 350;
-    if (active) settle(!cancel && (turn.progress >= .5 || (turn.progress >= .16 && velocity > .5 && performance.now() - lastTime < 150)));
+    if (active) settle(intent.commit,false,intent);
     else if (edge && !cancel) go(bookDestination(index, edge, single));
   }
   viewport.addEventListener('pointerup', event => endGesture(event), { signal });

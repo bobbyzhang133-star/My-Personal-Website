@@ -13,20 +13,25 @@ export function createRoomDiscovery({ show, hide, onSeen, seen = false, reduced 
   const remember = () => { if (!seen) { seen = true; onSeen(); } };
   const reveal = nextMode => {
     if (disposed || !available) return;
-    cancelIntro(); dismiss(); remember();
+    cancelIntro(); dismiss();
+    if (nextMode === 'manual') remember();
     mode = nextMode;
     show(mode);
     const duration = mode === 'manual' ? ROOM_DISCOVERY_TIMING.manualHold : ROOM_DISCOVERY_TIMING.introHold + (reduced() ? 0 : ROOM_DISCOVERY_TIMING.stagger * 4);
-    revealTimer = setTimer(dismiss, duration);
+    revealTimer = setTimer(() => { if (mode === 'intro') remember(); dismiss(); }, duration);
   };
   return {
     setAvailable(value) {
       if (disposed) return;
       available = value;
       if (!available) { cancelIntro(); dismiss(); return; }
-      if (!seen && introTimer === null) introTimer = setTimer(() => { introTimer = null; reveal('intro'); }, ROOM_DISCOVERY_TIMING.introDelay);
+      if (!seen && mode === null && introTimer === null) introTimer = setTimer(() => { introTimer = null; reveal('intro'); }, ROOM_DISCOVERY_TIMING.introDelay);
     },
     acknowledge() { if (!disposed) { remember(); cancelIntro(); dismiss(); } },
+    visitObject(name) {
+      if (disposed || !available || typeof name !== 'string') return;
+      this.acknowledge();
+    },
     manual() { reveal('manual'); },
     destroy() { disposed = true; cancelIntro(); dismiss(); },
     get state() { return { seen, available, mode, disposed }; }
