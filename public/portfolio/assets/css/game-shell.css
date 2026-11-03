@@ -283,13 +283,17 @@ body.game-mode #app { overflow: hidden; }
 .master-room .object-games[data-facing="left"] .category-mark-left { display: block; }
 .master-room .room-object:is(:hover,:focus-visible) :is(.object-art,.master-object-image) { filter: none; }
 .master-room .object-art::after { display: none; }
+.master-room .cinema-camera-image img { display: block; width: 100%; height: 100%; image-rendering: pixelated; filter: drop-shadow(3px 4px 2px #21151180); }
+.master-room .object-films { pointer-events: none; }
+.master-room .object-films .cinema-camera-hit { fill: transparent; pointer-events: fill; }
+.room-backdrop .master-room .object-films .cinema-camera-hit { pointer-events: none; }
 .master-room .transition-anchor { inset: 0; width: auto; height: auto; border-radius: 0; }
 .master-room .anchor-ai { left: 13.3%; top: 8.56%; width: 72.17%; height: 57.2%; }
 .master-room .object-games { transition: left 1800ms linear; }
 .master-room .bird-contact-shadow { position: absolute; inset: 0; width: 100%; height: 100%; }
 .master-room .object-games:is([data-state="walk-left"],[data-facing="left"]) :is(.bird-sprite,.bird-outline) { transform: scaleX(-1); }
 .master-room .object-idle-cue { position: absolute; pointer-events: none; }
-.master-room .object-films .object-idle-cue { left: 31%; top: 49%; width: 5%; height: 7%; background: #fff0c7; clip-path: polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%); animation: master-camera-reflection 13s ease-in-out infinite; }
+.master-room .object-films .object-idle-cue { left: 14%; top: 54%; width: 5%; height: 7%; background: #fff0c7; clip-path: polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%); animation: master-camera-reflection 13s ease-in-out infinite; }
 .master-room .book-cover-glint { position: absolute; left: 63.559322%; top: 0; width: 12.711864%; height: 23.214286%; object-fit: fill; object-position: initial; opacity: 0; filter: brightness(1.35) !important; pointer-events: none; animation: master-cover-reflection 8.7s ease-in-out infinite; }
 .master-room .object-music .object-idle-cue { left: 52%; top: 45%; width: 1%; height: 35%; background: #ffe4ac; transform: rotate(-5deg); animation: master-lens-glint 10.4s ease-in-out infinite; }
 .master-room .object-ai .object-idle-cue { left: 13.3%; top: 8.56%; width: 72.17%; height: 57.2%; background: linear-gradient(135deg,transparent 15%,rgba(157,206,194,.1) 50%,transparent 85%); animation: master-screen-light 10s ease-in-out infinite; }
@@ -825,4 +829,128 @@ html[data-motion="reduced"] .bird-part { animation: none !important; }
 @media (min-width: 681px) and (min-height: 501px) {
   .research-scene .flipbook .book-page h2 { font-size: clamp(30px,3.1vw,42px); }
   .research-scene .book-summary { font-size: 15px; line-height: 1.55; }
+}
+
+/* Camera cutaway and the exposed frame share the registered Room projection. */
+.film-transport-assembly, .film-transport-interior, .film-gate-frame { position: absolute; }
+.film-transport-interior { inset: 0; opacity: 0; }
+.film-transport-assembly img, .film-transport-assembly svg {
+  position: absolute; inset: 0; width: 100%; height: 100%; display: block;
+}
+.film-gate-frame {
+  background: #120e0c center / cover no-repeat;
+  border: 1px solid #38231c;
+  box-shadow: inset 0 0 0 1px #bf9263;
+  box-sizing: border-box;
+  opacity: 0;
+}
+
+/* Three mounted film frames move through the same projection. */
+.films-scene .camera-object { inset: 58px clamp(10px,4vw,60px) 16px; }
+.films-scene .camera-top { inset: 0 0 auto; height: 30px; background: #29231f; border-color: #665648; color: #f2ddbb; }
+.films-scene .camera-body { inset: 30px 0 0; padding: 0; border: 1px solid #665648; background: #191510; box-shadow: 8px 10px 0 #1a130c66; }
+.films-scene .camera-viewfinder { border: 0; box-shadow: none; }
+.films-scene .camera-viewfinder::before, .films-scene .camera-viewfinder::after { display: none; }
+.films-scene .film-browser { padding: 8px clamp(12px,4vw,54px) 14px; overflow: auto; background: radial-gradient(ellipse at 50% 24%,#3d2e23,#15110e 72%); }
+.films-scene .film-strip { position: relative; height: 60%; min-height: 142px; padding: 0; perspective: 850px; touch-action: pan-y; overflow: hidden; }
+.films-scene .film-strip::before, .films-scene .film-strip::after { display: none; }
+.films-scene .film-frame, .films-scene .film-frame[aria-selected="true"] {
+  position: absolute; left: 50%; top: 7%; width: min(46%,560px); height: 85%;
+  display: grid; grid-template-rows: minmax(0,1fr) auto; padding: 9px 14px 5px;
+  transform: translateX(-50%); opacity: 1; border: 1px solid #846b50; background: #211710;
+  transition: transform 360ms cubic-bezier(.2,.72,.25,1), opacity 250ms, filter 250ms;
+}
+.films-scene .film-frame img { height: 100%; width: 100%; min-height: 0; object-fit: cover; }
+.films-scene .film-frame[data-position="0"] { z-index: 3; filter: none; }
+.films-scene .film-frame:is([data-position="-1"],[data-position="1"]) { z-index: 2; opacity: .72; filter: brightness(.75); }
+.films-scene .film-frame[data-position="-1"] { transform: translateX(-129%) translateZ(-125px) rotateY(26deg); }
+.films-scene .film-frame[data-position="1"] { transform: translateX(29%) translateZ(-125px) rotateY(-26deg); }
+.films-scene .film-frame:focus-visible { outline: 2px solid #ffe5aa; outline-offset: 2px; }
+.films-scene .film-arrow { z-index: 5; top: 29%; color: #f1d6ab; background: #261d17; border-color: #846b50; }
+.films-scene .film-copy { margin: 10px 0 0; }
+@media (max-width: 700px) {
+  .films-scene .film-frame, .films-scene .film-frame[aria-selected="true"] { width: 72%; }
+  .films-scene .film-frame[data-position="-1"] { transform: translateX(-123%) translateZ(-120px) rotateY(27deg); }
+  .films-scene .film-frame[data-position="1"] { transform: translateX(23%) translateZ(-120px) rotateY(-27deg); }
+}
+html[data-motion="reduced"] .film-frame { transition: none; }
+@media (prefers-reduced-motion: reduce) { .films-scene .film-frame { transition: none; } }
+
+/* Music is organized along a full-height neck, with a small amplifier display. */
+.music-scene .studio-rig { padding: 0; border: 0; background: none; box-shadow: none; }
+.music-scene .fretboard-session {
+  display: grid; grid-template-columns: minmax(0,1.35fr) minmax(240px,.8fr);
+  grid-template-rows: minmax(0,1fr); align-items: center; gap: clamp(10px,3vw,42px);
+  padding: 0 clamp(10px,4vw,64px); background: #211313e8; border: 1px solid #947353;
+}
+.music-neck-area { position: relative; align-self: stretch; min-height: 0; display: grid; place-items: center; overflow: hidden; }
+.music-room-guitar { position: absolute; bottom: 0; right: 62%; height: 68%; opacity: .28; pointer-events: none; }
+.music-neck {
+  position: relative; height: min(95%,620px); aspect-ratio: 168 / 480;
+  background: linear-gradient(90deg,transparent 24%,#7e3a3b 24% 28%,#684232 28% 72%,#7e3a3b 72% 76%,transparent 76%);
+}
+.music-neck-render { position: absolute; width: 100%; height: 100%; inset: 0; object-fit: fill; }
+.music-scene .music-fret-tabs { position: absolute; inset: 0; margin: 0; display: block; }
+.music-scene .music-fret-tabs button {
+  position: absolute; left: var(--fret-x); top: var(--fret-y); transform: translate(-50%,-50%);
+  width: 78px; min-height: 44px; padding: 4px; color: #ffe6ba; background: #642f37;
+  border: 1px solid #c59769; border-radius: 8px 8px 18px 18px; font: 650 11px/1 'JetBrains Mono',monospace;
+}
+.music-scene .music-fret-tabs button[aria-selected="true"] { background: #e2bc84; color: #321b1d; border-color: #ffe2ab; box-shadow: 0 0 0 3px #dc985d55; }
+.music-scene .music-fret-tabs button:focus-visible { outline: 2px solid #fff0b7; outline-offset: 4px; }
+.music-scene .music-amp { max-height: 95%; padding: clamp(12px,2.4vw,26px); border: 4px solid #4c3028; border-radius: 5px; background: #211915; color: #ffe0b0; box-shadow: inset 0 0 0 1px #aa8565,6px 7px 0 #100b0a80; }
+.music-scene .music-amp h2 { color: #ffe0b0; font-size: clamp(25px,4vw,52px); text-shadow: none; }
+.music-scene .music-amp .music-amp-take { color: #d9a96f; }
+.music-scene .music-amp .performance-panel { min-height: 0; margin: 8px 0; padding: 5px; background: #150e0c; border-color: #735847; }
+.music-scene .music-amp iframe { width: 100%; min-height: 120px; height: min(29vh,260px); }
+.music-scene .music-amp .performance-source { margin: 5px 0; }
+@media (max-width: 700px) {
+  .music-scene .fretboard-session { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr) auto; gap: 5px; padding: 6px; }
+  .music-scene .music-amp { max-height: 38dvh; }
+  .music-scene .music-amp h2 { margin-block: 3px; }
+}
+.master-room :is(.music-body-anchor,.music-neck-anchor) { position: absolute; pointer-events: none; }
+.master-room .music-body-anchor { inset: 54% 6% 3% 7%; }
+.master-room .music-neck-anchor { left: 43%; top: 16%; width: 13%; height: 40%; }
+.music-scene .music-neck-area { overflow: visible; }
+
+.master-room .object-games { transition: left 1800ms cubic-bezier(.23,.09,.77,.91); }
+.master-room .object-games:is([data-state="walk-left"],[data-state="walk-right"]) .bird-body {
+  animation: bird-walk-bob 480ms ease-in-out infinite;
+}
+.master-room .object-games:is([data-state="walk-left"],[data-state="walk-right"]) .bird-near-foot,
+.master-room .object-games:is([data-state="walk-left"],[data-state="walk-right"]) .bird-far-foot {
+  animation-timing-function: linear;
+  animation-name: bird-grounded-step;
+}
+@keyframes bird-walk-bob {
+  0%,50%,100% { transform: none; }
+  25%,75% { transform: translateY(-.8%) rotate(.5deg); }
+}
+@keyframes bird-grounded-step {
+  0% { transform: translateX(calc(var(--bird-stride,20%) * .25)); }
+  50% { transform: translateX(calc(var(--bird-stride,20%) * -.25)); }
+  75% { transform: translateY(-2.4%); }
+  100% { transform: translateX(calc(var(--bird-stride,20%) * .25)); }
+}
+html[data-motion="reduced"] .master-room .object-games .bird-part { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .master-room .object-games .bird-part { animation: none !important; }
+}
+.transport-shutter { transform-origin: 121px 130px; }
+.films-scene .film-frame .perfs {
+  position: absolute; inset: 8px 3px; z-index: 1; pointer-events: none;
+  background: repeating-linear-gradient(#c09a6d 0 4px,transparent 4px 11px) left / 4px 100% no-repeat,
+    repeating-linear-gradient(#c09a6d 0 4px,transparent 4px 11px) right / 4px 100% no-repeat;
+}
+.music-scene .fretboard-session { border-radius: 4px; }
+.music-neck { background: none; }
+.music-neck-fallback {
+  background: repeating-linear-gradient(90deg,transparent 0 10px,#d5bb8d 10px 11px) center / 62% 92% no-repeat,
+    repeating-linear-gradient(0deg,#573521 0 29px,#c3a27d 29px 31px) center / 68% 92% no-repeat;
+}
+@keyframes room-bird-look {
+  0%,17%,23%,57%,68%,100% { transform: none; }
+  19%,21% { transform: skewX(-1.5deg); }
+  60%,64% { transform: rotate(1.2deg) translateY(.3%); }
 }

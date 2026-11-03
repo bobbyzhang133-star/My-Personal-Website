@@ -1,5 +1,5 @@
-import { getLoadedJournalModel, loadJournalModel, sampleJournalAction, JOURNAL_MODEL_ASSET, JOURNAL_MODEL_ID } from './journal-model.js?v=260ff82f01eb';
-import { drawJournalModel, journalRestDepth } from './journal-renderer.js?v=260ff82f01eb';
+import { getLoadedJournalModel, loadJournalModel, sampleJournalAction, JOURNAL_MODEL_ASSET, JOURNAL_MODEL_ID } from './journal-model.js?v=3d5bd1cfca66';
+import { drawJournalModel, journalRestDepth } from './journal-renderer.js?v=3d5bd1cfca66';
 
 const selector='canvas[data-room-journal]';
 // Draw the resting pose once in source coordinates; the short physical cue

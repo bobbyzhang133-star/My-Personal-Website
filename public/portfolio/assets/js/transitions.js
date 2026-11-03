@@ -1,6 +1,8 @@
-import { CAMERA_HOME, VirtualCamera } from './camera.js?v=260ff82f01eb';
-import { layoutJournal, moveJournal } from './scenes/journal-motion.js?v=260ff82f01eb';
-import { isReducedMotion, nextFrame } from './utils.js?v=260ff82f01eb';
+import { projects } from './content.js?v=3d5bd1cfca66';
+import { moveFilmTransport } from './scenes/film-transport.js?v=3d5bd1cfca66';
+import { CAMERA_HOME, VirtualCamera } from './camera.js?v=3d5bd1cfca66';
+import { layoutJournal, moveJournal } from './scenes/journal-motion.js?v=3d5bd1cfca66';
+import { isReducedMotion, nextFrame } from './utils.js?v=3d5bd1cfca66';
 
 export const OBJECT_TRANSITIONS = Object.freeze({
   games: { cameraDuration: 940, interfaceDuration: 320, exitInterfaceDuration: 220, restoreDuration: 820 },
@@ -9,6 +11,8 @@ export const OBJECT_TRANSITIONS = Object.freeze({
   music: { cameraDuration: 900, interfaceDuration: 300, exitInterfaceDuration: 210, restoreDuration: 800 },
   ai: { cameraDuration: 940, interfaceDuration: 340, exitInterfaceDuration: 230, restoreDuration: 830 }
 });
+
+const firstFilmArtwork = projects.find(project => project.category === 'films')?.artwork;
 
 const DEFAULT_TRANSITION = Object.freeze({ cameraDuration: 900, interfaceDuration: 300, exitInterfaceDuration: 210, restoreDuration: 800 });
 
@@ -50,6 +54,7 @@ export class TransitionDirector {
     this.backdropState = { ...CAMERA_HOME };
     this.activeElements = new Set();
     this.alignmentController = null;
+    this.transportController = null;
   }
 
   begin() {
@@ -68,7 +73,7 @@ export class TransitionDirector {
   }
 
   roomCameraTarget(route, root = this.host) {
-    return this.roomObjectArt(route, root) || root.querySelector(`[data-camera-anchor="${route}"]`) || this.roomTarget(route, root);
+    return (route === 'music' && root.querySelector('[data-music-room-neck]')) || this.roomObjectArt(route, root) || root.querySelector(`[data-camera-anchor="${route}"]`) || this.roomTarget(route, root);
   }
 
   roomObjectArt(route, root = this.host) {
@@ -251,6 +256,7 @@ export class TransitionDirector {
 
   async revealInterface(root, duration) {
     if(root?.dataset.scene==='research') { await moveJournal(root,this.backdrop,{opening:true,play,track:element=>this.track(element)}); return; }
+    if (root?.dataset.scene === 'music' && await this.moveMusicNeck(root, true)) return;
     const element = root?.querySelector('[data-category-interface]');
     if (!element || isReducedMotion()) return;
     this.track(element);
@@ -269,6 +275,7 @@ export class TransitionDirector {
 
   async hideInterface(root, duration) {
     if(root?.dataset.scene==='research') { await moveJournal(root,this.backdrop,{opening:false,play,track:element=>this.track(element)}); return; }
+    if (root?.dataset.scene === 'music' && await this.moveMusicNeck(root, false)) return;
     const element = root?.querySelector('[data-category-interface]');
     if (!element || isReducedMotion()) return;
     this.track(element);
@@ -279,7 +286,44 @@ export class TransitionDirector {
     ], { duration, easing: 'cubic-bezier(.4,0,1,1)' });
   }
 
+  async moveMusicNeck(root, opening) {
+    const source = this.backdrop?.querySelector('[data-music-room-neck]');
+    const neck = root.querySelector('[data-music-neck]');
+    const amp = root.querySelector('.music-amp');
+    const session = root.querySelector('[data-studio]');
+    if (isReducedMotion() || !source || !neck || !amp || !session) return false;
+    const from = source.getBoundingClientRect();
+    const to = neck.getBoundingClientRect();
+    if (!from.height || !to.height || !to.width) return false;
+    const mapped = `translate(${from.left+from.width/2-to.left-to.width/2}px,${from.top+from.height/2-to.top-to.height/2}px) rotate(-7deg) scale(${from.width/to.width},${from.height/to.height})`;
+    this.track(neck, amp, session);
+    const order = frames => opening ? frames : frames.toReversed();
+    const options = { duration: 580, easing: 'cubic-bezier(.42,0,.18,1)' };
+    await Promise.all([
+      play(neck, order([{ transform: mapped, opacity: 0 }, { transform: 'none', opacity: 1 }]), options),
+      play(amp, order([{ opacity: 0 }, { opacity: 1 }]), options),
+      play(session, order([{ backgroundColor: 'transparent', borderColor: 'transparent' },
+        { backgroundColor: '#211313e8', borderColor: '#947353' }]), options)
+    ]);
+    if (opening) for (const element of [neck, amp, session]) {
+      clearInlineMotion(element);
+      this.activeElements.delete(element);
+    }
+    return true;
+  }
+
+  async playFilmTransport(room, opening, artwork = firstFilmArtwork) {
+    const controller = new AbortController();
+    this.transportController = controller;
+    await moveFilmTransport(this.roomObjectArt('films', room), this.layer, {
+      opening, artwork, signal: controller.signal
+    });
+    if (this.transportController === controller) this.transportController = null;
+  }
+
   clear() {
+    this.transportController?.abort();
+    this.transportController = null;
     this.generation += 1;
     this.camera?.destroy();
     this.camera = null;
@@ -310,6 +354,7 @@ export class TransitionDirector {
     const viewport = room?.querySelector('[data-camera-viewport]');
     const world = room?.querySelector('[data-room-world]');
     const focusTarget = this.roomCameraTarget(route);
+    const guitarBody = route === 'music' && room?.querySelector('[data-music-body]');
     const object = room?.querySelector(`[data-room-object].object-${route}`);
 
     if(route==='research')await this.registry.home.ready?.(room);
@@ -326,9 +371,18 @@ export class TransitionDirector {
 
     this.camera = new VirtualCamera(viewport, world);
     object.setAttribute('data-activated', 'true');
-    await this.camera.focus(focusTarget, route, { duration: profile.cameraDuration });
+    if (guitarBody) {
+      const neckPose = this.camera.measure(focusTarget, route);
+      await this.camera.focus(guitarBody, route, { duration: 560 });
+      if (!this.isCurrent(generation)) return;
+      await this.camera.animateTo(neckPose, 640);
+    } else {
+      await this.camera.focus(focusTarget, route, { duration: profile.cameraDuration });
+    }
     if (!this.isCurrent(generation)) return;
 
+    if (route === 'films') await this.playFilmTransport(room, true);
+    if (!this.isCurrent(generation)) return;
     this.captureBackdrop(room, route);
     onSceneEntering();
     mount();
@@ -349,6 +403,9 @@ export class TransitionDirector {
       return;
     }
 
+    const artwork = route === 'films'
+      ? this.host.querySelector('.film-frame[aria-selected="true"] img')?.getAttribute('src')
+      : undefined;
     await this.hideInterface(this.host.querySelector('[data-scene]'), profile.exitInterfaceDuration);
     if (!this.isCurrent(generation)) return;
     onRoomEntering();
@@ -364,6 +421,8 @@ export class TransitionDirector {
     }
     this.clearBackdrop();
     await nextFrame();
+    if (route === 'films' && room) await this.playFilmTransport(room, false, artwork);
+    if (!this.isCurrent(generation)) return;
     if (this.camera) await this.camera.restore({ duration: profile.restoreDuration });
     if (this.isCurrent(generation)) this.clear();
   }

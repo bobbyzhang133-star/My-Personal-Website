@@ -991,9 +991,9 @@ test('creative scene modules omit website category headers and footers', async (
 test('category interfaces stay inside their physical Room objects', async () => {
   const expected = {
     games: { object: 'bird-character-select', surface: 'data-carousel="games"', asset: 'game-characters' },
-    films: { object: 'camera', surface: 'data-film-browser', asset: 'camera-original.svg' },
+    films: { object: 'camera', surface: 'data-film-browser', asset: 'studio-65.png' },
     research: { object: 'book', surface: 'data-book', asset: 'master/research.svg' },
-    music: { object: 'guitar-studio', surface: 'data-studio', asset: 'guitar-original.svg' },
+    music: { object: 'guitar-studio', surface: 'data-studio', asset: 'master/music.svg' },
     ai: { object: 'computer', surface: 'data-ai-system', asset: 'master/ai.svg' }
   };
   for (const [route, markers] of Object.entries(expected)) {
@@ -1056,7 +1056,7 @@ test('camera travel moves the full world toward a visible object at meaningful s
   assert.deepEqual(calculateTravelTransform(null, mobileViewport, mobileViewport), CAMERA_HOME);
 });
 
-test('Approved master supplies all five exact source cutouts and one shared camera', async () => {
+test('Approved master registers the four source cutouts and cinema camera in one Room camera', async () => {
   const html=sceneRegistry.home.render();
   assert.equal(MASTER_ROOM.approved,'2026-10-24');
   assert.equal(Object.keys(MASTER_OBJECTS).length,5);
@@ -1066,6 +1066,19 @@ test('Approved master supplies all five exact source cutouts and one shared came
   assert.match(html,/master-derived-native-reference/);
   const sourceHashes=[];
   for(const[name,o]of Object.entries(MASTER_OBJECTS)){
+    if (name === 'films') {
+      assert.match(html, /studio-65\.webp/);
+      assert.match(html, /studio-65\.png/);
+      assert(html.includes(`class="cinema-camera-hit" d="${o.path}"`));
+      const glb = await readFile(new URL('assets/room/cinema-camera/studio-65.glb', root));
+      assert.equal(glb.subarray(0, 4).toString(), 'glTF');
+      const model = JSON.parse(glb.subarray(20, 20 + glb.readUInt32LE(12)).toString());
+      assert(model.nodes.some(node => node.name === 'FILMS physical stencil'));
+      assert(model.nodes.some(node => node.name === 'Exposure aperture'));
+      assert.equal(model.cameras, undefined);
+      assert.equal(model.extensions?.KHR_lights_punctual, undefined);
+      continue;
+    }
     const svg=await readFile(new URL(`assets/room/master/${name}.svg`,root),'utf8');
     assert(svg.includes(`viewBox="${o.box.join(' ')}"`));
     assert(svg.includes(o.path),'mask must retain approved source coordinates');
@@ -1167,6 +1180,16 @@ test('Interrupted lessons remain pending; one deliberate keyboard focus acknowle
 test('Physical category markings preserve source boxes, semantic links and readable bird facing', async () => {
   const html=sceneRegistry.home.render(),css=await readFile(new URL('assets/css/game-shell.css',root),'utf8');
   for(const [name,label] of Object.entries({games:'GAMES',films:'FILMS',research:'RESEARCH',music:'MUSIC',ai:'AI'})) {
+    if (name === 'games') {
+      assert.match(html, /bird-leg-band/);
+      assert.doesNotMatch(html, /games(?:-left)?-mark\.svg/);
+      continue;
+    }
+    if (name === 'films') {
+      assert.match(html, /aria-label="Films"/);
+      assert.doesNotMatch(html, /films-mark\.svg/);
+      continue;
+    }
     const art=await readFile(new URL(`assets/room/master/${name}-mark.svg`,root),'utf8');
     assert(art.includes(`viewBox="${MASTER_OBJECTS[name].box.join(' ')}"`),'markings share the prop camera instead of using viewport labels');
     assert(art.includes(`data-category="${label}"`));assert(art.includes(MASTER_OBJECTS[name].path),'physical markings stay clipped to the prop surface');

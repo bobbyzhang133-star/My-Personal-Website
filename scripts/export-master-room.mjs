@@ -18,7 +18,10 @@ async function svg([x,y,w,h],source,clip=''){
   const hash=createHash('sha256').update(source).digest('hex');
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="${x} ${y} ${w} ${h}" data-source-sha256="${hash}">${clip?`<defs><clipPath id="cut"><path d="${clip}"/></clipPath></defs>`:''}<image x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="none" style="image-rendering:pixelated" href="data:image/webp;base64,${data}"${clip?' clip-path="url(#cut)"':''}/></svg>`;
 }
-for(const[name,o]of Object.entries(MASTER_OBJECTS))await writeFile(new URL(`${name}.svg`,root),await svg(o.box,master,o.path));
+for(const[name,o]of Object.entries(MASTER_OBJECTS)){
+  if(name==='films')continue; // The Blender camera has its own registered render.
+  await writeFile(new URL(`${name}.svg`,root),await svg(o.box,master,o.path));
+}
 await writeFile(new URL('floor-clean-patch.svg',root),await svg([480,700,240,207],clean));
 await writeFile(new URL('book-cover-glint.svg',root),await svg([722,414,45,26],master,'M730 414H748L762 425L751 426L740 420L729 420Z'));
-console.log('Exported five registered master masks, journal cover glint and reconstructed floor patch.');
+console.log('Exported four registered master masks, journal cover glint and reconstructed floor patch.');

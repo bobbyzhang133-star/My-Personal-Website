@@ -1,9 +1,9 @@
-import { projects, researchNotes } from '../content.js?v=260ff82f01eb';
-import { esc, isReducedMotion } from '../utils.js?v=260ff82f01eb';
-import { sceneController } from './shared.js?v=260ff82f01eb';
-import { journalMechanism } from './journal-motion.js?v=260ff82f01eb';
-import { pageFold, foldPolygon } from './book-fold.js?v=260ff82f01eb';
-import { addPageSample, pageReleaseIntent } from './book-gesture.js?v=260ff82f01eb';
+import { projects, researchNotes } from '../content.js?v=3d5bd1cfca66';
+import { esc, isReducedMotion } from '../utils.js?v=3d5bd1cfca66';
+import { sceneController } from './shared.js?v=3d5bd1cfca66';
+import { journalMechanism } from './journal-motion.js?v=3d5bd1cfca66';
+import { pageFold, foldPolygon } from './book-fold.js?v=3d5bd1cfca66';
+import { addPageSample, pageReleaseIntent } from './book-gesture.js?v=3d5bd1cfca66';
 
 const chapters = projects.filter(project => project.category === 'research');
 

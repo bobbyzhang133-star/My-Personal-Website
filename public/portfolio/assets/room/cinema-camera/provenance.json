@@ -1,0 +1,51 @@
+{
+  "model": "Studio 65",
+  "licenseSource": "Original portfolio artwork, no third-party assets",
+  "authoring": "Blender MCP 4.5.9 LTS, isolated scene, mesh primitives with beveled edges, joined stencil mesh, material render and mesh-only glTF export",
+  "sourceScript": "scripts/build-cinema-camera.py",
+  "registrationScript": "scripts/register-cinema-camera.mjs",
+  "dimensionsMetersApprox": [
+    0.58,
+    0.246,
+    0.433
+  ],
+  "axes": "X along lens, Y along reel axes, Z up; skid bottom at Z=0 in Blender",
+  "roomReference": "Approved 1672 \u00d7 941 Home Room, tabletop at source y=418\u2013521",
+  "projection": {
+    "type": "orthographic",
+    "widthMeters": 0.706,
+    "cameraOffsetMeters": [
+      -1.48,
+      -3.4,
+      1.07
+    ],
+    "sourceBox": [
+      1227,
+      276,
+      310,
+      231
+    ]
+  },
+  "geometry": {
+    "triangles": 18552,
+    "primitives": 340,
+    "materials": 49,
+    "textures": 0
+  },
+  "animationClips": [],
+  "files": [
+    "studio-65.glb",
+    "studio-65.webp",
+    "studio-65.png",
+    "transport-cutaway.webp"
+  ],
+  "browserIntegration": "scenes/room.js uses the rendered image; scenes/cinema-camera-registration.js contains the silhouette and projected base contacts.",
+  "visualReference": "https://www.panavision.com/camera-and-optics/advanced-solutions/product-detail/65spfx-system-65",
+  "designNotes": "Original common magazine housing with separate internal reels, brass-toned seams, recessed smoky optical glass in a hollow retaining rim and a physical FILMS plate. The reference informed the top-mounted magazine and was not used as an asset.",
+  "detailPass": "Sand-gray displacement magazine cover, black reflex finder, recessed side controls and counter window, ribbed focus ring and service-door fittings.",
+  "transport": {
+    "authoringScript": "scripts/render-cinema-transport.py",
+    "browserModule": "scenes/film-transport.js",
+    "representation": "Blender cutaway projected from the Room camera. Browser animation drives the reels, film perforations and exposure frame."
+  }
+}

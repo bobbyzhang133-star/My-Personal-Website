@@ -1,5 +1,5 @@
-import { esc, isReducedMotion } from './utils.js?v=260ff82f01eb';
-import { KITCHEN_SURFACES, projectKitchenSurface, kitchenReadingPoint } from './kitchen-surfaces.js?v=260ff82f01eb';
+import { esc, isReducedMotion } from './utils.js?v=3d5bd1cfca66';
+import { KITCHEN_SURFACES, projectKitchenSurface, kitchenReadingPoint } from './kitchen-surfaces.js?v=3d5bd1cfca66';
 
 export function kitchenInformation(project,delivered=0) {
   return [

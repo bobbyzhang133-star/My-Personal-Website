@@ -1,9 +1,9 @@
-import { isReducedMotion } from '../utils.js?v=260ff82f01eb';
-import { JOURNAL_COVER_QUAD } from './journal-geometry.js?v=260ff82f01eb';
+import { isReducedMotion } from '../utils.js?v=3d5bd1cfca66';
+import { JOURNAL_COVER_QUAD } from './journal-geometry.js?v=3d5bd1cfca66';
 
-import { drawJournalModel, journalRestDepth, journalReadingQuads } from './journal-renderer.js?v=260ff82f01eb';
-import { mountJournalReadingPages } from './journal-pages.js?v=260ff82f01eb';
-export { projectJournalPoint, journalRestDepth } from './journal-renderer.js?v=260ff82f01eb';
+import { drawJournalModel, journalRestDepth, journalReadingQuads } from './journal-renderer.js?v=3d5bd1cfca66';
+import { mountJournalReadingPages } from './journal-pages.js?v=3d5bd1cfca66';
+export { projectJournalPoint, journalRestDepth } from './journal-renderer.js?v=3d5bd1cfca66';
 
 export const JOURNAL_MODEL_ASSET='/assets/room/journal-3d/approved-v1/';
 export const JOURNAL_MODEL_ID=`blender-journal-${JOURNAL_MODEL_ASSET.split('/').at(-2)}`;

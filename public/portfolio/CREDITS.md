@@ -1,5 +1,16 @@
 # Asset Credits
 
+## Studio 65 cinema camera
+
+- Original Blender MCP model, with graphite enamel, warm metal fittings, teal optical glass and a cream FILMS stencil made from mesh geometry. Source and registration are reproducible through `scripts/build-cinema-camera.py` and `scripts/register-cinema-camera.mjs`. No third-party artwork, texture or font.
+- The runtime Room image comes from the same model as `assets/room/cinema-camera/studio-65.glb`. See the asset’s provenance for geometry and projection details.
+
+## Films transport and Music fretboard
+
+- The Studio 65 cutaway is a Blender render from the approved Room projection. The browser animates the guided film strip, reel spokes, shutter and exposure frame over that render.
+- The Music neck was modeled in Blender using a 648 mm scale and equal-temperament fret positions. The original wine-red Room guitar supplies the reference. The exported geometry and rendering are in `assets/room/guitar-neck/`. The two navigation markers use Blender-projected positions and represent performance takes.
+- The Room bird retains the One Last Bird reference pose and uses authored walking motion. The supplied move frames depict flight. The leg band is an original overlay attached to the moving foot.
+
 ## Approved 3D book at rest and during pickup (October 30, local only)
 
 - The Room now renders the actual approved `assets/room/journal-3d/approved-v1/` mesh and texture at rest, through `scenes/journal-room.js` and the same mesh renderer/action pose as pickup. No new model, texture, generated image, external asset or dependency was added; approved asset hashes are unchanged.

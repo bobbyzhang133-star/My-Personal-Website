@@ -1,8 +1,8 @@
-import { isReducedMotion, nextFrame } from '../utils.js?v=260ff82f01eb';
+import { isReducedMotion, nextFrame } from '../utils.js?v=3d5bd1cfca66';
 
-import { JOURNAL_COVER_QUAD, journalProjection, journalMatrix } from './journal-geometry.js?v=260ff82f01eb';
-import { animateBlenderJournal, fitJournalModelReader } from './journal-model.js?v=260ff82f01eb';
-export { JOURNAL_COVER_QUAD, journalProjection, journalMatrix } from './journal-geometry.js?v=260ff82f01eb';
+import { JOURNAL_COVER_QUAD, journalProjection, journalMatrix } from './journal-geometry.js?v=3d5bd1cfca66';
+import { animateBlenderJournal, fitJournalModelReader } from './journal-model.js?v=3d5bd1cfca66';
+export { JOURNAL_COVER_QUAD, journalProjection, journalMatrix } from './journal-geometry.js?v=3d5bd1cfca66';
 const rectangle = (x,y,w,h) => [[x,y],[x+w,y],[x+w,y+h],[x,y+h]];
 
 function sourcePlane(face = false) {

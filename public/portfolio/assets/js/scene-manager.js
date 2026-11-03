@@ -1,5 +1,5 @@
-import { isCreativePath, routeFromPath } from './utils.js?v=260ff82f01eb';
-import { TransitionDirector } from './transitions.js?v=260ff82f01eb';
+import { isCreativePath, routeFromPath } from './utils.js?v=3d5bd1cfca66';
+import { TransitionDirector } from './transitions.js?v=3d5bd1cfca66';
 
 export const SHELL_STATES = Object.freeze({
   BOOTING: 'BOOTING',
