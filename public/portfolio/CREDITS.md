@@ -2,8 +2,17 @@
 
 ## Studio 65 cinema camera
 
+- The active camera uses the actual Blender mesh through WebGL in the Room, during opening and inside Films. `scripts/build-camera-live.py` refines the approved `camera-live-v1/` mesh in Blender, preserving its geometry and corner normals, and adds four modeled exposure pressure rails in `assets/room/camera-live-v2/`. The GLB and editable `artifacts/film-exposure/camera-live.blend` preserve this version. The hollow housing, separate cover, transport, stock and shutter remain articulated.
+- Blank film-leader artwork is original project UI. Existing film covers are fitted in full inside the 16:9 exposure with their original aspect ratio, using a dark matte; they are not regenerated or stretched. No new third-party art was introduced.
+- The live renderer bundles Three.js 0.187.0, MIT license, from the official npm package. The license is retained in `assets/js/vendor/camera-three/LICENSE.txt`. Library source is at https://github.com/mrdoob/three.js/tree/r187.
+
 - Original Blender MCP model, with graphite enamel, warm metal fittings, teal optical glass and a cream FILMS stencil made from mesh geometry. Source and registration are reproducible through `scripts/build-cinema-camera.py` and `scripts/register-cinema-camera.mjs`. No third-party artwork, texture or font.
 - The runtime Room image comes from the same model as `assets/room/cinema-camera/studio-65.glb`. See the asset’s provenance for geometry and projection details.
+- The complete 2D opening assembly in `assets/room/camera-opening-v1/` is rendered through Blender MCP from this same original model. It includes 33 registered turn poses, a separate removable cover, and an exposed body. `scripts/build-film-opening.py` and `scripts/pack-film-opening.mjs` reproduce the layers and atlas. The browser positions the existing live film mechanism inside the model-projected service opening. All new layers are original project artwork.
+
+## Full Room guitar model
+
+- Blender MCP authored the complete wine-red guitar, including the beveled body, pickguard, headstock, strings, frets and hardware. `scripts/build-room-guitar.py` exports the animated GLB and renders the resting, intermediate and front-facing poses. The rebuilt silhouette and raised hardware follow the approved 2D Room guitar. Solid materials and modeled hardware define the instrument: round strings, frets, inlays, slotted screws and ribbed controls. Eevee renders use a warm key light, cooler fill, lacquer highlights and procedural wood grain. The turn uses twice the source resolution and the settled poses use four times the source resolution. The browser plays the rendered turn and registers the take controls to the projected fret positions. See `assets/room/guitar-model/provenance.json`.
 
 ## Films transport and Music fretboard
 

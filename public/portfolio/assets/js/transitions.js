@@ -1,8 +1,8 @@
-import { projects } from './content.js?v=3d5bd1cfca66';
-import { moveFilmTransport } from './scenes/film-transport.js?v=3d5bd1cfca66';
-import { CAMERA_HOME, VirtualCamera } from './camera.js?v=3d5bd1cfca66';
-import { layoutJournal, moveJournal } from './scenes/journal-motion.js?v=3d5bd1cfca66';
-import { isReducedMotion, nextFrame } from './utils.js?v=3d5bd1cfca66';
+import { placeFilmOverview } from './scenes/films.js?v=8273376a5e68';
+import { moveFilmTransport } from './scenes/film-transport.js?v=8273376a5e68';
+import { CAMERA_HOME, VirtualCamera } from './camera.js?v=8273376a5e68';
+import { layoutJournal, moveJournal } from './scenes/journal-motion.js?v=8273376a5e68';
+import { isReducedMotion, nextFrame } from './utils.js?v=8273376a5e68';
 
 export const OBJECT_TRANSITIONS = Object.freeze({
   games: { cameraDuration: 940, interfaceDuration: 320, exitInterfaceDuration: 220, restoreDuration: 820 },
@@ -11,8 +11,6 @@ export const OBJECT_TRANSITIONS = Object.freeze({
   music: { cameraDuration: 900, interfaceDuration: 300, exitInterfaceDuration: 210, restoreDuration: 800 },
   ai: { cameraDuration: 940, interfaceDuration: 340, exitInterfaceDuration: 230, restoreDuration: 830 }
 });
-
-const firstFilmArtwork = projects.find(project => project.category === 'films')?.artwork;
 
 const DEFAULT_TRANSITION = Object.freeze({ cameraDuration: 900, interfaceDuration: 300, exitInterfaceDuration: 210, restoreDuration: 800 });
 
@@ -81,6 +79,18 @@ export class TransitionDirector {
   }
 
   alignSceneObject(route) {
+    if (route === 'music') {
+      const source = this.backdrop?.querySelector('.room-guitar-model');
+      const neck = this.host.querySelector('[data-music-neck]');
+      if (!source || !neck) return;
+      const art = source.getBoundingClientRect();
+      const controls = neck.parentElement.getBoundingClientRect();
+      Object.assign(neck.style, {
+        left: `${art.left-controls.left}px`, top: `${art.top-controls.top}px`,
+        width: `${art.width}px`, height: `${art.height}px`
+      });
+      return;
+    }
     if (route === 'research') {
       const source=this.backdrop?.querySelector('.object-research');
       const research=this.host.querySelector('[data-scene="research"]');
@@ -160,8 +170,11 @@ export class TransitionDirector {
       if(viewport && world && target) {
         // Recompute from unscaled source coordinates; never compound the previous zoom.
         world.style.transform='';
+        const guitar = route === 'music' && room.querySelector('[data-guitar-facing]');
+        guitar?.removeAttribute?.('data-guitar-facing');
         const camera=new VirtualCamera(viewport,world);
         this.backdropState=camera.focusInstant(target,route);
+        guitar?.setAttribute?.('data-guitar-facing', '');
       }
       update();
     }, { signal: this.alignmentController.signal });
@@ -223,6 +236,7 @@ export class TransitionDirector {
     } else {
       this.backdropState = { ...CAMERA_HOME };
     }
+    if (route === 'music') room.querySelector('.object-music .object-art')?.setAttribute('data-guitar-facing', '');
     this.sanitizeBackdrop(room, route);
   }
 
@@ -256,11 +270,10 @@ export class TransitionDirector {
 
   async revealInterface(root, duration) {
     if(root?.dataset.scene==='research') { await moveJournal(root,this.backdrop,{opening:true,play,track:element=>this.track(element)}); return; }
-    if (root?.dataset.scene === 'music' && await this.moveMusicNeck(root, true)) return;
     const element = root?.querySelector('[data-category-interface]');
     if (!element || isReducedMotion()) return;
     this.track(element);
-    const entrance = ['games','ai'].includes(root?.dataset.scene) ? 'translate3d(0,0,0)' : 'translate3d(0,12px,0)';
+    const entrance = ['games','ai','music'].includes(root?.dataset.scene) ? 'translate3d(0,0,0)' : 'translate3d(0,12px,0)';
     element.style.opacity = '0';
     element.style.transform = entrance;
     element.style.willChange = 'opacity, transform';
@@ -275,48 +288,76 @@ export class TransitionDirector {
 
   async hideInterface(root, duration) {
     if(root?.dataset.scene==='research') { await moveJournal(root,this.backdrop,{opening:false,play,track:element=>this.track(element)}); return; }
-    if (root?.dataset.scene === 'music' && await this.moveMusicNeck(root, false)) return;
     const element = root?.querySelector('[data-category-interface]');
     if (!element || isReducedMotion()) return;
     this.track(element);
-    const departure = root?.dataset.scene === 'ai' ? 'translate3d(0,0,0)' : 'translate3d(0,8px,0)';
+    const departure = ['ai','music'].includes(root?.dataset.scene) ? 'translate3d(0,0,0)' : 'translate3d(0,8px,0)';
     await play(element, [
       { opacity: 1, transform: 'translate3d(0,0,0)' },
       { opacity: 0, transform: departure }
     ], { duration, easing: 'cubic-bezier(.4,0,1,1)' });
   }
 
-  async moveMusicNeck(root, opening) {
-    const source = this.backdrop?.querySelector('[data-music-room-neck]');
-    const neck = root.querySelector('[data-music-neck]');
-    const amp = root.querySelector('.music-amp');
-    const session = root.querySelector('[data-studio]');
-    if (isReducedMotion() || !source || !neck || !amp || !session) return false;
-    const from = source.getBoundingClientRect();
-    const to = neck.getBoundingClientRect();
-    if (!from.height || !to.height || !to.width) return false;
-    const mapped = `translate(${from.left+from.width/2-to.left-to.width/2}px,${from.top+from.height/2-to.top-to.height/2}px) rotate(-7deg) scale(${from.width/to.width},${from.height/to.height})`;
-    this.track(neck, amp, session);
-    const order = frames => opening ? frames : frames.toReversed();
-    const options = { duration: 580, easing: 'cubic-bezier(.42,0,.18,1)' };
-    await Promise.all([
-      play(neck, order([{ transform: mapped, opacity: 0 }, { transform: 'none', opacity: 1 }]), options),
-      play(amp, order([{ opacity: 0 }, { opacity: 1 }]), options),
-      play(session, order([{ backgroundColor: 'transparent', borderColor: 'transparent' },
-        { backgroundColor: '#211313e8', borderColor: '#947353' }]), options)
-    ]);
-    if (opening) for (const element of [neck, amp, session]) {
-      clearInlineMotion(element);
-      this.activeElements.delete(element);
+  async turnMusicGuitar(room, facing) {
+    const art = room?.querySelector('.object-music .object-art');
+    const frames = art?.querySelector('.guitar-turn-frames');
+    if (!frames) return;
+    const generation = this.generation;
+    if (!isReducedMotion() && frames.animate) {
+      const strip = new Image();
+      strip.src = '/assets/room/guitar-model/guitar-turn.webp';
+      let timeout;
+      let decoded = false;
+      try {
+        await Promise.race([strip.decode().then(() => { decoded = true; }), new Promise(resolve => {
+          timeout = setTimeout(resolve, 650);
+        })]);
+      } catch {
+        // The static Blender poses can still hand off to the scene.
+      } finally {
+        clearTimeout(timeout);
+      }
+      if (!this.isCurrent(generation)) return;
+      if (decoded && !isReducedMotion()) {
+        const count = Number(frames.style.getPropertyValue('--guitar-frame-count'));
+        const positions = Array.from({ length: count }, (_, index) => ({
+          offset: index / (count-1),
+          backgroundPosition: `${100*(facing ? index : count-1-index)/(count-1)}% 0`,
+          easing: 'steps(1,end)'
+        }));
+        art.setAttribute('data-guitar-turning', '');
+        this.track(frames);
+        try {
+          await play(frames, positions, { duration: 640 });
+        } finally {
+          clearInlineMotion(frames);
+          this.activeElements.delete(frames);
+          art.removeAttribute('data-guitar-turning');
+        }
+      }
     }
-    return true;
+    if (this.isCurrent(generation)) art.toggleAttribute('data-guitar-facing', facing);
   }
 
-  async playFilmTransport(room, opening, artwork = firstFilmArtwork) {
+  async playFilmTransport(room, opening, snapshot) {
     const controller = new AbortController();
     this.transportController = controller;
+    const template = document.createElement('template');
+    template.innerHTML = this.registry.films.render({ preview: true }).trim();
+    const preview = snapshot || template.content.firstElementChild;
+    preview.inert = true;
+    preview.setAttribute('aria-hidden','true');
+    preview.querySelectorAll('[id]').forEach(node=>node.removeAttribute('id'));
+    preview.removeAttribute('id');
+    preview.querySelectorAll('iframe').forEach(node=>node.remove());
+    const surface = preview.querySelector('[data-film-browser]');
+    delete surface.dataset.zooming;
+    delete surface.dataset.playback;
+    surface.querySelector('.gate-close').hidden = true;
+    surface.querySelector('.gate-playback-source').hidden = true;
+    placeFilmOverview(preview,innerWidth,innerHeight);
     await moveFilmTransport(this.roomObjectArt('films', room), this.layer, {
-      opening, artwork, signal: controller.signal
+      opening, signal: controller.signal, preview
     });
     if (this.transportController === controller) this.transportController = null;
   }
@@ -354,10 +395,9 @@ export class TransitionDirector {
     const viewport = room?.querySelector('[data-camera-viewport]');
     const world = room?.querySelector('[data-room-world]');
     const focusTarget = this.roomCameraTarget(route);
-    const guitarBody = route === 'music' && room?.querySelector('[data-music-body]');
     const object = room?.querySelector(`[data-room-object].object-${route}`);
 
-    if(route==='research')await this.registry.home.ready?.(room);
+    if(route==='research'||route==='films')await this.registry.home.ready?.(room);
     if(!this.isCurrent(generation))return;
 
     if (isReducedMotion() || !viewport || !world || !focusTarget || !object) {
@@ -371,15 +411,9 @@ export class TransitionDirector {
 
     this.camera = new VirtualCamera(viewport, world);
     object.setAttribute('data-activated', 'true');
-    if (guitarBody) {
-      const neckPose = this.camera.measure(focusTarget, route);
-      await this.camera.focus(guitarBody, route, { duration: 560 });
-      if (!this.isCurrent(generation)) return;
-      await this.camera.animateTo(neckPose, 640);
-    } else {
-      await this.camera.focus(focusTarget, route, { duration: profile.cameraDuration });
-    }
+    await this.camera.focus(focusTarget, route, { duration: profile.cameraDuration });
     if (!this.isCurrent(generation)) return;
+    if (route === 'music') await this.turnMusicGuitar(room, true);
 
     if (route === 'films') await this.playFilmTransport(room, true);
     if (!this.isCurrent(generation)) return;
@@ -388,7 +422,7 @@ export class TransitionDirector {
     mount();
     this.watchSceneAlignment(route);
     if (!this.isCurrent(generation)) return;
-    await this.revealInterface(this.host.querySelector('[data-scene]'), profile.interfaceDuration);
+    if (route !== 'films') await this.revealInterface(this.host.querySelector('[data-scene]'), profile.interfaceDuration);
     if (this.isCurrent(generation)) this.clear();
   }
 
@@ -403,10 +437,9 @@ export class TransitionDirector {
       return;
     }
 
-    const artwork = route === 'films'
-      ? this.host.querySelector('.film-frame[aria-selected="true"] img')?.getAttribute('src')
-      : undefined;
-    await this.hideInterface(this.host.querySelector('[data-scene]'), profile.exitInterfaceDuration);
+    const filmScene = route === 'films' ? this.host.querySelector('[data-scene="films"]') : null;
+    const filmSnapshot = filmScene?.cloneNode(true);
+    if (!filmScene) await this.hideInterface(this.host.querySelector('[data-scene]'), profile.exitInterfaceDuration);
     if (!this.isCurrent(generation)) return;
     onRoomEntering();
     mountRoom();
@@ -419,9 +452,11 @@ export class TransitionDirector {
       this.camera.jumpTo(this.backdropState);
       viewport.dataset.cameraTarget = route;
     }
+    if (route === 'music') room?.querySelector('.object-music .object-art')?.setAttribute('data-guitar-facing', '');
     this.clearBackdrop();
     await nextFrame();
-    if (route === 'films' && room) await this.playFilmTransport(room, false, artwork);
+    if (route === 'music') await this.turnMusicGuitar(room, false);
+    if (route === 'films' && room) await this.playFilmTransport(room, false, filmSnapshot);
     if (!this.isCurrent(generation)) return;
     if (this.camera) await this.camera.restore({ duration: profile.restoreDuration });
     if (this.isCurrent(generation)) this.clear();

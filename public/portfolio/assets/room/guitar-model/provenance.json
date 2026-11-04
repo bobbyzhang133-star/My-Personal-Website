@@ -1,0 +1,32 @@
+{
+  "source": "scripts/build-room-guitar.py",
+  "reference": "Wine-red Home Room guitar, registered to source box 54 166 280 602",
+  "dimensionsMetersApprox": [
+    0.4,
+    0.06,
+    0.98
+  ],
+  "animation": "Turn toward Music viewer",
+  "poseCount": 13,
+  "settledAnchorPercent": [
+    [
+      65.151,
+      28.924
+    ],
+    [
+      65.728,
+      46.865
+    ]
+  ],
+  "sourceSize": [
+    280,
+    602
+  ],
+  "renderScale": 2,
+  "closeupRenderScale": 4,
+  "mechanicalReferences": [
+    "https://www.fender.com/articles/setup/what-is-a-string-tree",
+    "https://www.fender.com/products/player-ii-stratocaster"
+  ],
+  "finish": "Geometry and solid materials throughout, including six individually gauged round strings, raised frets, pearloid inlays and modeled hardware."
+}

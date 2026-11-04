@@ -1,17 +1,17 @@
-import { projects, researchNotes } from '../content.js?v=3d5bd1cfca66';
-import { esc, isReducedMotion } from '../utils.js?v=3d5bd1cfca66';
-import { sceneController } from './shared.js?v=3d5bd1cfca66';
-import { journalMechanism } from './journal-motion.js?v=3d5bd1cfca66';
-import { pageFold, foldPolygon } from './book-fold.js?v=3d5bd1cfca66';
-import { addPageSample, pageReleaseIntent } from './book-gesture.js?v=3d5bd1cfca66';
+import { projects } from '../content.js?v=8273376a5e68';
+import { purchaseResearch, researchBlocks } from '../research-summary.js?v=8273376a5e68';
+import { esc, isReducedMotion } from '../utils.js?v=8273376a5e68';
+import { sceneController } from './shared.js?v=8273376a5e68';
+import { journalMechanism } from './journal-motion.js?v=8273376a5e68';
+import { pageFold, foldPolygon } from './book-fold.js?v=8273376a5e68';
+import { addPageSample, pageReleaseIntent } from './book-gesture.js?v=8273376a5e68';
 
 const chapters = projects.filter(project => project.category === 'research');
 
-// Supplied overviews and journal notes, not an invented full manuscript.
 export const researchPages = [
   { title: 'Field Notes', kind: 'contents' },
-  ...chapters.map((project, index) => ({ title: project.title, kind: 'chapter', project, chapter: index })),
-  { title: 'Currently chasing', kind: 'notes' }
+  ...chapters.map(project => ({ title: 'Why players spend', kind: 'chapter', project })),
+  ...purchaseResearch.sections.map(section => ({ ...section, kind: 'notes' }))
 ];
 
 export function bookPageIndex(page, single = false, count = researchPages.length) {
@@ -24,16 +24,21 @@ export function bookDestination(page, direction, single = false, count = researc
 }
 
 function pageContent(page) {
-  if (page.kind === 'contents') return `<p class="eyebrow">Bobby Zhang / Research journal</p><h2>Field Notes</h2><p class="book-intro">Questions, experiments,<br>and work in progress.</p><nav class="book-contents" aria-label="Research chapters">${chapters.map((project, index) => `<button type="button" data-book-jump="${index + 1}"><span>0${index + 1}</span><span>${esc(project.title)}</span><small>${index + 2}</small></button>`).join('')}<button type="button" data-book-jump="${researchPages.length - 1}"><span>↳</span><span>Currently chasing</span><small>${researchPages.length}</small></button></nav><p class="book-handnote">A working journal, not a finished manuscript.</p>`;
-  if (page.kind === 'notes') return `<p class="eyebrow">Notebook / Open questions</p><h2>Currently<br>chasing</h2><ol class="book-research-notes">${researchNotes.map(note => `<li>${esc(note)}</li>`).join('')}</ol><p class="book-handnote">Still testing. Still learning.</p>`;
-  const { project, chapter } = page;
-  return `<p class="eyebrow">Chapter 0${chapter + 1} / ${esc(project.yearStatus)}</p><h2>${esc(project.title)}</h2><p class="book-summary">${esc(project.description)}</p><div class="tags">${project.technologies.map(item => `<span>${esc(item)}</span>`).join('')}</div><a class="book-read-link" href="${project.detailRoute}">Open project notes <span aria-hidden="true">↗</span></a>${project.externalLinks.map(link => `<a class="book-source-link" href="${esc(link.url)}">${esc(link.label)} ↗</a>`).join('')}<p class="book-availability">Project overview · ${chapter === 0 ? 'The full 29-page draft is not included in this journal.' : 'Research and writing in progress.'}</p>`;
+  const heading = `<h2 tabindex="-1">${esc(page.title)}</h2>`;
+  if (page.kind === 'contents') {
+    const links = researchPages.slice(1).map(({ title }, index) =>
+      `<button type="button" data-book-jump="${index + 1}"><span>${esc(title)}</span><small aria-hidden="true">${String(index + 2).padStart(2, '0')}</small></button>`
+    ).join('');
+    return `<p class="eyebrow">Bobby Zhang / Research journal</p>${heading}<p class="book-intro">Notes on why players spend in free-to-play games.</p><nav class="book-contents" aria-label="Table of contents">${links}</nav>`;
+  }
+  if (page.kind === 'notes') return `<p class="eyebrow">Research notebook</p>${heading}${researchBlocks(page.blocks)}`;
+  return `<p class="eyebrow">Project overview / ${esc(page.project.yearStatus)}</p>${heading}<p class="book-summary">${esc(purchaseResearch.introduction)}</p><p class="book-summary">The draft considers fear of missing out, parasocial attachment, and the appeal of expressing an ideal self. Its two cases put these ideas alongside the actual design of in-game offers.</p><a class="book-read-link" href="${page.project.detailRoute}">Open project notes <span aria-hidden="true">↗</span></a><p class="book-availability">${esc(purchaseResearch.status)}</p>`;
 }
 
 function pageMarkup(index, side = '') {
   const page = researchPages[index];
   if (!page) return '<div class="book-page book-blank" aria-hidden="true"></div>';
-  return `<article class="book-page journal-page ${side}" data-page-index="${index}" aria-label="Page ${index + 1}: ${esc(page.title)}"><div class="book-page-content">${pageContent(page)}</div><div class="book-folio"><span>FIELD NOTES</span><span>${String(index + 1).padStart(2, '0')}</span></div></article>`;
+  return `<article class="book-page journal-page ${side}" data-page-index="${index}" data-page-kind="${page.kind}" aria-label="Page ${index + 1}: ${esc(page.title)}"><div class="book-page-content">${pageContent(page)}</div><div class="book-folio"><span>FIELD NOTES</span><span>${String(index + 1).padStart(2, '0')}</span></div></article>`;
 }
 
 export function renderResearch({ preview: isPreview = false } = {}) {
@@ -74,6 +79,7 @@ export function mountResearch(root) {
   const media = window.matchMedia('(max-width: 680px) and (orientation: portrait)');
   let single = media.matches;
   let index = 0;
+  let readingPage = 0;
   let turn = null;
   let gesture = null;
   let frame = 0;
@@ -83,7 +89,7 @@ export function mountResearch(root) {
     surface.dataset.bookMode = single ? 'single' : 'spread';
     surface.dataset.bookPage = String(index + 1);
     pages.innerHTML = pageMarkup(index, 'page-left') + (single ? '' : pageMarkup(index + 1, 'page-right'));
-    const facing=!single&&index+1<researchPages.length-1;
+    const facing = !single && index + 1 < researchPages.length;
     counter.textContent = `${facing ? 'Pages' : 'Page'} ${index + 1}${facing ? `–${index + 2}` : ''} / ${researchPages.length}`;
     surface.querySelectorAll('[data-book-direction], [data-book-edge]').forEach(button => {
       const direction = Number(button.dataset.bookDirection || button.dataset.bookEdge);
@@ -93,7 +99,11 @@ export function mountResearch(root) {
 
   function finish(commit = true) {
     cancelAnimationFrame(frame);
-    if (turn && commit) index = turn.to;
+    const jumpPage = turn && commit ? turn.jumpPage : undefined;
+    if (turn && commit) {
+      index = turn.to;
+      readingPage = jumpPage ?? index;
+    }
     const refocus = pages.contains(document.activeElement);
     turn = null;
     leaf.hidden = true;
@@ -101,7 +111,15 @@ export function mountResearch(root) {
     surface.removeAttribute('data-turning');
     pages.inert = false;
     paint();
-    if (refocus) surface.focus({ preventScroll: true });
+    if (jumpPage !== undefined) focusPage(jumpPage);
+    else if (refocus) surface.focus({ preventScroll: true });
+  }
+
+  function focusPage(page) {
+    const heading = pages.querySelector(`[data-page-index="${page}"] h2`);
+    if (!heading) return;
+    heading.parentElement.scrollTop = 0;
+    heading.focus({ preventScroll: true });
   }
 
   function fold(point) {
@@ -178,11 +196,22 @@ export function mountResearch(root) {
     frame = requestAnimationFrame(tick);
   }
 
-  function go(to) {
+  function go(to, jump = false) {
     if (gesture || turn) return;
-    const target = bookPageIndex(to, single);
+    const page = bookPageIndex(to, true);
+    const target = bookPageIndex(page, single);
+    if (target === index) {
+      if (jump) {
+        readingPage = page;
+        focusPage(page);
+      }
+      return;
+    }
     if (pages.contains(document.activeElement)) surface.focus({ preventScroll: true });
-    if (begin(target)) settle(true, true);
+    if (begin(target)) {
+      if (jump) turn.jumpPage = page;
+      settle(true, true);
+    }
   }
 
   surface.addEventListener('click', event => {
@@ -190,7 +219,7 @@ export function mountResearch(root) {
     const direction = event.target.closest('[data-book-direction], [data-book-edge]');
     const jump = event.target.closest('[data-book-jump]');
     if (direction) go(bookDestination(index, Number(direction.dataset.bookDirection || direction.dataset.bookEdge), single));
-    else if (jump) go(Number(jump.dataset.bookJump));
+    else if (jump) go(Number(jump.dataset.bookJump), true);
   }, { signal });
 
   surface.addEventListener('keydown', event => {
@@ -275,7 +304,7 @@ export function mountResearch(root) {
     releaseGesture();
     finish(false);
     single = media.matches;
-    index = bookPageIndex(index, single);
+    index = bookPageIndex(readingPage, single);
     paint();
   }, { signal });
   signal.addEventListener('abort', () => {

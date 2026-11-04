@@ -1,4 +1,4 @@
-import { esc } from './utils.js?v=3d5bd1cfca66';
+import { esc } from './utils.js?v=8273376a5e68';
 
 // Keep embedding URLs in content; direct links must open the original file viewer.
 export function originalSourceUrl(url) {

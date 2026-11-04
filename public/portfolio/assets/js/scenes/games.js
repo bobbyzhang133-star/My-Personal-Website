@@ -1,7 +1,7 @@
-import { projects } from '../content.js?v=3d5bd1cfca66';
-import { $$, esc } from '../utils.js?v=3d5bd1cfca66';
-import { addSwipe, bindLinearKeys, sceneController, setRoving } from './shared.js?v=3d5bd1cfca66';
-import { GAME_ANIMATIONS, mountCharacterAnimations } from '../game-animation.js?v=3d5bd1cfca66';
+import { projects } from '../content.js?v=8273376a5e68';
+import { $$, esc } from '../utils.js?v=8273376a5e68';
+import { addSwipe, bindLinearKeys, sceneController, setRoving } from './shared.js?v=8273376a5e68';
+import { GAME_ANIMATIONS, mountCharacterAnimations } from '../game-animation.js?v=8273376a5e68';
 
 const games = projects.filter(project => project.category === 'games');
 

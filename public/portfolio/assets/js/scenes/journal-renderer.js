@@ -1,4 +1,4 @@
-import { journalProjection } from './journal-geometry.js?v=3d5bd1cfca66';
+import { journalProjection } from './journal-geometry.js?v=8273376a5e68';
 const clamp=value=>Math.max(0,Math.min(1,value));
 const mix=(a,b,t)=>a+(b-a)*t;
 

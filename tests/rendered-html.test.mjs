@@ -26,7 +26,8 @@ import { GAME_ANIMATIONS, sampleClip, createSpritePlayer } from '../public/portf
 import { BREAKOUT_CHAPTERS, orderedChapters, OCEAN_LEVELS, OCEAN_WORLD, BOSS_TENTACLES, oceanLevel, oceanCamera, verticalCamera, RAT_OBJECTS, newRatState, validRatState, ratAction, ratPropGeometry, projectRatPoint } from '../public/portfolio/assets/js/experience-state.js';
 import { TransitionDirector } from '../public/portfolio/assets/js/transitions.js';
 import { calculateTravelTransform, CAMERA_HOME, CAMERA_TRAVEL_PROFILES, VirtualCamera } from '../public/portfolio/assets/js/camera.js';
-import { projects, aiGroups, aiResearchNotes, researchNotes } from '../public/portfolio/assets/js/content.js';
+import { projects, aiGroups, aiResearchNotes } from '../public/portfolio/assets/js/content.js';
+import { purchaseResearch } from '../public/portfolio/assets/js/research-summary.js';
 import { aiEvidence } from '../public/portfolio/assets/js/ai-projects.js';
 import { sceneRegistry } from '../public/portfolio/assets/js/scenes/index.js';
 import { bookPageIndex, bookDestination, researchPages, mountResearch } from '../public/portfolio/assets/js/scenes/research.js';
@@ -38,7 +39,12 @@ import { pageFold, foldPolygon } from '../public/portfolio/assets/js/scenes/book
 import { addPageSample, pageReleaseIntent } from '../public/portfolio/assets/js/scenes/book-gesture.js';
 import { isCreativePath, routeFromPath } from '../public/portfolio/assets/js/utils.js';
 import { originalSourceUrl, projectSources } from '../public/portfolio/assets/js/project-sources.js';
-import { filmCopy } from '../public/portfolio/assets/js/scenes/films.js';
+import { filmCopy, filmGateRect, filmTransportSample } from '../public/portfolio/assets/js/scenes/films.js';
+import { filmOpeningSample } from '../public/portfolio/assets/js/scenes/film-transport.js';
+import { FILM_MACHINE } from '../public/portfolio/assets/js/scenes/film-opening-geometry.js';
+import { CAMERA_MODEL_ASSET } from '../public/portfolio/assets/js/scenes/camera-live.js';
+import { filmSlots, fitFilmCover, projectionSample } from '../public/portfolio/assets/js/scenes/film-strip.js';
+import { filmPlaybackUrl } from '../public/portfolio/assets/js/scenes/films.js';
 import { musicSource } from '../public/portfolio/assets/js/scenes/music.js';
 
 const root = new URL('../public/portfolio/', import.meta.url);
@@ -64,6 +70,41 @@ test('Original game links and supplied recordings remain accessible in every gam
   }
 });
 
+test('Film movement brackets release and registration, and the gate remains framed', () => {
+  for (const [from,to] of [[0,1],[2,0]]) {
+    assert.equal(filmTransportSample(.12,from,to).position,from);
+    assert.equal(filmTransportSample(.12,from,to).phase,'release');
+    assert.equal(filmTransportSample(.5,from,to).phase,'transport');
+    assert.equal(filmTransportSample(.88,from,to).position,to);
+    assert.equal(filmTransportSample(.88,from,to).phase,'register');
+    assert.equal(filmTransportSample(1,from,to).phase,'registered');
+  }
+  for (const [width,height] of [[1280,720],[390,844]]) {
+    const gate=filmGateRect(width,height);
+    assert(Math.abs(gate.left+gate.width/2-width/2)<.01);
+    assert(gate.top>48 && gate.top+gate.height<height-130);
+    assert(Math.abs(gate.width/gate.height-288/162)<.00001);
+  }
+  assert.doesNotMatch(sceneRegistry.films.render(), /<iframe/);
+});
+
+test('Camera opening finishes its turn and cover removal before approaching the live gate, with a reversible path', () => {
+  for (let step=0;step<=100;step++) {
+    const sample=filmOpeningSample(step/100);
+    if (sample.cover>0) assert.equal(sample.turn,1,'the cover stays attached while the camera is turning');
+    if (sample.zoom>0) assert.equal(sample.cover,1,'the gate approach begins only after uncovering');
+    const reverse=filmOpeningSample(1-step/100,false);
+    for (const field of ['turn','cover','zoom']) assert(Math.abs(sample[field]-reverse[field])<1e-10);
+  }
+  assert.equal(filmOpeningSample(0).turn,0);
+  assert.equal(filmOpeningSample(1).zoom,1);
+  const [x,y,w,h]=FILM_MACHINE.panel;
+  assert(x>0&&y>0&&x+w<FILM_MACHINE.size[0]&&y+h<FILM_MACHINE.size[1]);
+  assert(w>h,'the opening follows the wide physical service door');
+  const contacts=FILM_MACHINE.ground.map(point=>point[1]);
+  assert(Math.max(...contacts)-Math.min(...contacts)<.001,'the foreground skid contact stays on the desk through every pose');
+});
+
 test('Film and music sources open the original viewer while music embeds stay lazy', () => {
   const music = projects.find(project => project.category === 'music');
   assert.equal(originalSourceUrl(music.externalLinks[0].url), 'https://drive.google.com/file/d/1fB9kPFtr7Y1Ot_9K0noQOGsuAvvXRDBJ/view');
@@ -87,14 +128,14 @@ test('Film and music sources open the original viewer while music embeds stay la
 
 test('Research pagination is bounded, supports single pages and facing spreads, and retains canonical content', () => {
   assert.equal(bookPageIndex(-20), 0);
-  assert.equal(bookPageIndex(99), 2);
-  assert.equal(bookPageIndex(3, true), 2);
+  assert.equal(bookPageIndex(99), 4);
+  assert.equal(bookPageIndex(3, true), 3);
   assert.equal(bookPageIndex(3, false), 2, 'portrait to spread retains the same sheet');
   assert.equal(bookDestination(0, -1), 0, 'never wrap before the first page');
   assert.equal(bookDestination(0, 1), 2);
-  assert.equal(bookDestination(2, 1), 2, 'never wrap after the last spread');
+  assert.equal(bookDestination(4, 1), 4, 'never wrap after the last spread');
   assert.equal(bookDestination(1, 1, true), 2);
-  assert.equal(bookDestination(3, -1, true), 1);
+  assert.equal(bookDestination(3, -1, true), 2);
   assert.equal(bookDestination(2, 1, false, 5), 4, 'an odd last leaf is reachable');
   assert.equal(bookDestination(4, 1, false, 5), 4);
   assert.deepEqual(researchPages.filter(page => page.kind === 'chapter').map(page => page.project), projects.filter(project => project.category === 'research'));
@@ -104,7 +145,7 @@ test('Research pagination is bounded, supports single pages and facing spreads, 
   assert.match(html, /aria-label="Book navigation"/);
   assert.match(html, /role="status" aria-live="polite"/);
   assert.match(html, /data-book-direction="-1"[^>]*disabled/);
-  assert.match(html, /data-book-jump="2"/);
+  for (const page of [1, 2, 3, 4]) assert.match(html, new RegExp(`data-book-jump="${page}"`));
   assert.match(html, /full 29-page draft is not included/);
   assert.doesNotMatch(html, /book-preview|data-chapter|aria-current="page"/);
 });
@@ -200,7 +241,9 @@ test('Research physical sheet handles forward/back, interrupted drags, resize, r
   const map = { '[data-book-viewport]': viewport, '[data-book-pages]': pages, '[data-book-leaf]': leaf, '[data-book-counter]': counter };
   surface.querySelector = selector => map[selector];
   surface.querySelectorAll = () => [prev, next, edgePrev, edgeNext];
-  pages.querySelector = () => null;
+  const jumpHeading = new Element();
+  jumpHeading.parentElement = { scrollTop: 10 };
+  pages.querySelector = selector => selector === '[data-page-index="1"] h2' ? jumpHeading : null;
   leaf.querySelector = selector => selector === '.leaf-front' ? front : back;
   leaf.querySelectorAll = () => [];
   front.querySelector = back.querySelector = () => shade;
@@ -220,7 +263,11 @@ test('Research physical sheet handles forward/back, interrupted drags, resize, r
   const up = (ms=16) => viewport.emit('pointerup', { pointerId: 1,clientX:lastX,clientY:lastY,timeStamp:gestureTime+=ms });
   try {
     const scene = mountResearch({ querySelector: () => surface });
-    assert.equal(counter.textContent, 'Pages 1–2 / 3'); assert(prev.disabled); assert(!next.disabled);
+    assert.equal(counter.textContent, 'Pages 1–2 / 5'); assert(prev.disabled); assert(!next.disabled);
+    click(new Element({ bookJump: '1' }));
+    assert.equal(document.activeElement, jumpHeading, 'contents focuses the exact facing page without turning');
+    assert.equal(jumpHeading.parentElement.scrollTop, 0);
+    assert.equal(frames.size, 0);
     assert(!viewport.emit('selectstart').defaultPrevented,'normal reading text stays selectable');
     assert(!down(500).defaultPrevented,'interior reading is not hijacked as an edge pull');assert.equal(viewport.dataset.bookGrabbed,undefined);
     assert(down(990).defaultPrevented,'mouse selection must be blocked at the edge press, before the movement threshold');
@@ -233,8 +280,8 @@ test('Research physical sheet handles forward/back, interrupted drags, resize, r
     assert.match(leaf.innerHTML, /leaf-front[^]*data-page-index="1"/);
     assert.match(leaf.innerHTML, /leaf-back[^]*data-page-index="2"/);
     click(next); assert.equal(frames.size, 1, 'rapid input does not fork animations');
-    flush(); assert.equal(counter.textContent, 'Page 3 / 3'); assert(next.disabled); assert(leaf.hidden); assert(!pages.inert);
-    assert.doesNotMatch(pages.innerHTML, /Read on GitHub|FLUX|Groq/); assert.match(pages.innerHTML, /Currently/);
+    flush(); assert.equal(counter.textContent, 'Pages 3–4 / 5'); assert(!next.disabled); assert(leaf.hidden); assert(!pages.inert);
+    assert.doesNotMatch(pages.innerHTML, /Read on GitHub|FLUX|Groq/); assert.match(pages.innerHTML, /Cases &amp; approach/);
     click(prev); assert.equal(surface.dataset.turning, 'backward'); flush();
     down(990); move(940); const beforeY=leaf.dataset.foldAngle; move(940,280); assert.notEqual(leaf.dataset.foldAngle,beforeY,'vertical mouse motion changes the fold while horizontal position stays fixed'); up(); flush();
     assert.equal(surface.dataset.bookPage, '1', 'short drag snaps back');
@@ -247,10 +294,10 @@ test('Research physical sheet handles forward/back, interrupted drags, resize, r
     assert.equal(leaf.dataset.foldAngle,beforeCancel,'cancellation must not jump the grabbed paper to synthetic (0,0) coordinates');flush();
     assert.equal(surface.dataset.bookPage, '3', 'cancel restores the original spread');
     down(10); move(350); win.emit('resize'); assert(leaf.hidden); assert(!pages.inert); assert.equal(frames.size, 0);
-    single = true; win.emit('resize'); assert.equal(surface.dataset.bookMode, 'single'); assert.equal(counter.textContent, 'Page 3 / 3');
+    single = true; win.emit('resize'); assert.equal(surface.dataset.bookMode, 'single'); assert.equal(counter.textContent, 'Page 3 / 5');
     assert.equal((pages.innerHTML.match(/<article/g) || []).length, 1);
     assert(!down(500, 'touch').defaultPrevented,'touch retains vertical reading scroll');move(510, 250); assert.equal(viewport.capture, null, 'vertical reading does not turn a leaf');assert.equal(viewport.dataset.bookGrabbed,undefined);
-    click(prev); flush();down(800, 'touch'); move(450); up(); flush(); assert.equal(counter.textContent, 'Page 3 / 3');
+    click(prev); flush();down(800, 'touch'); move(450); up(); flush(); assert.equal(counter.textContent, 'Page 3 / 5');
     surface.emit('keydown', { key: 'Home' }); flush(); assert.equal(surface.dataset.bookPage, '1');
     click(new Element({ bookJump: '2' })); flush(); assert.equal(surface.dataset.bookPage, '3');
     motion = 'reduced'; click(prev); assert.equal(surface.dataset.bookPage, '2'); assert.equal(frames.size, 0); assert(leaf.hidden);
@@ -270,7 +317,7 @@ test('AI groups tools with their real research while the book keeps unrelated re
   assert.deepEqual([...ids].sort(),projects.filter(project=>project.category==='ai').map(project=>project.id).sort());
   assert.equal(projects.filter(project=>project.category==='research').length,1);
   assert.equal(projects.find(project=>project.id==='gamification').category,'research');
-  assert(researchNotes.every(note=>!/Groq|FLUX|HTML5/.test(note)));assert(aiResearchNotes.some(note=>/HTML5/.test(note)));
+  assert(purchaseResearch.sections.every(section=>section.blocks.every(note=>!/Groq|FLUX|HTML5/.test(note.text))));assert(aiResearchNotes.some(note=>/HTML5/.test(note)));
   const research=projects.find(project=>project.id==='github-profile');assert.equal(research.category,'ai');assert.match(research.detailRoute,/^\/ai\//);
   assert(research.externalLinks.some(link=>link.url.endsWith('/PAPER.md')));assert(research.externalLinks.some(link=>link.url.endsWith('/research-journal.md')));
   const free=projects.find(project=>project.id==='game-builder-free'),pro=projects.find(project=>project.id==='game-builder-pro'),definition=projects.find(project=>project.id==='definition');
@@ -991,9 +1038,9 @@ test('creative scene modules omit website category headers and footers', async (
 test('category interfaces stay inside their physical Room objects', async () => {
   const expected = {
     games: { object: 'bird-character-select', surface: 'data-carousel="games"', asset: 'game-characters' },
-    films: { object: 'camera', surface: 'data-film-browser', asset: 'studio-65.png' },
+    films: { object: 'camera', surface: 'data-film-browser', asset: 'data-film-model' },
     research: { object: 'book', surface: 'data-book', asset: 'master/research.svg' },
-    music: { object: 'guitar-studio', surface: 'data-studio', asset: 'master/music.svg' },
+    music: { object: 'guitar-studio', surface: 'data-studio', asset: 'data-music-neck' },
     ai: { object: 'computer', surface: 'data-ai-system', asset: 'master/ai.svg' }
   };
   for (const [route, markers] of Object.entries(expected)) {
@@ -1056,7 +1103,7 @@ test('camera travel moves the full world toward a visible object at meaningful s
   assert.deepEqual(calculateTravelTransform(null, mobileViewport, mobileViewport), CAMERA_HOME);
 });
 
-test('Approved master registers the four source cutouts and cinema camera in one Room camera', async () => {
+test('Approved master registers the source cutouts and Blender props in one Room camera', async () => {
   const html=sceneRegistry.home.render();
   assert.equal(MASTER_ROOM.approved,'2026-10-24');
   assert.equal(Object.keys(MASTER_OBJECTS).length,5);
@@ -1066,8 +1113,23 @@ test('Approved master registers the four source cutouts and cinema camera in one
   assert.match(html,/master-derived-native-reference/);
   const sourceHashes=[];
   for(const[name,o]of Object.entries(MASTER_OBJECTS)){
+    if (name === 'music') {
+      assert.match(html, /guitar-rest\.webp/);
+      assert.match(html, /guitar-facing\.webp/);
+      const glb = await readFile(new URL('assets/room/guitar-model/room-guitar.glb', root));
+      assert.equal(glb.subarray(0, 4).toString(), 'glTF');
+      const model = JSON.parse(glb.subarray(20, 20 + glb.readUInt32LE(12)).toString());
+      const blenderName = name => name.replace(/\.\d{3}$/, '');
+      assert.equal(model.scenes.length, 1, 'the guitar export excludes other Blender scenes');
+      assert(model.animations.some(animation => blenderName(animation.name) === 'Turn toward Music viewer'));
+      assert(model.nodes.some(node => blenderName(node.name) === 'Rosewood fretboard'));
+      assert.equal(model.nodes.filter(node => /^String [1-6]$/.test(blenderName(node.name)) && node.mesh !== undefined).length, 6);
+      assert(model.nodes.some(node => node.name.startsWith('Pearloid inlay') && node.mesh !== undefined));
+      assert.equal(model.textures?.length ?? 0, 0, 'guitar detail comes from geometry and materials');
+      continue;
+    }
     if (name === 'films') {
-      assert.match(html, /studio-65\.webp/);
+      assert.match(html, /data-room-camera/);
       assert.match(html, /studio-65\.png/);
       assert(html.includes(`class="cinema-camera-hit" d="${o.path}"`));
       const glb = await readFile(new URL('assets/room/cinema-camera/studio-65.glb', root));
@@ -1183,6 +1245,11 @@ test('Physical category markings preserve source boxes, semantic links and reada
     if (name === 'games') {
       assert.match(html, /bird-leg-band/);
       assert.doesNotMatch(html, /games(?:-left)?-mark\.svg/);
+      continue;
+    }
+    if (name === 'music') {
+      assert.match(html, /aria-label="Music"/);
+      assert.doesNotMatch(html, /music-mark\.svg/);
       continue;
     }
     if (name === 'films') {
@@ -1619,5 +1686,105 @@ test('Moving printed pages preserve the current chapter and scroll, stay inert, 
     moving.update({left:{visible:false},right:{visible:true,name:'JournalRightReadingLeaf',quad:[[300,0],[600,0],[600,343],[300,343]]}});
     if(!single)assert.equal(faces[0].style.visibility,'hidden','the inside face disappears by physical backface visibility');
     moving.remove();assert(faces.every(face=>face.removed));assert.equal(originals[0].querySelector().scrollTop,73,'the real reader remains intact');
+  }
+});
+
+test('The active camera export contains movable 3D geometry and valid buffer ranges',async()=>{
+  const model=JSON.parse(await readFile(new URL(`${CAMERA_MODEL_ASSET.slice(1)}camera.json`,root),'utf8'));
+  const binary=await readFile(new URL(`${CAMERA_MODEL_ASSET.slice(1)}camera.bin`,root));
+  const values=new Float32Array(binary.buffer,binary.byteOffset,binary.byteLength/4);
+  assert.equal(model.id,'studio-65-live-mesh-v2');
+  assert.equal(model.meshes.reduce((sum,mesh)=>sum+mesh.count/9,0),model.triangles);
+  for(const part of ['body','cover','mechanism','stock','shutter','rotor0','rotor1'])assert(model.meshes.some(mesh=>mesh.part===part),part);
+  for(const mesh of model.meshes){
+    assert.equal(mesh.count%9,0);
+    assert(mesh.positionOffset+mesh.count<=values.length&&mesh.normalOffset+mesh.count<=values.length);
+    for(let i=0;i<mesh.count;i+=3){
+      assert([...values.slice(mesh.positionOffset+i,mesh.positionOffset+i+3)].every(Number.isFinite));
+      const normal=values.slice(mesh.normalOffset+i,mesh.normalOffset+i+3);
+      assert(Math.abs(Math.hypot(...normal)-1)<.001);
+      if(mesh.part==='body')assert(values[mesh.positionOffset+i+1]>=-.00001,'the whole camera body stays above its supporting base');
+    }
+  }
+  for(const rotor of [0,1]){
+    const meshes=model.meshes.filter(mesh=>mesh.part===`rotor${rotor}`);
+    const xs=meshes.flatMap(mesh=>Array.from(values.slice(mesh.positionOffset,mesh.positionOffset+mesh.count)).filter((_,i)=>i%3===0));
+    const expected=model.gate.reels[rotor][2]*model.unit*2;
+    assert(Math.abs(Math.max(...xs)-Math.min(...xs)-expected)<.0001,'the complete machined reel must retain its approved diameter');
+    assert(Math.abs((Math.max(...xs)+Math.min(...xs))/2-model.pivots[`rotor${rotor}`][0])<.0001,'reels cannot collapse onto the enclosure origin during Blender export');
+  }
+  assert.equal(model.meshes.flatMap(mesh=>mesh.objects).filter(name=>name.includes('exposure pressure rail')).length,4);
+  const glb=await readFile(new URL(`${CAMERA_MODEL_ASSET.slice(1)}camera.glb`,root));
+  assert.equal(glb.toString('ascii',0,4),'glTF');assert.equal(glb.readUInt32LE(8),glb.length);
+  const manifest=JSON.parse(glb.toString('utf8',20,20+glb.readUInt32LE(12)));
+  assert(manifest.meshes.length>10,'portable asset must contain meshes rather than a rendered billboard');
+});
+
+test('The real camera projection keeps desk contact through turning and aligns its film plane with accessible controls',async()=>{
+  const THREE=await import('../public/portfolio/assets/js/vendor/camera-three/three.js');
+  const {LiveCameraView}=await import('../public/portfolio/assets/js/scenes/camera-live.js');
+  const {filmOverview}=await import('../public/portfolio/assets/js/scenes/films.js');
+  const model=JSON.parse(await readFile(new URL(`${CAMERA_MODEL_ASSET.slice(1)}camera.json`,root),'utf8'));
+  for(const [width,height] of [[1280,720],[390,844],[844,390]]){
+    const view=Object.create(LiveCameraView.prototype);
+    Object.assign(view,{asset:{THREE,model},width,height,camera:new THREE.OrthographicCamera(-1,1,1,-1,.001,30),cover(){},render(){}});
+    const rect={left:width*.3,top:height*.35,width:width*.4,height:width*.4*231/310};
+    for(const progress of [0,.2,.3,.42,.6]){
+      view.opening(filmOpeningSample(progress),rect,filmOverview(width,height));
+      const base=view.project(new THREE.Vector3(...model.room.contact));
+      assert(Math.abs(base.y-(rect.top+221.87/231*rect.height))<.001,'turning must retain desk contact');
+    }
+    view.opening(filmOpeningSample(1),rect,filmOverview(width,height));
+    const [u,v,w,h]=model.gate.gate,expected=filmGateRect(width,height);
+    for(const [x,y,ex,ey] of [[u,v,expected.left,expected.top],[u+w,v+h,expected.left+expected.width,expected.top+expected.height]]){
+      const point=view.project(view.point(x,y,36));assert(Math.hypot(point.x-ex,point.y-ey)<.001,'mesh and HTML frame cannot jump at handoff');
+    }
+  }
+});
+
+test('A failed camera asset load leaves Room navigation available and retains the registered fallback',async()=>{
+  const {prepareRoomCamera}=await import('../public/portfolio/assets/js/scenes/camera-live.js');
+  const originalFetch=globalThis.fetch,originalWarn=console.warn,object={dataset:{}};
+  globalThis.fetch=async()=>{throw new Error('Offline mesh request');};console.warn=()=>{};
+  try{
+    await prepareRoomCamera({isConnected:true,querySelectorAll:()=>[{closest:()=>object}]});
+    assert.equal(object.dataset.cameraSource,'fallback');
+  }finally{globalThis.fetch=originalFetch;console.warn=originalWarn;}
+});
+
+test('Film leader fills both ends without becoming a selectable or invented project',()=>{
+  const slots=filmSlots(3);
+  assert.deepEqual(slots.filter(s=>s.projectIndex!==null).map(s=>s.projectIndex),[0,1,2]);
+  assert(slots.some(s=>s.index<0&&s.projectIndex===null));
+  assert(slots.some(s=>s.index>2&&s.projectIndex===null));
+  const html=sceneRegistry.films.render();
+  assert.equal((html.match(/data-film-leader/g)||[]).length,8);
+  assert.equal((html.match(/class="gate-frame-button"/g)||[]).length,3);
+  assert.equal((html.match(/aria-selected="true"/g)||[]).length,1);
+  assert.match(html,/Play selected film/);
+});
+
+test('The complete film cover fits the exposure without stretching, including portrait and ultrawide art',()=>{
+  for(const [w,h] of [[712,534],[712,535],[600,1000],[1800,600]]){
+    const fit=fitFilmCover(w,h,1152,648);
+    assert(Math.abs(fit.width/fit.height-w/h)<1e-10);
+    assert(fit.x>=0&&fit.y>=0&&fit.x+fit.width<=1152.0001&&fit.y+fit.height<=648.0001);
+    assert(Math.abs(fit.x*2+fit.width-1152)<1e-8&&Math.abs(fit.y*2+fit.height-648)<1e-8);
+  }
+});
+
+test('Projector spools before the zoom and only actual video sources request autoplay',()=>{
+  assert.equal(projectionSample(.15).zoom,0);
+  assert(projectionSample(.15).drive>0);
+  let previous={drive:0,zoom:0};
+  for(let i=0;i<=100;i++){
+    const sample=projectionSample(i/100);
+    assert(sample.drive>=previous.drive&&sample.zoom>=previous.zoom);previous=sample;
+  }
+  assert.equal(previous.drive,6);assert.equal(previous.zoom,1);
+  for(const project of projects.filter(p=>p.category==='films')){
+    const url=filmPlaybackUrl(project);
+    if(project.id==='historical-war-vehicles')assert.equal(url,null,'an unfinished project cannot zoom to an empty video');
+    else {assert(url.startsWith('https://drive.google.com/file/d/'));assert.equal(new URL(url).searchParams.get('autoplay'),'1');}
   }
 });

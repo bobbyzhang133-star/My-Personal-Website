@@ -1,0 +1,2 @@
+# Preserve generated upstream GLSL template-string formatting in the vendor bundle.
+public/portfolio/assets/js/vendor/camera-three/three.js -whitespace
