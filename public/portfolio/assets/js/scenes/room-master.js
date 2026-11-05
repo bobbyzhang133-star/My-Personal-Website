@@ -1,5 +1,5 @@
-import { ROOM_GUITAR } from './room-guitar-registration.js?v=8273376a5e68';
-import { CINEMA_CAMERA } from './cinema-camera-registration.js?v=8273376a5e68';
+import { ROOM_GUITAR } from './room-guitar-registration.js?v=3fe186ecf43b';
+import { CINEMA_CAMERA } from './cinema-camera-registration.js?v=3fe186ecf43b';
 
 // Measured source coordinates in Bobby's approved master, not independent viewport placements.
 export const MASTER_ROOM=Object.freeze({width:1672,height:941,approved:'2026-10-24',artRevision:'diegetic-forms-2026-10-29',source:'/assets/room/master/studio-environment-v2.webp',objectSource:'/assets/room/master/studio-objects-v3.webp',floorPatch:'/assets/room/master/floor-clean-patch.svg',horizon:{y:210,uncertainty:80},vanishingRegion:[850,130,250,170],desk:[[448,418],[1672,418],[1672,521],[284,521]],floor:[[0,716],[1672,716],[1672,941],[0,941]],birdLane:[480,900],birdFeetY:879});

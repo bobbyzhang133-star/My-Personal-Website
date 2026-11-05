@@ -1,4 +1,4 @@
-import { FlipCalculation } from '../vendor/st-page-flip-geometry.js?v=8273376a5e68';
+import { FlipCalculation } from '../vendor/st-page-flip-geometry.js?v=3fe186ecf43b';
 
 const rectangle = (w, h) => [{ x: 0, y: 0 }, { x: w, y: 0 }, { x: w, y: h }, { x: 0, y: h }];
 

@@ -1,8 +1,8 @@
-import { originalSourceUrl } from './project-sources.js?v=8273376a5e68';
-import { about, categories, experience, projects } from './content.js?v=8273376a5e68';
-import { aiEvidence, aiActions } from './ai-projects.js?v=8273376a5e68';
-import { purchaseResearch, researchBlocks } from './research-summary.js?v=8273376a5e68';
-import { $$, esc } from './utils.js?v=8273376a5e68';
+import { originalSourceUrl } from './project-sources.js?v=3fe186ecf43b';
+import { about, categories, experience, projects } from './content.js?v=3fe186ecf43b';
+import { aiEvidence, aiActions } from './ai-projects.js?v=3fe186ecf43b';
+import { purchaseResearch, researchBlocks } from './research-summary.js?v=3fe186ecf43b';
+import { $$, esc } from './utils.js?v=3fe186ecf43b';
 
 function categoryHeader(kicker, title, description) {
   return `<header class="experience-header"><div><p class="eyebrow">${esc(kicker)}</p><h1>${esc(title)}</h1><p>${esc(description)}</p></div><a class="back-link" href="/">← Return to room</a></header>`;

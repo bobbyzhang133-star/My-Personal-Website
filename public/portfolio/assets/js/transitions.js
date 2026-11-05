@@ -1,8 +1,8 @@
-import { placeFilmOverview } from './scenes/films.js?v=8273376a5e68';
-import { moveFilmTransport } from './scenes/film-transport.js?v=8273376a5e68';
-import { CAMERA_HOME, VirtualCamera } from './camera.js?v=8273376a5e68';
-import { layoutJournal, moveJournal } from './scenes/journal-motion.js?v=8273376a5e68';
-import { isReducedMotion, nextFrame } from './utils.js?v=8273376a5e68';
+import { placeFilmOverview } from './scenes/films.js?v=3fe186ecf43b';
+import { moveFilmTransport } from './scenes/film-transport.js?v=3fe186ecf43b';
+import { CAMERA_HOME, VirtualCamera } from './camera.js?v=3fe186ecf43b';
+import { layoutJournal, moveJournal } from './scenes/journal-motion.js?v=3fe186ecf43b';
+import { isReducedMotion, nextFrame } from './utils.js?v=3fe186ecf43b';
 
 export const OBJECT_TRANSITIONS = Object.freeze({
   games: { cameraDuration: 940, interfaceDuration: 320, exitInterfaceDuration: 220, restoreDuration: 820 },

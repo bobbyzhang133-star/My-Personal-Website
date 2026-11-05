@@ -860,7 +860,6 @@ html[data-motion="reduced"] .bird-part { animation: none !important; }
 .film-native-ready .gate-drive-overlay { display: none; }
 .film-native-ready :is(.film-stock-channel,.film-stock,.film-gate-frame-item) { background: transparent; box-shadow: none; }
 .film-native-ready .film-gate-frame-item img { opacity: 0; }
-.film-native-ready .gate-shutter { background: transparent; }
 .film-native-ready .fixed-film-gate { box-shadow: none; }
 .game-shell:has(.film-machine-assembly) :is(.menu-button,.film-machine-pause) { pointer-events: auto; }
 
@@ -1021,10 +1020,7 @@ html[data-motion="reduced"] .master-room .object-games .bird-part { animation: n
   box-shadow: 0 0 0 3px #c69965, 0 0 0 6px #352319, 0 0 14px #140e09;
   overflow: hidden; pointer-events: none;
 }
-.gate-shutter { position: absolute; inset: 0; transform-origin: top; transform: scaleY(0); background: repeating-linear-gradient(#221d1b 0 8px,#2c2623 8px 9px); transition: transform 110ms; }
-.film-gate-session:is([data-phase="release"],[data-phase="transport"],[data-phase="register"]) .gate-shutter { transform: scaleY(1); }
 .gate-registration { position: absolute; inset: 0; border: 2px solid #ffe5a978; }
-.film-gate-session:not([data-phase="registered"]) .gate-registration { border-color: transparent; }
 .film-gate-session[data-phase="exposure"] .gate-registration { animation: gate-exposure 240ms ease-out; }
 @keyframes gate-exposure { from { background: #fff0cc9c; } to { background: transparent; } }
 
@@ -1065,10 +1061,8 @@ html[data-motion="reduced"] .master-room .object-games .bird-part { animation: n
   .film-gate-scene .film-copy .film-description { display: none; }
   .film-gate-scene .film-source-actions { grid-column: 2; }
 }
-html[data-motion="reduced"] .gate-shutter { transition: none; }
 html[data-motion="reduced"] .gate-registration { animation: none !important; }
 @media (prefers-reduced-motion: reduce) {
-  .gate-shutter { transition: none; }
   .gate-registration { animation: none !important; }
 }
 .film-gate-frame { border: 0; box-shadow: none; }

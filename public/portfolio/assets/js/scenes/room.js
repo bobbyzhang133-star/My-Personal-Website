@@ -1,11 +1,11 @@
-import {categories} from '../content.js?v=8273376a5e68';
-import {$$,esc,isReducedMotion} from '../utils.js?v=8273376a5e68';
-import {MASTER_ROOM,MASTER_OBJECTS,masterBoxStyle,alignMasterRoom,masterPanForObject,masterPanFromDrag} from './room-master.js?v=8273376a5e68';
-import {createRoomDiscovery} from './room-discovery.js?v=8273376a5e68';
-import { loadJournalModel, getLoadedJournalModel } from './journal-model.js?v=8273376a5e68';
-import { prepareRoomJournal, copyRoomJournal, paintRoomJournal } from './journal-room.js?v=8273376a5e68';
-import { createJournalIdle } from './journal-idle.js?v=8273376a5e68';
-import { prepareRoomCamera, copyRoomCamera } from './camera-live.js?v=8273376a5e68';
+import {categories} from '../content.js?v=3fe186ecf43b';
+import {$$,esc,isReducedMotion} from '../utils.js?v=3fe186ecf43b';
+import {MASTER_ROOM,MASTER_OBJECTS,masterBoxStyle,alignMasterRoom,masterPanForObject,masterPanFromDrag} from './room-master.js?v=3fe186ecf43b';
+import {createRoomDiscovery} from './room-discovery.js?v=3fe186ecf43b';
+import { loadJournalModel, getLoadedJournalModel } from './journal-model.js?v=3fe186ecf43b';
+import { prepareRoomJournal, copyRoomJournal, paintRoomJournal } from './journal-room.js?v=3fe186ecf43b';
+import { createJournalIdle } from './journal-idle.js?v=3fe186ecf43b';
+import { prepareRoomCamera, copyRoomCamera } from './camera-live.js?v=3fe186ecf43b';
 export { prepareRoomJournal, copyRoomJournal };
 export function prepareRoomArtwork(root,options) {
   return Promise.all([prepareRoomJournal(root,options),prepareRoomCamera(root,options)]);

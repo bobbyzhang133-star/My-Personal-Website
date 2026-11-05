@@ -1,0 +1,19 @@
+---
+description: Preserve earlier Films versions and check every Films task against Bobby's mechanism reference
+alwaysApply: true
+---
+
+# Films: Add to the Existing Version and Review the Reference
+
+Apply when changing the Room cinema camera, Films scene, mechanism, film transport or related transitions.
+
+- Bobby's November 4 instruction is to build on the earlier version. Preserve its composition, enclosure, mechanical layout, materials and working interactions while adding the requested detail or motion. A feature request is not permission to replace the approved design with a different mechanism.
+- Keep earlier model assets, editable Blender files, screenshots and reproducible source. Never overwrite or delete an older version to make room for a revision. Use a new version folder for experiments and retain a recoverable baseline before changing the active version.
+- The pre-rebuild mechanism is `assets/room/camera-live-v3/`, with editable source and screenshots in `artifacts/film-gate-clearance/`. The v4 rebuild in `assets/room/camera-live-v4/` is a separate candidate, not approval to abandon the earlier design. Model versions v1–v3 also remain available.
+- Visual source: `artifacts/film-reference/Cinematic Film Mechanism Interaction Board.png`, copied byte-for-byte from Bobby's supplied picture. The original is `/Users/bobbyzhang/Downloads/Cinematic Film Mechanism Interaction Board.png`.
+- After EVERY related task, follow the mandatory four-step loop in `reference-check.mdc`: inspect the picture, implement accordingly, compare actual output with it, and repeat from step 1 while mismatches remain. Steps 3 and 4 are required before completion. Compare against the earlier version too, at the intended display scale. Review both appearance and behavior; successful tests alone are not visual approval.
+- Check enclosure/gate proportions, warm aged metal and dark housing, visible construction detail, reel hubs/spokes, rollers and supports, perforated film threading, and the physical connection between film movement and turning parts. Preserve the selected frame at the exposure gate and the complete cover aspect ratio.
+- For motion, compare resting, transport, registration, selected-film entry and return. Keep the fixed cutaway gate visible as Bobby subsequently requested, even though the board also diagrams a closed optical shutter. Later explicit instructions take precedence over illustration details.
+- Check desktop and portrait framing, grounding, readable covers, clean controls, continuity and reduced motion. Save before/after evidence and a short reference comparison identifying matches and remaining differences. Do not claim the reference is fully matched when it is not.
+- Resolve regressions and reference mismatches in the requested work before completion; recording them for a later task does not satisfy the reference check. Keep the work within the authorized scope and preserve the earlier design while iterating.
+- Keep previews local; publish or push only when Bobby explicitly requests the corresponding action.

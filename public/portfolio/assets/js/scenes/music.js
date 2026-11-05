@@ -1,8 +1,8 @@
-import { ROOM_GUITAR } from './room-guitar-registration.js?v=8273376a5e68';
-import { projects } from '../content.js?v=8273376a5e68';
-import { $$, esc } from '../utils.js?v=8273376a5e68';
-import { bindLinearKeys, sceneController } from './shared.js?v=8273376a5e68';
-import { originalSourceUrl } from '../project-sources.js?v=8273376a5e68';
+import { ROOM_GUITAR } from './room-guitar-registration.js?v=3fe186ecf43b';
+import { projects } from '../content.js?v=3fe186ecf43b';
+import { $$, esc } from '../utils.js?v=3fe186ecf43b';
+import { bindLinearKeys, sceneController } from './shared.js?v=3fe186ecf43b';
+import { originalSourceUrl } from '../project-sources.js?v=3fe186ecf43b';
 
 const project = projects.find(item => item.category === 'music');
 

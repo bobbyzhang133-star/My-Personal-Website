@@ -1,4 +1,4 @@
-import { journalProjection, journalMatrix } from './journal-geometry.js?v=8273376a5e68';
+import { journalProjection, journalMatrix } from './journal-geometry.js?v=3fe186ecf43b';
 
 // Native HTML lettering stays sharp and shares the settled reader's exact
 // layout/scroll. Only its physical paper plane is projected while held.

@@ -45,6 +45,7 @@ import { FILM_MACHINE } from '../public/portfolio/assets/js/scenes/film-opening-
 import { CAMERA_MODEL_ASSET } from '../public/portfolio/assets/js/scenes/camera-live.js';
 import { filmSlots, fitFilmCover, projectionSample } from '../public/portfolio/assets/js/scenes/film-strip.js';
 import { filmPlaybackUrl } from '../public/portfolio/assets/js/scenes/films.js';
+import { sampleFilmPath, filmSurface, transportPose } from '../public/portfolio/assets/js/scenes/film-kinematics.js';
 import { musicSource } from '../public/portfolio/assets/js/scenes/music.js';
 
 const root = new URL('../public/portfolio/', import.meta.url);
@@ -1693,7 +1694,7 @@ test('The active camera export contains movable 3D geometry and valid buffer ran
   const model=JSON.parse(await readFile(new URL(`${CAMERA_MODEL_ASSET.slice(1)}camera.json`,root),'utf8'));
   const binary=await readFile(new URL(`${CAMERA_MODEL_ASSET.slice(1)}camera.bin`,root));
   const values=new Float32Array(binary.buffer,binary.byteOffset,binary.byteLength/4);
-  assert.equal(model.id,'studio-65-live-mesh-v2');
+  assert.equal(model.id,'studio-65-live-mesh-v5');
   assert.equal(model.meshes.reduce((sum,mesh)=>sum+mesh.count/9,0),model.triangles);
   for(const part of ['body','cover','mechanism','stock','shutter','rotor0','rotor1'])assert(model.meshes.some(mesh=>mesh.part===part),part);
   for(const mesh of model.meshes){
@@ -1786,5 +1787,169 @@ test('Projector spools before the zoom and only actual video sources request aut
     const url=filmPlaybackUrl(project);
     if(project.id==='historical-war-vehicles')assert.equal(url,null,'an unfinished project cannot zoom to an empty video');
     else {assert(url.startsWith('https://drive.google.com/file/d/'));assert.equal(new URL(url).searchParams.get('autoplay'),'1');}
+  }
+});
+
+test('The optical shutter stays behind the visible film, leaving the cutaway gate open during transport',async()=>{
+  const model=JSON.parse(await readFile(new URL(`${CAMERA_MODEL_ASSET.slice(1)}camera.json`,root),'utf8'));
+  const binary=await readFile(new URL(`${CAMERA_MODEL_ASSET.slice(1)}camera.bin`,root));
+  const values=new Float32Array(binary.buffer,binary.byteOffset,binary.byteLength/4);
+  const depths=part=>model.meshes.filter(mesh=>mesh.part===part).flatMap(mesh=>{
+    const z=[];for(let i=mesh.positionOffset;i<mesh.positionOffset+mesh.count;i+=3){
+      const u=(values[i]-model.plane.x)/model.unit+480,v=340-(values[i+1]-model.plane.y)/model.unit;
+      if(part!=='stock'||u>=335&&u<=625&&v>=241&&v<=405)z.push(values[i+2]);
+    }return z;
+  });
+  assert(Math.max(...depths('shutter'))<Math.min(...depths('stock'))-2*model.unit,'a closed optical shutter cannot sit in front of the cutaway film');
+  const {LiveCameraView}=await import('../public/portfolio/assets/js/scenes/camera-live.js');
+  const THREE=await import('../public/portfolio/assets/js/vendor/camera-three/three.js');
+  const groups=new Map(Object.keys(model.pivots).map(part=>{
+    const group=new THREE.Group();group.position.fromArray(model.pivots[part]||[0,0,0]);group.userData.rest=group.position.clone();return[part,group];
+  }));
+  const view=Object.create(LiveCameraView.prototype);
+  Object.assign(view,{asset:{model,THREE},groups,frameMeshes:[],dynamicStrips:[],coverProgress:1,canvas:{dataset:{}}});
+  const shutterOrigin=groups.get('shutter').position.clone();
+  for(const p of [0,.2,.5,.9,1]){
+    const sample=filmTransportSample(p,0,2);view.transport(sample.position,sample.phase);
+    assert(groups.get('shutter').position.equals(shutterOrigin),'transport cannot move the shutter back in front of the cutaway');
+  }
+  assert.doesNotMatch(sceneRegistry.films.render(),/class="gate-shutter"/,'the HTML layer cannot put another opaque door over the film');
+  const css=await readFile(new URL('assets/css/game-shell.css',root),'utf8');
+  assert.doesNotMatch(css,/film-gate-session:not\([^}]+gate-registration[^}]+border-color:\s*transparent/,'the gate rim stays visible between registered frames');
+});
+
+test('The threaded film keeps constant width, orthogonal frames and an exact flat exposure surface',async()=>{
+  const model=JSON.parse(await readFile(new URL(`${CAMERA_MODEL_ASSET.slice(1)}camera.json`,root),'utf8'));
+  const t=model.transport,dot=(a,b)=>a.reduce((n,v,i)=>n+v*b[i],0);
+  for(let s=0;s<=t.length;s+=2){
+    const q=sampleFilmPath(t.path,s),left=filmSurface(t.path,s,-t.halfWidth),right=filmSurface(t.path,s,t.halfWidth);
+    assert(q.point.every(Number.isFinite));
+    for(const axis of [q.tangent,q.width,q.normal])assert(Math.abs(Math.hypot(...axis)-1)<1e-10);
+    assert(Math.abs(dot(q.width,q.tangent))<1e-10);
+    assert(Math.abs(Math.hypot(...right.point.map((v,i)=>v-left.point[i]))-2*t.halfWidth)<1e-8);
+  }
+  for(const v of [242,323,404]){
+    const q=filmSurface(t.path,t.gateDistance+v-323,0,3);
+    assert(Math.hypot(q.point[0]-480,q.point[1]-v,q.point[2]-36)<1e-8,'the film and accessible gate must share the same plane');
+    assert.deepEqual(q.width,[1,0,0]);
+  }
+  for(let i=1;i<t.path.length;i++){
+    const a=t.path[i-1],b=t.path[i];assert(b.s>a.s);
+    assert(Math.abs(Math.hypot(...b.p.map((v,k)=>v-a.p[k]))-(b.s-a.s))<.03,'path distance must follow geometry, including bends');
+    assert(dot(a.t,b.t)>.8,'threading cannot reverse abruptly at a roller tangent');
+  }
+});
+
+test('Film travel drives no-slip rollers, meshing gears, the belt and a rigid slider-crank',async()=>{
+  const model=JSON.parse(await readFile(new URL(`${CAMERA_MODEL_ASSET.slice(1)}camera.json`,root),'utf8')),t=model.transport;
+  for(const contact of t.contacts){
+    assert(Math.abs(Math.abs(t.drives[contact.part]*contact.radius)-1)<1e-10);
+    if(contact.part!=='rotor0')assert(Math.abs(contact.radius*2*Math.PI/t.perforationPitch-Math.round(contact.radius*2*Math.PI/t.perforationPitch))<1e-10,'sprocket teeth match perforation pitch');
+  }
+  for(let i=1;i<t.gears.length;i++){
+    const a=t.gears[i-1],b=t.gears[i];
+    assert.equal(Math.hypot(a.center[0]-b.center[0],a.center[1]-b.center[1]),a.radius+b.radius);
+    assert(Math.abs(t.drives[a.part]*a.radius+t.drives[b.part]*b.radius)<1e-10);
+  }
+  for(let distance=-390;distance<=390;distance+=3){
+    const p=transportPose(t,distance);
+    assert(Math.abs(Math.hypot(p.slider[0]-p.pin[0],p.slider[1]-p.pin[1])-t.crank.rodLength)<1e-10);
+    assert.equal(p.slider[0],t.crank.center[0]);
+    assert.equal(p.beltDistance,distance*t.belt.factor);
+  }
+  const rest=transportPose(t,0),oneFrame=transportPose(t,model.gate.pitch);
+  assert(Math.hypot(...rest.pin.map((v,i)=>v-oneFrame.pin[i]))<1e-8);
+  assert.equal(rest.slider[1],t.crank.sliderRest);
+  assert(Math.abs(Math.hypot(...t.crank.center.map((v,i)=>v-t.crank.beltContact[i]))-t.crank.idlerRadius)<1e-5);
+  assert(Math.abs(t.drives.cam*t.crank.idlerRadius+t.belt.factor)<1e-10,'the visible cam idler must engage the belt at the matching speed');
+});
+
+test('Registration pins release before film travel and engage only after it stops',()=>{
+  for(let i=0;i<=100;i++){
+    const sample=filmTransportSample(i/100,0,2);
+    if(sample.phase==='release')assert.equal(sample.position,0);
+    if(sample.phase==='transport')assert.equal(sample.grip,0);
+    if(sample.phase==='register'||sample.phase==='registered')assert.equal(sample.position,2);
+  }
+  assert.equal(filmTransportSample(0,0,2).grip,1);
+  assert.equal(filmTransportSample(1,0,2).grip,1);
+});
+
+test('Moving perforation bridges follow the curved stock surface in either travel direction',async()=>{
+  const model=JSON.parse(await readFile(new URL(`${CAMERA_MODEL_ASSET.slice(1)}camera.json`,root),'utf8'));
+  const THREE=await import('../public/portfolio/assets/js/vendor/camera-three/three.js');
+  const {LiveCameraView}=await import('../public/portfolio/assets/js/scenes/camera-live.js');
+  const t=model.transport,cells=Math.ceil(t.length/t.perforationPitch)+2;
+  const geometry=new THREE.BufferGeometry(),count=cells*2*2*6;
+  for(const name of ['position','normal'])geometry.setAttribute(name,new THREE.Float32BufferAttribute(new Float32Array(count*3),3));
+  const spec={path:t.path,length:t.length,pitch:t.perforationPitch,span:t.bridgeLength,bands:[[-160,-150],[150,160]],origin:t.materialOrigin,closed:false,offset:.05,cells,mesh:{geometry}};
+  const view=Object.create(LiveCameraView.prototype);view.asset={model,THREE};
+  for(const distance of [-31,0,11,195]){
+    view.updateStrip(spec,distance);
+    const phase=((distance-spec.origin)%spec.pitch+spec.pitch)%spec.pitch;
+    for(let cell=2;cell<cells-2;cell+=7){
+      const q=filmSurface(t.path,(cell-1)*spec.pitch+phase-spec.span/2,-160,spec.offset);
+      const expected=view.point(...q.point),index=cell*24;
+      const actual=new THREE.Vector3().fromBufferAttribute(geometry.attributes.position,index);
+      assert(actual.distanceTo(expected)<1e-6,'perforations must follow the threaded route instead of translating a flat strip');
+    }
+  }
+  geometry.dispose();
+});
+
+test('The reference revision adds to the earlier camera, preserving its fixed geometry and reel layout',async()=>{
+  const oldRoot=new URL('assets/room/camera-live-v3/',root),newRoot=new URL(CAMERA_MODEL_ASSET.slice(1),root);
+  const [old,model]=await Promise.all([oldRoot,newRoot].map(async path=>JSON.parse(await readFile(new URL('camera.json',path),'utf8'))));
+  const buffers=await Promise.all([oldRoot,newRoot].map(path=>readFile(new URL('camera.bin',path))));
+  const [a,b]=buffers.map(buffer=>new Float32Array(buffer.buffer,buffer.byteOffset,buffer.byteLength/4));
+  assert.deepEqual(model.gate.reels,old.gate.reels);
+  assert.deepEqual(model.gate.guides.map(g=>g.slice(0,2)),old.gate.guides.map(g=>g.slice(0,2)));
+  assert.equal(model.baseline.asset,'camera-live-v3');
+  assert(model.baseline.replacedStaticTeethTriangles>0,'old stationary teeth must be replaced by driven teeth');
+  for(let i=0;i<old.meshes.length;i++){
+    const source=old.meshes[i];
+    if(source.part==='stock'||source.part==='mechanism'&&[13,15].includes(source.material))continue;
+    const retained=model.meshes.find(mesh=>mesh.sourceBatches.includes(i));
+    assert(retained,`baseline batch ${i} must remain in the new model`);
+    assert(retained.count>=source.count);
+    for(let n=0;n<source.count;n++)assert(Math.abs(a[source.positionOffset+n]-b[retained.positionOffset+n])<1e-9,`baseline batch ${i} changed shape or position`);
+  }
+});
+
+test('The actual ribbon wraps the front rollers with contact, matched speed and a clear exposure',async()=>{
+  const model=JSON.parse(await readFile(new URL(`${CAMERA_MODEL_ASSET.slice(1)}camera.json`,root),'utf8')),t=model.transport;
+  const {centers,radius,wrapRadians}=t.frontRollers;
+  assert(Math.abs(wrapRadians-2*Math.PI/3)<1e-10);
+  for(let i=0;i<centers.length;i++){
+    const [x,y,z]=centers[i];
+    assert.equal(t.axes[`nip${i}`],'x');assert.equal(t.drives[`nip${i}`]*radius,1);
+    const points=t.path.filter(q=>Math.abs(q.p[1]-y)<radius*.8&&q.p[2]>z+radius*.5);
+    assert(points.length>=4,'the film must visibly wrap the roller, not just pass a nearby spinning wheel');
+    for(const q of points){
+      assert.equal(q.p[0],x);
+      assert(Math.abs(Math.hypot(q.p[1]-y,q.p[2]-z)-radius)<.0001);
+      assert.deepEqual(q.w,[1,0,0]);
+    }
+    assert(y<242||y>404,'guides cannot cover the selected exposure');
+  }
+  for(const q of t.path)for(const side of [-t.halfWidth,t.halfWidth]){
+    const p=filmSurface(t.path,q.s,side).point;
+    assert(p[0]>=-45&&p[0]<=1005&&p[1]>=-36&&p[1]<=716,'the whole film footprint must remain inside the earlier casting, including during cover removal');
+  }
+});
+
+test('Native metal surface detail has valid attached UVs and retained original texture files',async()=>{
+  const path=new URL(CAMERA_MODEL_ASSET.slice(1),root),model=JSON.parse(await readFile(new URL('camera.json',path),'utf8'));
+  const binary=await readFile(new URL('camera.bin',path)),values=new Float32Array(binary.buffer,binary.byteOffset,binary.byteLength/4);
+  assert(model.materials.filter(m=>m.weathered).length>=8);
+  for(const mesh of model.meshes){
+    assert(Number.isInteger(mesh.uvOffset));
+    const length=mesh.count/3*2;assert(mesh.uvOffset+length<=values.length);
+    assert(values.slice(mesh.uvOffset,mesh.uvOffset+length).every(Number.isFinite));
+  }
+  for(const name of ['patina','relief']){
+    const image=await readFile(new URL(model.surfaceTextures[name],path));
+    assert.equal(image.toString('hex',0,8),'89504e470d0a1a0a');
+    assert.equal(image.readUInt32BE(16),512);assert.equal(image.readUInt32BE(20),512);
   }
 });

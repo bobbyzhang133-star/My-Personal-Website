@@ -1,0 +1,20 @@
+---
+description: Mandatory inspect, implement, compare and repeat loop for reference-based work
+alwaysApply: true
+---
+
+# Reference Check
+
+When Bobby says "reference check," or work is guided by a supplied reference, follow this procedure:
+
+1. **Check the reference.** Open and inspect the actual reference before working. Identify the required appearance, proportions, details, materials, composition and behavior for the requested task. Preserve earlier approved versions.
+2. **Do the work according to the reference.** Implement those requirements within the requested scope. Keep the reference available while working; do not rely only on memory or a verbal description.
+3. **Compare the work to the reference — mandatory.** Inspect the actual finished output beside the reference at comparable perspective, scale and display size. Use screenshots, renders and relevant motion states. Explicitly check each requirement and identify visible or behavioral mismatches. Code inspection and passing tests do not replace this step.
+4. **If it still does not match, repeat from step 1 — mandatory.** Reopen the reference, correct the mismatches and compare again. Continue this loop until the requested result matches the reference. Listing differences, calling it "close enough," or moving discrepancies into future work does not complete a reference check.
+
+Steps 3 and 4 are completion requirements, not optional review suggestions. Do not declare the task or reference check complete while a known mismatch remains in the requested work.
+
+- Save comparison evidence from the final iteration, including relevant before/after and motion states. State what was verified without overstating fidelity.
+- Bobby's later explicit instructions take precedence over conflicting reference details; document those intentional differences rather than treating them as defects.
+- If access to the reference or another concrete blocker prevents completing the loop, report the blocker and the incomplete status honestly. Do not invent a match or silently substitute another reference.
+- This procedure does not expand the task into unrelated redesigns or authorize deletion, publication or GitHub uploads.

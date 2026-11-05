@@ -1,4 +1,4 @@
-import { esc } from './utils.js?v=8273376a5e68';
+import { esc } from './utils.js?v=3fe186ecf43b';
 
 export const purchaseResearch = {
   introduction: 'What makes spending feel worthwhile in a game that is free to start? This draft looks at how reward guarantees, limited-time offers, and attachment to characters or public figures can shape the purchase decision.',

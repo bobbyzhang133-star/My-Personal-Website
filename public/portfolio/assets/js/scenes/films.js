@@ -1,10 +1,10 @@
-import { projects } from '../content.js?v=8273376a5e68';
-import { $$, esc, isReducedMotion } from '../utils.js?v=8273376a5e68';
-import { sceneController } from './shared.js?v=8273376a5e68';
-import { sourceLinks } from '../project-sources.js?v=8273376a5e68';
-import { FILM_GATE } from './film-gate-geometry.js?v=8273376a5e68';
-import { LiveCameraView, loadLiveCamera } from './camera-live.js?v=8273376a5e68';
-import { filmSlots, projectionSample } from './film-strip.js?v=8273376a5e68';
+import { projects } from '../content.js?v=3fe186ecf43b';
+import { $$, esc, isReducedMotion } from '../utils.js?v=3fe186ecf43b';
+import { sceneController } from './shared.js?v=3fe186ecf43b';
+import { sourceLinks } from '../project-sources.js?v=3fe186ecf43b';
+import { FILM_GATE } from './film-gate-geometry.js?v=3fe186ecf43b';
+import { LiveCameraView, loadLiveCamera } from './camera-live.js?v=3fe186ecf43b';
+import { filmSlots, projectionSample } from './film-strip.js?v=3fe186ecf43b';
 
 const films = projects.filter(project => project.category === 'films');
 const [width, height] = FILM_GATE.size;
@@ -44,10 +44,12 @@ export function filmTransportSample(progress, from, to) {
   const p = Math.max(0, Math.min(1, progress));
   const travel = Math.max(0, Math.min(1, (p-.16)/.65));
   const eased = travel * travel * (3-2*travel);
+  const release=Math.min(1,p/.16),registration=Math.max(0,Math.min(1,(p-.81)/.13));
   return {
     position: from+(to-from)*eased,
     phase: p < .16 ? 'release' : p < .81 ? 'transport' : p < .94 ? 'register' : 'registered',
     slack: Math.sin(travel*Math.PI)*Math.sign(to-from),
+    grip:p<.16?1-release*release*(3-2*release):registration*registration*(3-2*registration),
   };
 }
 
@@ -94,7 +96,7 @@ export function renderFilms({preview=false}={}) {
           <div class="film-stock-channel">
             <div class="film-stock" role="listbox" aria-label="Film projects" aria-orientation="vertical">${filmSlots(films.length).map(slot=>slot.projectIndex===null?leaderFrame(slot.index):filmFrame(films[slot.projectIndex],slot.index)).join('')}</div>
           </div>
-          <div class="fixed-film-gate" aria-hidden="true"><span class="gate-shutter"></span><span class="gate-registration"></span></div>
+          <div class="fixed-film-gate" aria-hidden="true"><span class="gate-registration"></span></div>
         </div>
       </div>
       <div class="gate-deck">
@@ -144,20 +146,21 @@ export function mountFilms(root) {
   let nativePosition=0;
   let nativePhase='registered';
   let nativeDrive=0;
+  let nativeGrip=1;
   let nativeProjectionKey;
   let finishProjection;
 
   function syncNative() {
     if (!nativeView||nativeView.disposed) return;
     const transform=getComputedStyle(world).transform;
-    const key=[transform,viewport.clientWidth,viewport.clientHeight,nativePosition,nativePhase,nativeDrive].join('/');
+    const key=[transform,viewport.clientWidth,viewport.clientHeight,nativePosition,nativePhase,nativeDrive,nativeGrip].join('/');
     if (key===nativeProjectionKey) return;
     nativeProjectionKey=key;
     const matrix=new DOMMatrix(transform);
     nativeView.resize(viewport.clientWidth,viewport.clientHeight);
     nativeView.frontProjection({x:matrix.e,y:matrix.f,scale:matrix.a});
     nativeView.cover(1);
-    nativeView.transport(nativePosition,nativePhase,nativeDrive);
+    nativeView.transport(nativePosition,nativePhase,nativeDrive,nativeGrip);
     nativeView.render();
   }
   loadLiveCamera().then(async asset=>{
@@ -195,6 +198,7 @@ export function mountFilms(root) {
   function paint(sample) {
     nativePosition=sample.position;
     nativePhase=sample.phase;
+    nativeGrip=sample.grip??(sample.phase==='registered'?1:0);
     if(sample.drive!==undefined)nativeDrive=sample.drive;
     const px=sample.position*pitch;
     stock.style.transform=`translateY(${px}px)`;
@@ -203,7 +207,7 @@ export function mountFilms(root) {
     spindles.forEach((part,i)=>{part.style.transform=`rotate(${px*(i<2?.74:2.3)*(i===1||i===4?-1:1)}deg)`;});
     surface.dataset.phase=sample.phase;
     surface.dataset.drive=String(nativeDrive);
-    label.textContent=sample.phase==='registered'?'GATE REGISTERED':sample.phase==='projecting'?'PROJECTOR RUNNING':sample.phase==='transport'?'ADVANCING FILM':sample.phase==='register'?'REGISTERING FRAME':'SHUTTER CLOSED';
+    label.textContent=sample.phase==='registered'?'GATE REGISTERED':sample.phase==='projecting'?'PROJECTOR RUNNING':sample.phase==='transport'?'ADVANCING FILM':sample.phase==='register'?'REGISTERING FRAME':'RELEASING FRAME';
     syncNative();
   }
 
@@ -381,6 +385,12 @@ export function mountFilms(root) {
     if(i===index)enterPlayback();
     else select(i,true);
   },{signal}));
+  viewport.addEventListener('click',event=>{
+    if(state!=='overview'||performance.now()<ignoreClickUntil||event.target.closest('button,a'))return;
+    const rect=viewport.getBoundingClientRect(),target=nativeView?.hitProject(event.clientX-rect.left,event.clientY-rect.top);
+    if(target===null||target===undefined)return;
+    if(target===index)enterPlayback();else select(target,true);
+  },{signal});
   surface.addEventListener('keydown',event=>{
     if(event.altKey||event.ctrlKey||event.metaKey||state!=='overview')return;
     if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'].includes(event.key))return;

@@ -1,4 +1,4 @@
-import { $, $$, esc, isReducedMotion } from './utils.js?v=8273376a5e68';
+import { $, $$, esc, isReducedMotion } from './utils.js?v=3fe186ecf43b';
 
 const MOTION_KEY = 'bz-portfolio-motion';
 

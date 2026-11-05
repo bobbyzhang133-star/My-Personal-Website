@@ -1,10 +1,10 @@
-import { projects } from '../content.js?v=8273376a5e68';
-import { purchaseResearch, researchBlocks } from '../research-summary.js?v=8273376a5e68';
-import { esc, isReducedMotion } from '../utils.js?v=8273376a5e68';
-import { sceneController } from './shared.js?v=8273376a5e68';
-import { journalMechanism } from './journal-motion.js?v=8273376a5e68';
-import { pageFold, foldPolygon } from './book-fold.js?v=8273376a5e68';
-import { addPageSample, pageReleaseIntent } from './book-gesture.js?v=8273376a5e68';
+import { projects } from '../content.js?v=3fe186ecf43b';
+import { purchaseResearch, researchBlocks } from '../research-summary.js?v=3fe186ecf43b';
+import { esc, isReducedMotion } from '../utils.js?v=3fe186ecf43b';
+import { sceneController } from './shared.js?v=3fe186ecf43b';
+import { journalMechanism } from './journal-motion.js?v=3fe186ecf43b';
+import { pageFold, foldPolygon } from './book-fold.js?v=3fe186ecf43b';
+import { addPageSample, pageReleaseIntent } from './book-gesture.js?v=3fe186ecf43b';
 
 const chapters = projects.filter(project => project.category === 'research');
 
